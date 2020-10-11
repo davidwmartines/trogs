@@ -5,7 +5,7 @@ from . import app
 
 @app.route("/")
 def home():
-    return "hello"
+    return render_template("home.html")
 
 @app.route("/artist/<id>")
 def artist(id):
@@ -14,8 +14,10 @@ def artist(id):
 
 @app.route("/track/<id>")
 def track(id):
-   return "track"
+   # get track by id
+   return render_template("track.html", title="Moonlight Serenade", url="https://dxffd4gk9zzvk2.s3.us-east-2.amazonaws.com/solos/moonlight+serenade.flac")
 
 @app.route("/album/<id>")
 def album(id):
-   return "album"
+   # get album by id
+   return render_template("album.html", title=id)
