@@ -1,0 +1,72 @@
+{
+  "ModelName": "Music2",
+  "ModelMetadata": {
+    "Author": "David Martines",
+    "DateCreated": "Oct 11, 2020, 12:51 PM",
+    "DateLastModified": "Oct 11, 2020, 01:00 PM",
+    "Description": "Artists, Albums, Tracks, iteration 2",
+    "Version": "1.0"
+  },
+  "DataModel": [
+    {
+      "TableName": "art",
+      "KeyAttributes": {
+        "PartitionKey": {
+          "AttributeName": "PK",
+          "AttributeType": "S"
+        },
+        "SortKey": {
+          "AttributeName": "SK",
+          "AttributeType": "S"
+        }
+      },
+      "NonKeyAttributes": [
+        {
+          "AttributeName": "name",
+          "AttributeType": "S"
+        },
+        {
+          "AttributeName": "title",
+          "AttributeType": "S"
+        },
+        {
+          "AttributeName": "url",
+          "AttributeType": "S"
+        },
+        {
+          "AttributeName": "year",
+          "AttributeType": "N"
+        },
+        {
+          "AttributeName": "GSI1PK",
+          "AttributeType": "S"
+        },
+        {
+          "AttributeName": "GSI1SK",
+          "AttributeType": "S"
+        }
+      ],
+      "GlobalSecondaryIndexes": [
+        {
+          "IndexName": "GSI1",
+          "KeyAttributes": {
+            "PartitionKey": {
+              "AttributeName": "GSI1PK",
+              "AttributeType": "S"
+            },
+            "SortKey": {
+              "AttributeName": "GSI1SK",
+              "AttributeType": "S"
+            }
+          },
+          "Projection": {
+            "ProjectionType": "ALL"
+          }
+        }
+      ],
+      "DataAccess": {
+        "MySql": {}
+      }
+    }
+  ]
+}
