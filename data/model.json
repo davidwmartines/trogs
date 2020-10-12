@@ -3,7 +3,7 @@
   "ModelMetadata": {
     "Author": "David Martines",
     "DateCreated": "Oct 11, 2020, 12:51 PM",
-    "DateLastModified": "Oct 11, 2020, 01:00 PM",
+    "DateLastModified": "Oct 12, 2020, 02:52 PM",
     "Description": "Artists, Albums, Tracks, iteration 2",
     "Version": "1.0"
   },
@@ -44,6 +44,10 @@
         {
           "AttributeName": "GSI1SK",
           "AttributeType": "S"
+        },
+        {
+          "AttributeName": "GSI2PK",
+          "AttributeType": "S"
         }
       ],
       "GlobalSecondaryIndexes": [
@@ -61,6 +65,22 @@
           },
           "Projection": {
             "ProjectionType": "ALL"
+          }
+        },
+        {
+          "IndexName": "GSI2",
+          "KeyAttributes": {
+            "PartitionKey": {
+              "AttributeName": "GSI2PK",
+              "AttributeType": "S"
+            },
+            "SortKey": {
+              "AttributeName": "name",
+              "AttributeType": "S"
+            }
+          },
+          "Projection": {
+            "ProjectionType": "KEYS_ONLY"
           }
         }
       ],
