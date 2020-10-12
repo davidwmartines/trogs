@@ -1,0 +1,175 @@
+{
+  "art": [
+    {
+      "PutRequest": {
+        "Item": {
+          "SK": {
+            "S": "METADATA#2"
+          },
+          "name": {
+            "S": "Led Zeppelin"
+          },
+          "PK": {
+            "S": "ARTIST#2"
+          },
+          "GSI2PK": {
+            "S": "ARTIST"
+          }
+        }
+      }
+    },
+    {
+      "PutRequest": {
+        "Item": {
+          "SK": {
+            "S": "TRACK#3"
+          },
+          "PK": {
+            "S": "TRACK#3"
+          },
+          "GSI1PK": {
+            "S": "ALBUM#2"
+          },
+          "title": {
+            "S": "Sgt Pepper's Lonely Hearts Club Band"
+          },
+          "url": {
+            "S": "https://..."
+          },
+          "GSI1SK": {
+            "S": "001"
+          }
+        }
+      }
+    },
+    {
+      "PutRequest": {
+        "Item": {
+          "SK": {
+            "S": "TRACK#2"
+          },
+          "PK": {
+            "S": "TRACK#2"
+          },
+          "title": {
+            "S": "Eleanor Rigby"
+          },
+          "GSI1PK": {
+            "S": "ALBUM#1"
+          },
+          "GSI1SK": {
+            "S": "002"
+          }
+        }
+      }
+    },
+    {
+      "PutRequest": {
+        "Item": {
+          "SK": {
+            "S": "ALBUM#1"
+          },
+          "PK": {
+            "S": "ARTIST#1"
+          },
+          "title": {
+            "S": "Revolver"
+          },
+          "GSI1PK": {
+            "S": "ALBUM#1"
+          },
+          "year": {
+            "N": "1966"
+          },
+          "GSI1SK": {
+            "S": "000"
+          }
+        }
+      }
+    },
+    {
+      "PutRequest": {
+        "Item": {
+          "SK": {
+            "S": "ALBUM#2"
+          },
+          "PK": {
+            "S": "ARTIST#1"
+          },
+          "GSI1PK": {
+            "S": "ALBUM#2"
+          },
+          "title": {
+            "S": "Sgt Pepper's Lonely Hearts Club Band"
+          },
+          "year": {
+            "N": "1967"
+          },
+          "GSI1SK": {
+            "S": "000"
+          }
+        }
+      }
+    },
+    {
+      "PutRequest": {
+        "Item": {
+          "SK": {
+            "S": "METADATA#1"
+          },
+          "name": {
+            "S": "The Beatles"
+          },
+          "GSI2PK": {
+            "S": "ARTIST"
+          },
+          "PK": {
+            "S": "ARTIST#1"
+          }
+        }
+      }
+    },
+    {
+      "PutRequest": {
+        "Item": {
+          "SK": {
+            "S": "TRACK#4"
+          },
+          "PK": {
+            "S": "TRACK#4"
+          },
+          "title": {
+            "S": "With a Little Help From My Friends"
+          },
+          "GSI1PK": {
+            "S": "ALBUM#2"
+          },
+          "GSI1SK": {
+            "S": "002"
+          }
+        }
+      }
+    },
+    {
+      "PutRequest": {
+        "Item": {
+          "SK": {
+            "S": "TRACK#1"
+          },
+          "PK": {
+            "S": "TRACK#1"
+          },
+          "title": {
+            "S": "Taxman"
+          },
+          "GSI1PK": {
+            "S": "ALBUM#1"
+          },
+          "GSI1SK": {
+            "S": "001"
+          }
+        }
+      }
+    }
+  ]
+}
