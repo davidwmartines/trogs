@@ -2,6 +2,7 @@ import os
 
 import boto3
 from botocore.exceptions import ClientError
+from boto3.dynamodb.conditions import Key
 
 ERROR_HELP_STRINGS = {
     # Common Errors
@@ -16,34 +17,14 @@ ERROR_HELP_STRINGS = {
     'RequestLimitExceeded': 'Throughput exceeds the current throughput limit for your account, increase account level throughput before retrying',
 }
 
-def create_dynamodb_client():
+def get_table():
     endpoint_url = os.environ["AWS_ENDPOINT_URL"]
     if (endpoint_url != ''):
-        return boto3.client("dynamodb", endpoint_url=endpoint_url)
+        dynamodb = boto3.resource('dynamodb', endpoint_url=os.environ["AWS_ENDPOINT_URL"])
     else:
-        return boto3.client("dynamodb")
-
-
-def create_query_input():
-    return {
-        "TableName": "art",
-        "IndexName": "GSI2",
-        "KeyConditionExpression": "#0f340 = :0f340",
-        "ExpressionAttributeNames": {"#0f340":"GSI2PK"},
-        "ExpressionAttributeValues": {":0f340": {"S":"ARTIST"}}
-    }
-
-
-def execute_query(dynamodb_client, input):
-    try:
-        response = dynamodb_client.query(**input)
-        print("Query successful.")
-        return response
-    except ClientError as error:
-        handle_error(error)
-    except BaseException as error:
-        print("Unknown error while querying: " + error.response['Error']['Message'])
-
+        dynamodb = boto3.resource("dynamodb")
+    table = dynamodb.Table("art")
+    return table
 
 def handle_error(error):
     error_code = error.response['Error']['Code']
@@ -58,14 +39,17 @@ def handle_error(error):
 
 
 def list_all():
-    # Create the DynamoDB Client
-    dynamodb_client = create_dynamodb_client()
+    table = get_table()
+    try:
+        response = table.query(
+            IndexName='GSI2',
+            KeyConditionExpression=Key('GSI2PK').eq('ARTIST')
+        )
+        print(response)
+        return response['Items']
 
-    # Create the dictionary containing arguments for query call
-    query_input = create_query_input()
+    except ClientError as error:
+        handle_error(error)
 
-    # Call DynamoDB's query API
-    response = execute_query(dynamodb_client, query_input)
-
-    #print(response)
-    return response['Items']
+    except BaseException as error:
+        print("Unknown error while querying: " + error)
