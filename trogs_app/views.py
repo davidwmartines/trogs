@@ -13,8 +13,9 @@ def home():
 
 @app.route("/artist/<id>")
 def artist(id):
-    # get artist by id
-   return render_template("artist.html", name=id)
+   # get artist by id
+   artist = artists.get_by_id(id)
+   return render_template("artist.html", artist=artist)
 
 @app.route("/track/<id>")
 def track(id):

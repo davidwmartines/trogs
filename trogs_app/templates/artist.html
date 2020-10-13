@@ -1,7 +1,14 @@
 {% extends "layout.html" %}
 {% block title %}
-{{name}}
+{{artist.name}}
 {% endblock %}
 {% block content %}
-<h1>{{name}}</h1>
+<h1>{{artist.name}}</h1>
+<ul>
+    {% for album in artist.albums %}
+<li>{{album.title}}</li>
+    {% endfor %}
+
+</ul>>
+
 {% endblock %}

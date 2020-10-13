@@ -21,7 +21,7 @@ ERROR_HELP_STRINGS = {
 def get_table():
     endpoint_url = os.environ["AWS_ENDPOINT_URL"]
     if (endpoint_url != ''):
-        dynamodb = boto3.resource('dynamodb', endpoint_url=os.environ["AWS_ENDPOINT_URL"])
+        dynamodb = boto3.resource('dynamodb', endpoint_url=endpoint_url)
     else:
         dynamodb = boto3.resource("dynamodb")
     table = dynamodb.Table("art")
@@ -38,7 +38,7 @@ def handle_error(error):
                   help_string=error_help_string,
                   error_message=error_message))
 
-def map_item(item):
+def map_list_item(item):
     return {
         'name': item['name'],
         'id': urlsafe_b64encode(item['PK'].encode())
@@ -52,10 +52,48 @@ def list_all():
             KeyConditionExpression=Key('GSI2PK').eq('ARTIST')
         )
         #print(response)
-        return map(map_item, response['Items'])
+        return map(map_list_item, response['Items'])
 
     except ClientError as error:
         handle_error(error)
 
     except BaseException as error:
         print("Unknown error while querying: " + error)
+
+def map_detail(items):
+
+    artist = {
+        'name': items[0]['name'],
+        'albums' : map(map_album, items[slice(1, len(items)+1)])
+    }
+
+    return artist
+
+def map_album(item):
+    return {
+        'title': item['title'],
+        'year': item['year'],
+        'id': urlsafe_b64encode(item['SK'].encode())
+    }
+
+
+def get_by_id(id):
+    print(id)
+    pk = urlsafe_b64decode(id.encode()).decode()
+
+    table = get_table()
+    try:
+        response = table.query(
+            ScanIndexForward=False,
+            KeyConditionExpression=Key('PK').eq(pk)
+        )
+        print(response)
+        detail =  map_detail(response['Items'])
+        print(detail)
+        return detail
+
+    except ClientError as error:
+        handle_error(error)
+
+    except BaseException as error:
+        print(error)
