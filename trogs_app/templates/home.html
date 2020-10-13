@@ -3,5 +3,10 @@
 Mushmud
 {% endblock %}
 {% block content %}
-home page
+
+<ul>
+{% for artist in artists %}
+<li>{{artist.name}}</li>
+{% endfor %}
+</ul>
 {% endblock %}

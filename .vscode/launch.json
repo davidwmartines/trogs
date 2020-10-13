@@ -12,7 +12,9 @@
             "env": {
                 "FLASK_APP": "trogs_app.webapp",
                 "FLASK_ENV": "development",
-                "FLASK_DEBUG": "0"
+                "FLASK_DEBUG": "0",
+                "AWS_PROFILE": "local",
+                "AWS_ENDPOINT_URL": "http://localhost:8042"
             },
             "args": [
                 "run",

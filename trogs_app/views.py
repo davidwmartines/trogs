@@ -1,11 +1,15 @@
 from flask import Flask, render_template
 
 from . import app
+from . import artists
 
 
 @app.route("/")
 def home():
-    return render_template("home.html")
+
+   #show all artists on home page
+   allArtists  = artists.list_all()
+   return render_template("home.html", artists=allArtists)
 
 @app.route("/artist/<id>")
 def artist(id):
