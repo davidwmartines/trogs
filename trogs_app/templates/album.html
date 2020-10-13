@@ -1,9 +1,12 @@
 {% extends "layout.html" %}
 {% block title %}
-{{title}}
+{{album.title}}
 {% endblock %}
 {% block content %}
-<h1>{{title}}</h1>
-
-tracks...
+<h1>{{album.title}}</h1>
+<ul>
+    {% for track in album.tracks %}
+    <li>{{track.title}}</li>
+    {% endfor %}
+</ul>
 {% endblock %}

@@ -1,4 +1,3 @@
-import os
 from base64 import urlsafe_b64decode, urlsafe_b64encode
 from boto3.dynamodb.conditions import Key
 
@@ -52,5 +51,5 @@ def map_album(item):
     return {
         'title': item['title'],
         'year': item['SK'],
-        'id': urlsafe_b64encode(item['SK'].encode())
+        'id': urlsafe_b64encode(item['AlbumID'].encode())
     }

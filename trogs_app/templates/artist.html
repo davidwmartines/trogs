@@ -6,7 +6,7 @@
 <h1>{{artist.name}}</h1>
 <ul>
     {% for album in artist.albums %}
-    <li>{{album.title}}</li>
+    <li><a href="{{url_for('album', id=album.id)}}">{{album.title}}</a></li></li>
     {% endfor %}
 </ul>
 
