@@ -9,15 +9,11 @@
       "AttributeType": "S"
     },
     {
-      "AttributeName": "GSI1PK",
+      "AttributeName": "AlbumID",
       "AttributeType": "S"
     },
     {
-      "AttributeName": "GSI1SK",
-      "AttributeType": "S"
-    },
-    {
-      "AttributeName": "GSI2PK",
+      "AttributeName": "TYPE",
       "AttributeType": "S"
     },
     {
@@ -36,21 +32,20 @@
       "KeyType": "RANGE"
     }
   ],
-   "ProvisionedThroughput": {
-    
+  "ProvisionedThroughput": {
     "ReadCapacityUnits": 5,
     "WriteCapacityUnits": 5
   },
   "GlobalSecondaryIndexes": [
     {
-      "IndexName": "GSI1",
+      "IndexName": "IX_ALBUM",
       "KeySchema": [
         {
-          "AttributeName": "GSI1PK",
+          "AttributeName": "AlbumID",
           "KeyType": "HASH"
         },
         {
-          "AttributeName": "GSI1SK",
+          "AttributeName": "SK",
           "KeyType": "RANGE"
         }
       ],
@@ -61,11 +56,12 @@
         "ReadCapacityUnits": 5,
         "WriteCapacityUnits": 5
       }
-    },{
-      "IndexName": "GSI2",
+    },
+    {
+      "IndexName": "IX_ARTIST",
       "KeySchema": [
         {
-          "AttributeName": "GSI2PK",
+          "AttributeName": "TYPE",
           "KeyType": "HASH"
         },
         {

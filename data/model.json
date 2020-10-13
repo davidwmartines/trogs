@@ -1,10 +1,10 @@
 {
-  "ModelName": "Music2",
+  "ModelName": "Music 3",
   "ModelMetadata": {
     "Author": "David Martines",
-    "DateCreated": "Oct 11, 2020, 12:51 PM",
-    "DateLastModified": "Oct 12, 2020, 02:52 PM",
-    "Description": "Artists, Albums, Tracks, iteration 2",
+    "DateCreated": "Oct 13, 2020, 11:21 AM",
+    "DateLastModified": "Oct 13, 2020, 11:37 AM",
+    "Description": "Iteration 3 of design, for use in NoSQL Workbench",
     "Version": "1.0"
   },
   "DataModel": [
@@ -30,36 +30,32 @@
           "AttributeType": "S"
         },
         {
-          "AttributeName": "url",
-          "AttributeType": "S"
-        },
-        {
           "AttributeName": "year",
           "AttributeType": "N"
         },
         {
-          "AttributeName": "GSI1PK",
+          "AttributeName": "url",
           "AttributeType": "S"
         },
         {
-          "AttributeName": "GSI1SK",
+          "AttributeName": "AlbumID",
           "AttributeType": "S"
         },
         {
-          "AttributeName": "GSI2PK",
+          "AttributeName": "TYPE",
           "AttributeType": "S"
         }
       ],
       "GlobalSecondaryIndexes": [
         {
-          "IndexName": "GSI1",
+          "IndexName": "IX_ALBUM",
           "KeyAttributes": {
             "PartitionKey": {
-              "AttributeName": "GSI1PK",
+              "AttributeName": "AlbumID",
               "AttributeType": "S"
             },
             "SortKey": {
-              "AttributeName": "GSI1SK",
+              "AttributeName": "SK",
               "AttributeType": "S"
             }
           },
@@ -68,10 +64,10 @@
           }
         },
         {
-          "IndexName": "GSI2",
+          "IndexName": "IX_ARTIST",
           "KeyAttributes": {
             "PartitionKey": {
-              "AttributeName": "GSI2PK",
+              "AttributeName": "TYPE",
               "AttributeType": "S"
             },
             "SortKey": {
@@ -81,6 +77,123 @@
           },
           "Projection": {
             "ProjectionType": "KEYS_ONLY"
+          }
+        }
+      ],
+      "TableData": [
+        {
+          "PK": {
+            "S": "ARTIST#1"
+          },
+          "SK": {
+            "S": "000"
+          },
+          "name": {
+            "S": "The Beatles"
+          }
+        },
+        {
+          "PK": {
+            "S": "ARTIST#1"
+          },
+          "SK": {
+            "S": "1966"
+          },
+          "title": {
+            "S": "Revolver"
+          },
+          "AlbumID": {
+            "S": "ALBUM#1"
+          }
+        },
+        {
+          "PK": {
+            "S": "ARTIST#1"
+          },
+          "SK": {
+            "S": "1965"
+          },
+          "title": {
+            "S": "Help"
+          },
+          "AlbumID": {
+            "S": "ALBUM#2"
+          }
+        },
+        {
+          "PK": {
+            "S": "ARTIST#1"
+          },
+          "SK": {
+            "S": "1967"
+          },
+          "title": {
+            "S": "Sgt. Pepper"
+          },
+          "AlbumID": {
+            "S": "ALBUM#3"
+          }
+        },
+        {
+          "PK": {
+            "S": "TRACK#1"
+          },
+          "SK": {
+            "S": "TRACK-001"
+          },
+          "title": {
+            "S": "Taxman"
+          },
+          "url": {
+            "S": "https://..."
+          },
+          "AlbumID": {
+            "S": "ALBUM#1"
+          }
+        },
+        {
+          "PK": {
+            "S": "TRACK#2"
+          },
+          "SK": {
+            "S": "TRACK-002"
+          },
+          "title": {
+            "S": "Eleanor Rigby"
+          },
+          "url": {
+            "S": "https://..."
+          },
+          "AlbumID": {
+            "S": "ALBUM#1"
+          }
+        },
+        {
+          "PK": {
+            "S": "TRACK#3"
+          },
+          "SK": {
+            "S": "TRACK-001"
+          },
+          "title": {
+            "S": "Help"
+          },
+          "AlbumID": {
+            "S": "ALBUM#2"
+          }
+        },
+        {
+          "PK": {
+            "S": "TRACK#4"
+          },
+          "SK": {
+            "S": "TRACK-002"
+          },
+          "title": {
+            "S": "Yesterday"
+          },
+          "AlbumID": {
+            "S": "ALBUM#2"
           }
         }
       ],

@@ -48,8 +48,9 @@ def list_all():
     table = get_table()
     try:
         response = table.query(
-            IndexName='GSI2',
-            KeyConditionExpression=Key('GSI2PK').eq('ARTIST')
+            IndexName='IX_ARTIST',
+            ScanIndexForward=True,
+            KeyConditionExpression=Key('TYPE').eq('ARTIST')
         )
         #print(response)
         return map(map_list_item, response['Items'])
@@ -72,7 +73,7 @@ def map_detail(items):
 def map_album(item):
     return {
         'title': item['title'],
-        'year': item['year'],
+        'year': item['SK'],
         'id': urlsafe_b64encode(item['SK'].encode())
     }
 
@@ -84,7 +85,7 @@ def get_by_id(id):
     table = get_table()
     try:
         response = table.query(
-            ScanIndexForward=False,
+            ScanIndexForward=True,
             KeyConditionExpression=Key('PK').eq(pk)
         )
         print(response)
