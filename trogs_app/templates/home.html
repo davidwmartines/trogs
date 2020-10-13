@@ -6,7 +6,7 @@ Mushmud
 
 <ul>
 {% for artist in artists %}
-<li><a href="{{url_for('artist', id=artist.PK)}}">{{artist.name}}</a></li>
+<li><a href="{{url_for('artist', id=artist.id)}}">{{artist.name}}</a></li>
 {% endfor %}
 </ul>
 {% endblock %}

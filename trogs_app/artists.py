@@ -1,8 +1,9 @@
 import os
+from base64 import urlsafe_b64decode, urlsafe_b64encode
 
 import boto3
-from botocore.exceptions import ClientError
 from boto3.dynamodb.conditions import Key
+from botocore.exceptions import ClientError
 
 ERROR_HELP_STRINGS = {
     # Common Errors
@@ -37,6 +38,11 @@ def handle_error(error):
                   help_string=error_help_string,
                   error_message=error_message))
 
+def map_item(item):
+    return {
+        'name': item['name'],
+        'id': urlsafe_b64encode(item['PK'].encode())
+        }
 
 def list_all():
     table = get_table()
@@ -45,8 +51,8 @@ def list_all():
             IndexName='GSI2',
             KeyConditionExpression=Key('GSI2PK').eq('ARTIST')
         )
-        print(response)
-        return response['Items']
+        #print(response)
+        return map(map_item, response['Items'])
 
     except ClientError as error:
         handle_error(error)
