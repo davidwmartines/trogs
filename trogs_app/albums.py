@@ -24,7 +24,7 @@ def map_album(items):
         'artistName': items[0]['ArtistName'],
         'year': dateutil.parser.parse(items[0]['SK']).strftime('%Y'),
         'artistId': ids.to_id(items[0]['ArtistID']),
-        'tracks': map(map_track, items[slice(1, len(items)+1)])
+        'tracks': list(map(map_track, items[slice(1, len(items)+1)]))
     }
 
 
