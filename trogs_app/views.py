@@ -1,8 +1,6 @@
 from flask import Flask, render_template
 
-from . import app
-from . import artists
-from . import albums
+from . import albums, app, artists, tracks
 
 
 @app.route("/")
@@ -25,5 +23,5 @@ def album(id):
 
 @app.route("/track/<id>")
 def track(id):
-    # get track by id
-    return render_template("track.html", title="Moonlight Serenade", url="https://dxffd4gk9zzvk2.s3.us-east-2.amazonaws.com/solos/moonlight+serenade.flac")
+    track = tracks.get_by_id(id)
+    return render_template("track.html", track=track)

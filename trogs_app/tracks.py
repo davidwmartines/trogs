@@ -1,0 +1,22 @@
+from boto3.dynamodb.conditions import Key
+
+from . import db
+
+@db.handle_db_error
+def get_by_id(id):
+    table = db.get_table()
+
+    res = table.query(
+        KeyConditionExpression=Key('PK').eq(id)
+    )
+
+    item = res['Items'][0]
+
+    return {
+        'artistId': item['ArtistID'],
+        'artistName': item['ArtistName'],
+        'albumId': item['AlbumID'],
+        'albumTitle': item['AlbumTitle'],
+        'trackTitle': item['TrackTitle'],
+        'audioUrl': item['AudioURL']
+    }

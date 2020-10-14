@@ -1,8 +1,15 @@
 {% extends "layout.html" %}
+
 {% block title %}
-{{title}}
-{% endblock %}
+{{track.trackTitle}}
+{% endblock%}
+
 {% block content %}
-<h1>{{title}}</h1>
-<audio id="track" controls><source src="{{url}}"></audio>
+<h1>{{track.trackTitle}}</h1>
+<p>
+  From the album
+  <a href="{{ url_for('album', id=track.albumId)}}">{{track.albumTitle}}</a>
+  by <a href="{{url_for('artist', id=track.artistId)}}">{{track.artistName}}</a>
+</p>
+<audio id="track" controls><source src="{{track.audioUrl}}" /></audio>
 {% endblock %}
