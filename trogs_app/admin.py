@@ -62,6 +62,7 @@ def create_album(artistName, albumTitle, releaseDateISO):
 
     print(query["Items"][0])
 
+
 def add_track(artistName, albumTitle, trackTitle, audioUrl, sortNum=None):
     table = db.get_table()
 
@@ -80,14 +81,16 @@ def add_track(artistName, albumTitle, trackTitle, audioUrl, sortNum=None):
     print(artist)
 
     res = table.query(
-        ScanIndexForward = True,
+        ScanIndexForward=True,
         KeyConditionExpression=Key('PK').eq(artist['PK'])
     )
 
-    albums = list(filter(lambda item: attr_matches('AlbumTitle', albumTitle, item), res['Items']))
+    albums = list(filter(lambda item: attr_matches(
+        'AlbumTitle', albumTitle, item), res['Items']))
 
     if(len(albums) == 0):
-        print("Error: No album found by '{0}' with title '{1}'.".format(artist["ArtistName"], albumTitle))
+        print("Error: No album found by '{0}' with title '{1}'.".format(
+            artist["ArtistName"], albumTitle))
         return
 
     album = albums[0]
@@ -96,9 +99,9 @@ def add_track(artistName, albumTitle, trackTitle, audioUrl, sortNum=None):
 
     if(sortNum is None):
         res = table.query(
-            IndexName = 'IX_ALBUM',
-            ScanIndexForward = True,
-            KeyConditionExpression = Key('AlbumID').eq(album['AlbumID'])
+            IndexName='IX_ALBUM',
+            ScanIndexForward=True,
+            KeyConditionExpression=Key('AlbumID').eq(album['AlbumID'])
         )
 
         if(len(res['Items']) > 1):
@@ -109,7 +112,7 @@ def add_track(artistName, albumTitle, trackTitle, audioUrl, sortNum=None):
             sort = 'TRACK-100'
     else:
         sort = 'TRACK-' + str(sortNum)
-            
+
     id = ids.new_id()
 
     print("creating '{0}', id '{1}', sort {2}".format(trackTitle, id, sort))
@@ -130,34 +133,8 @@ def add_track(artistName, albumTitle, trackTitle, audioUrl, sortNum=None):
     )
 
     print(res["Items"][0])
-    
-    
+
+
 def attr_matches(attr, value, item):
     if(attr in item):
         return item[attr] == value
-
-# class Artist:
-#     def __init__(self, id, name):
-#         self.id = id
-#         self.name = name
-
-#     def save(self):
-#         table = db.get_table()
-#         table.put_item(Item={
-#             'PK': self.id,
-#             'SK': '000',
-#             'ArtistId': self.id,
-#             'ArtistName': self.name,
-#             'IsArtist': 1
-#         })
-
-#     def add_album(self, id, title, date):
-#         table = db.get_table()
-#         table.put_item(Item={
-#             'PK': self.id,
-#             'SK': date,
-#             'AlbumTitle': title,
-#             'AlbumID': id,
-#             'ArtistID': self.id,
-#             'ArtistName': self.name
-#         })
