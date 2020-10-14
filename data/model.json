@@ -30,7 +30,7 @@
           "AttributeType": "S"
         },
         {
-          "AttributeName": "TrackURL",
+          "AttributeName": "AudioURL",
           "AttributeType": "S"
         },
         {
@@ -175,7 +175,7 @@
           "AlbumTitle": {
             "S": "Revolver"
           },
-          "TrackURL": {
+          "AudioURL": {
             "S": "https://..."
           },
           "AlbumID": {
@@ -201,7 +201,7 @@
           "AlbumTitle": {
             "S": "Revolver"
           },
-          "TrackURL": {
+          "AudioURL": {
             "S": "https://..."
           },
           "AlbumID": {
@@ -227,7 +227,7 @@
           "AlbumTitle": {
             "S": "Help"
           },
-          "TrackURL": {
+          "AudioURL": {
             "S": "https://..."
           },
           "AlbumID": {
@@ -253,7 +253,7 @@
           "AlbumTitle": {
             "S": "Help"
           },
-          "TrackURL": {
+          "AudioURL": {
             "S": "https://..."
           },
           "AlbumID": {

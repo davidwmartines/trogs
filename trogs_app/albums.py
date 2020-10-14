@@ -30,5 +30,5 @@ def map_track(item):
     return {
         'id': ids.to_id(item['PK']),
         'title': item['TrackTitle'],
-        'url': item['TrackURL']
+        'audioUrl': item['AudioURL']
     }

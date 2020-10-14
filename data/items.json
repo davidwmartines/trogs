@@ -7,13 +7,13 @@
             "S": "000"
           },
           "ArtistID": {
-            "S": "ARTIST#3"
+            "S": "38slbc00bvxln93d"
           },
           "ArtistName": {
             "S": "The Rolling Stones"
           },
           "PK": {
-            "S": "ARTIST#3"
+            "S": "38slbc00bvxln93d"
           },
           "IsArtist": {
             "N": "1"
@@ -28,13 +28,13 @@
             "S": "000"
           },
           "ArtistID": {
-            "S": "ARTIST#2"
+            "S": "83e5h2oddoy49l4d"
           },
           "ArtistName": {
             "S": "Led Zeppelin"
           },
           "PK": {
-            "S": "ARTIST#2"
+            "S": "83e5h2oddoy49l4d"
           },
           "IsArtist": {
             "N": "1"
@@ -45,14 +45,14 @@
     {
       "PutRequest": {
         "Item": {
-          "TrackURL": {
+          "AudioURL": {
             "S": "https://..."
           },
           "ArtistID": {
-            "S": "ARTIST#1"
+            "S": "56w5u0mmgnzp82sj"
           },
           "AlbumID": {
-            "S": "ALBUM#2"
+            "S": "dg6zyx2qzmjxwh37"
           },
           "SK": {
             "S": "TRACK-001"
@@ -64,7 +64,7 @@
             "S": "Help"
           },
           "PK": {
-            "S": "TRACK#3"
+            "S": "0fqt5bccn0wgso1b"
           },
           "AlbumTitle": {
             "S": "Help"
@@ -75,14 +75,14 @@
     {
       "PutRequest": {
         "Item": {
-          "TrackURL": {
+          "AudioURL": {
             "S": "https://..."
           },
           "ArtistID": {
-            "S": "ARTIST#1"
+            "S": "56w5u0mmgnzp82sj"
           },
           "AlbumID": {
-            "S": "ALBUM#1"
+            "S": "3yt4hd98t8k2a0gr"
           },
           "SK": {
             "S": "TRACK-002"
@@ -94,7 +94,7 @@
             "S": "Eleanor Rigby"
           },
           "PK": {
-            "S": "TRACK#2"
+            "S": "a85u5e5m5nqitdzv"
           },
           "AlbumTitle": {
             "S": "Revolver"
@@ -112,10 +112,10 @@
             "S": "The Beatles"
           },
           "ArtistID": {
-            "S": "ARTIST#1"
+            "S": "56w5u0mmgnzp82sj"
           },
           "PK": {
-            "S": "ARTIST#1"
+            "S": "56w5u0mmgnzp82sj"
           },
           "IsArtist": {
             "N": "1"
@@ -133,16 +133,16 @@
             "S": "The Beatles"
           },
           "ArtistID": {
-            "S": "ARTIST#1"
+            "S": "56w5u0mmgnzp82sj"
           },
           "PK": {
-            "S": "ARTIST#1"
+            "S": "56w5u0mmgnzp82sj"
           },
           "AlbumTitle": {
             "S": "Help"
           },
           "AlbumID": {
-            "S": "ALBUM#2"
+            "S": "dg6zyx2qzmjxwh37"
           }
         }
       }
@@ -157,16 +157,16 @@
             "S": "The Beatles"
           },
           "ArtistID": {
-            "S": "ARTIST#1"
+            "S": "56w5u0mmgnzp82sj"
           },
           "PK": {
-            "S": "ARTIST#1"
+            "S": "56w5u0mmgnzp82sj"
           },
           "AlbumTitle": {
             "S": "Revolver"
           },
           "AlbumID": {
-            "S": "ALBUM#1"
+            "S": "3yt4hd98t8k2a0gr"
           }
         }
       }
@@ -181,16 +181,16 @@
             "S": "The Beatles"
           },
           "ArtistID": {
-            "S": "ARTIST#1"
+            "S": "56w5u0mmgnzp82sj"
           },
           "PK": {
-            "S": "ARTIST#1"
+            "S": "56w5u0mmgnzp82sj"
           },
           "AlbumTitle": {
             "S": "Sgt. Pepper"
           },
           "AlbumID": {
-            "S": "ALBUM#3"
+            "S": "3vzrdau438kwkr7t"
           }
         }
       }
@@ -198,14 +198,14 @@
     {
       "PutRequest": {
         "Item": {
-          "TrackURL": {
+          "AudioURL": {
             "S": "https://..."
           },
           "ArtistID": {
-            "S": "ARTIST#1"
+            "S": "56w5u0mmgnzp82sj"
           },
           "AlbumID": {
-            "S": "ALBUM#2"
+            "S": "dg6zyx2qzmjxwh37"
           },
           "SK": {
             "S": "TRACK-002"
@@ -217,7 +217,7 @@
             "S": "Yesterday"
           },
           "PK": {
-            "S": "TRACK#4"
+            "S": "0u5e23cypt375nap"
           },
           "AlbumTitle": {
             "S": "Help"
@@ -228,14 +228,14 @@
     {
       "PutRequest": {
         "Item": {
-          "TrackURL": {
+          "AudioURL": {
             "S": "https://..."
           },
           "ArtistID": {
-            "S": "ARTIST#1"
+            "S": "56w5u0mmgnzp82sj"
           },
           "AlbumID": {
-            "S": "ALBUM#1"
+            "S": "3yt4hd98t8k2a0gr"
           },
           "SK": {
             "S": "TRACK-001"
@@ -247,7 +247,7 @@
             "S": "Taxman"
           },
           "PK": {
-            "S": "TRACK#1"
+            "S": "6i1ez54ngb6m4wnx"
           },
           "AlbumTitle": {
             "S": "Revolver"
