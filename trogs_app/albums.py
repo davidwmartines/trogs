@@ -1,3 +1,4 @@
+import dateutil.parser
 from boto3.dynamodb.conditions import Key
 
 from . import db, ids
@@ -19,7 +20,7 @@ def map_album(items):
     return {
         'title': items[0]['AlbumTitle'],
         'artistName': items[0]['ArtistName'],
-        'year': items[0]['Year'],
+        'year': dateutil.parser.parse(items[0]['SK']).strftime('%Y'),
         'artistId': ids.to_id(items[0]['ArtistID']),
         'tracks': map(map_track, items[slice(1, len(items)+1)])
     }

@@ -48,10 +48,6 @@
         {
           "AttributeName": "TrackTitle",
           "AttributeType": "S"
-        },
-        {
-          "AttributeName": "Year",
-          "AttributeType": "S"
         }
       ],
       "GlobalSecondaryIndexes": [
@@ -111,7 +107,7 @@
             "S": "ARTIST#1"
           },
           "SK": {
-            "S": "ALBUM-002"
+            "S": "1966-01-01"
           },
           "ArtistName": {
             "S": "The Beatles"
@@ -131,7 +127,7 @@
             "S": "ARTIST#1"
           },
           "SK": {
-            "S": "ALBUM-001"
+            "S": "1965-01-01"
           },
           "ArtistName": {
             "S": "The Beatles"
@@ -151,7 +147,7 @@
             "S": "ARTIST#1"
           },
           "SK": {
-            "S": "ALBUM-003"
+            "S": "1967-01-01"
           },
           "ArtistName": {
             "S": "The Beatles"
