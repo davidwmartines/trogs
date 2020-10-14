@@ -7,6 +7,7 @@
 {% block content %}
 <h1>{{album.title}}</h1>
 <p>Album by <a href="{{ url_for('artist', id=album.artistId) }}">{{album.artistName}}</a></p>
+<p>{{album.year}}</p>
 <ul>
     {% for track in album.tracks %}
     <li>{{track.title}}</li>
