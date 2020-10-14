@@ -23,6 +23,9 @@ def get_by_id(id):
         ScanIndexForward=True,
         KeyConditionExpression=Key('PK').eq(pk)
     )
+    if(len(response['Items']) == 0):
+        return None
+        
     detail = map_detail(response['Items'])
     return detail
 

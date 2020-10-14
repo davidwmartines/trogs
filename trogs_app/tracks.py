@@ -10,6 +10,9 @@ def get_by_id(id):
         KeyConditionExpression=Key('PK').eq(id)
     )
 
+    if(len(res['Items']) == 0):
+        return None
+
     item = res['Items'][0]
 
     return {

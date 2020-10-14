@@ -18,11 +18,10 @@ def handle_db_error(wrapped_function):
     def _wrapper(*args, **kwargs):
         try:
             response = wrapped_function(*args, **kwargs)
+            return response
         except ClientError as error:
             handle_client_error(error)
-        except BaseException as error:
-            print(error)
-        return response
+            raise error
     return _wrapper
 
 
