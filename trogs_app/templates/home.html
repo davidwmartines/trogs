@@ -1,9 +1,10 @@
 {% extends "layout.html" %}
+
 {% block title %}
 Mushmud
 {% endblock %}
-{% block content %}
 
+{% block content %}
 <ul>
 {% for artist in artists %}
 <li><a href="{{url_for('artist', id=artist.id)}}">{{artist.name}}</a></li>

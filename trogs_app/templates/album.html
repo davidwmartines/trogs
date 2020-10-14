@@ -1,9 +1,12 @@
 {% extends "layout.html" %}
+
 {% block title %}
-{{album.title}}
+{{album.artistName}} - {{album.title}}
 {% endblock %}
+
 {% block content %}
 <h1>{{album.title}}</h1>
+<p>Album by <a href="{{ url_for('artist', id=album.artistId) }}">{{album.artistName}}</a></p>
 <ul>
     {% for track in album.tracks %}
     <li>{{track.title}}</li>

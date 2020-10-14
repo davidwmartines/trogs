@@ -13,11 +13,11 @@
       "AttributeType": "S"
     },
     {
-      "AttributeName": "TYPE",
-      "AttributeType": "S"
+      "AttributeName": "IsArtist",
+      "AttributeType": "N"
     },
     {
-      "AttributeName": "name",
+      "AttributeName": "ArtistName",
       "AttributeType": "S"
     }
   ],
@@ -32,10 +32,13 @@
       "KeyType": "RANGE"
     }
   ],
+ 
   "ProvisionedThroughput": {
+
     "ReadCapacityUnits": 5,
     "WriteCapacityUnits": 5
   },
+
   "GlobalSecondaryIndexes": [
     {
       "IndexName": "IX_ALBUM",
@@ -61,11 +64,11 @@
       "IndexName": "IX_ARTIST",
       "KeySchema": [
         {
-          "AttributeName": "TYPE",
+          "AttributeName": "IsArtist",
           "KeyType": "HASH"
         },
         {
-          "AttributeName": "name",
+          "AttributeName": "ArtistName",
           "KeyType": "RANGE"
         }
       ],

@@ -6,14 +6,17 @@
           "SK": {
             "S": "000"
           },
-          "name": {
+          "ArtistID": {
+            "S": "ARTIST#3"
+          },
+          "ArtistName": {
             "S": "The Rolling Stones"
           },
           "PK": {
             "S": "ARTIST#3"
           },
-          "TYPE": {
-            "S": "ARTIST"
+          "IsArtist": {
+            "N": "1"
           }
         }
       }
@@ -24,14 +27,17 @@
           "SK": {
             "S": "000"
           },
-          "name": {
+          "ArtistID": {
+            "S": "ARTIST#2"
+          },
+          "ArtistName": {
             "S": "Led Zeppelin"
           },
           "PK": {
             "S": "ARTIST#2"
           },
-          "TYPE": {
-            "S": "ARTIST"
+          "IsArtist": {
+            "N": "1"
           }
         }
       }
@@ -39,17 +45,29 @@
     {
       "PutRequest": {
         "Item": {
+          "TrackURL": {
+            "S": "https://..."
+          },
+          "ArtistID": {
+            "S": "ARTIST#1"
+          },
+          "AlbumID": {
+            "S": "ALBUM#2"
+          },
           "SK": {
             "S": "TRACK-001"
+          },
+          "ArtistName": {
+            "S": "The Beatles"
+          },
+          "TrackTitle": {
+            "S": "Help"
           },
           "PK": {
             "S": "TRACK#3"
           },
-          "title": {
+          "AlbumTitle": {
             "S": "Help"
-          },
-          "AlbumID": {
-            "S": "ALBUM#2"
           }
         }
       }
@@ -57,20 +75,29 @@
     {
       "PutRequest": {
         "Item": {
+          "TrackURL": {
+            "S": "https://..."
+          },
+          "ArtistID": {
+            "S": "ARTIST#1"
+          },
+          "AlbumID": {
+            "S": "ALBUM#1"
+          },
           "SK": {
             "S": "TRACK-002"
+          },
+          "ArtistName": {
+            "S": "The Beatles"
+          },
+          "TrackTitle": {
+            "S": "Eleanor Rigby"
           },
           "PK": {
             "S": "TRACK#2"
           },
-          "title": {
-            "S": "Eleanor Rigby"
-          },
-          "url": {
-            "S": "https://..."
-          },
-          "AlbumID": {
-            "S": "ALBUM#1"
+          "AlbumTitle": {
+            "S": "Revolver"
           }
         }
       }
@@ -81,14 +108,17 @@
           "SK": {
             "S": "000"
           },
-          "name": {
+          "ArtistName": {
             "S": "The Beatles"
+          },
+          "ArtistID": {
+            "S": "ARTIST#1"
           },
           "PK": {
             "S": "ARTIST#1"
           },
-          "TYPE": {
-            "S": "ARTIST"
+          "IsArtist": {
+            "N": "1"
           }
         }
       }
@@ -97,12 +127,18 @@
       "PutRequest": {
         "Item": {
           "SK": {
-            "S": "1965"
+            "S": "1965#ALBUM#2"
+          },
+          "ArtistName": {
+            "S": "The Beatles"
+          },
+          "ArtistID": {
+            "S": "ARTIST#1"
           },
           "PK": {
             "S": "ARTIST#1"
           },
-          "title": {
+          "AlbumTitle": {
             "S": "Help"
           },
           "AlbumID": {
@@ -115,12 +151,18 @@
       "PutRequest": {
         "Item": {
           "SK": {
-            "S": "1966"
+            "S": "1966#ALBUM#1"
+          },
+          "ArtistName": {
+            "S": "The Beatles"
+          },
+          "ArtistID": {
+            "S": "ARTIST#1"
           },
           "PK": {
             "S": "ARTIST#1"
           },
-          "title": {
+          "AlbumTitle": {
             "S": "Revolver"
           },
           "AlbumID": {
@@ -133,12 +175,18 @@
       "PutRequest": {
         "Item": {
           "SK": {
-            "S": "1967"
+            "S": "1967#ALBUM#3"
+          },
+          "ArtistName": {
+            "S": "The Beatles"
+          },
+          "ArtistID": {
+            "S": "ARTIST#1"
           },
           "PK": {
             "S": "ARTIST#1"
           },
-          "title": {
+          "AlbumTitle": {
             "S": "Sgt. Pepper"
           },
           "AlbumID": {
@@ -150,56 +198,59 @@
     {
       "PutRequest": {
         "Item": {
+          "TrackURL": {
+            "S": "https://..."
+          },
+          "ArtistID": {
+            "S": "ARTIST#1"
+          },
+          "AlbumID": {
+            "S": "ALBUM#2"
+          },
           "SK": {
             "S": "TRACK-002"
+          },
+          "ArtistName": {
+            "S": "The Beatles"
+          },
+          "TrackTitle": {
+            "S": "Yesterday"
           },
           "PK": {
             "S": "TRACK#4"
           },
-          "title": {
-            "S": "Yesterday"
+          "AlbumTitle": {
+            "S": "Help"
+          }
+        }
+      }
+    },
+    {
+      "PutRequest": {
+        "Item": {
+          "TrackURL": {
+            "S": "https://..."
+          },
+          "ArtistID": {
+            "S": "ARTIST#1"
           },
           "AlbumID": {
-            "S": "ALBUM#2"
-          }
-        }
-      }
-    },
-    {
-      "PutRequest": {
-        "Item": {
-          "SK": {
-            "S": "000"
+            "S": "ALBUM#1"
           },
-          "name": {
-            "S": "Yes"
-          },
-          "PK": {
-            "S": "ARTIST#4"
-          },
-          "TYPE": {
-            "S": "ARTIST"
-          }
-        }
-      }
-    },
-    {
-      "PutRequest": {
-        "Item": {
           "SK": {
             "S": "TRACK-001"
+          },
+          "ArtistName": {
+            "S": "The Beatles"
+          },
+          "TrackTitle": {
+            "S": "Taxman"
           },
           "PK": {
             "S": "TRACK#1"
           },
-          "title": {
-            "S": "Taxman"
-          },
-          "url": {
-            "S": "https://..."
-          },
-          "AlbumID": {
-            "S": "ALBUM#1"
+          "AlbumTitle": {
+            "S": "Revolver"
           }
         }
       }

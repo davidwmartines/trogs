@@ -1,10 +1,10 @@
 {
-  "ModelName": "Music 3",
+  "ModelName": "Music 6",
   "ModelMetadata": {
     "Author": "David Martines",
     "DateCreated": "Oct 13, 2020, 11:21 AM",
-    "DateLastModified": "Oct 13, 2020, 11:37 AM",
-    "Description": "Iteration 3 of design, for use in NoSQL Workbench",
+    "DateLastModified": "Oct 13, 2020, 09:21 PM",
+    "Description": "Iteration 6 of design, for use in NoSQL Workbench",
     "Version": "1.0"
   },
   "DataModel": [
@@ -22,19 +22,15 @@
       },
       "NonKeyAttributes": [
         {
-          "AttributeName": "name",
+          "AttributeName": "ArtistName",
           "AttributeType": "S"
         },
         {
-          "AttributeName": "title",
+          "AttributeName": "AlbumTitle",
           "AttributeType": "S"
         },
         {
-          "AttributeName": "year",
-          "AttributeType": "N"
-        },
-        {
-          "AttributeName": "url",
+          "AttributeName": "TrackURL",
           "AttributeType": "S"
         },
         {
@@ -42,7 +38,19 @@
           "AttributeType": "S"
         },
         {
-          "AttributeName": "TYPE",
+          "AttributeName": "IsArtist",
+          "AttributeType": "N"
+        },
+        {
+          "AttributeName": "ArtistID",
+          "AttributeType": "S"
+        },
+        {
+          "AttributeName": "TrackTitle",
+          "AttributeType": "S"
+        },
+        {
+          "AttributeName": "Year",
           "AttributeType": "S"
         }
       ],
@@ -67,11 +75,11 @@
           "IndexName": "IX_ARTIST",
           "KeyAttributes": {
             "PartitionKey": {
-              "AttributeName": "TYPE",
-              "AttributeType": "S"
+              "AttributeName": "IsArtist",
+              "AttributeType": "N"
             },
             "SortKey": {
-              "AttributeName": "name",
+              "AttributeName": "ArtistName",
               "AttributeType": "S"
             }
           },
@@ -88,8 +96,14 @@
           "SK": {
             "S": "000"
           },
-          "name": {
+          "ArtistName": {
             "S": "The Beatles"
+          },
+          "IsArtist": {
+            "N": "1"
+          },
+          "ArtistID": {
+            "S": "ARTIST#1"
           }
         },
         {
@@ -97,13 +111,19 @@
             "S": "ARTIST#1"
           },
           "SK": {
-            "S": "1966"
+            "S": "ALBUM-002"
           },
-          "title": {
+          "ArtistName": {
+            "S": "The Beatles"
+          },
+          "AlbumTitle": {
             "S": "Revolver"
           },
           "AlbumID": {
             "S": "ALBUM#1"
+          },
+          "ArtistID": {
+            "S": "ARTIST#1"
           }
         },
         {
@@ -111,13 +131,19 @@
             "S": "ARTIST#1"
           },
           "SK": {
-            "S": "1965"
+            "S": "ALBUM-001"
           },
-          "title": {
+          "ArtistName": {
+            "S": "The Beatles"
+          },
+          "AlbumTitle": {
             "S": "Help"
           },
           "AlbumID": {
             "S": "ALBUM#2"
+          },
+          "ArtistID": {
+            "S": "ARTIST#1"
           }
         },
         {
@@ -125,13 +151,19 @@
             "S": "ARTIST#1"
           },
           "SK": {
-            "S": "1967"
+            "S": "ALBUM-003"
           },
-          "title": {
+          "ArtistName": {
+            "S": "The Beatles"
+          },
+          "AlbumTitle": {
             "S": "Sgt. Pepper"
           },
           "AlbumID": {
             "S": "ALBUM#3"
+          },
+          "ArtistID": {
+            "S": "ARTIST#1"
           }
         },
         {
@@ -141,14 +173,23 @@
           "SK": {
             "S": "TRACK-001"
           },
-          "title": {
-            "S": "Taxman"
+          "ArtistName": {
+            "S": "The Beatles"
           },
-          "url": {
+          "AlbumTitle": {
+            "S": "Revolver"
+          },
+          "TrackURL": {
             "S": "https://..."
           },
           "AlbumID": {
             "S": "ALBUM#1"
+          },
+          "ArtistID": {
+            "S": "ARTIST#1"
+          },
+          "TrackTitle": {
+            "S": "Taxman"
           }
         },
         {
@@ -158,14 +199,23 @@
           "SK": {
             "S": "TRACK-002"
           },
-          "title": {
-            "S": "Eleanor Rigby"
+          "ArtistName": {
+            "S": "The Beatles"
           },
-          "url": {
+          "AlbumTitle": {
+            "S": "Revolver"
+          },
+          "TrackURL": {
             "S": "https://..."
           },
           "AlbumID": {
             "S": "ALBUM#1"
+          },
+          "ArtistID": {
+            "S": "ARTIST#1"
+          },
+          "TrackTitle": {
+            "S": "Eleanor Rigby"
           }
         },
         {
@@ -175,11 +225,23 @@
           "SK": {
             "S": "TRACK-001"
           },
-          "title": {
+          "ArtistName": {
+            "S": "The Beatles"
+          },
+          "AlbumTitle": {
             "S": "Help"
+          },
+          "TrackURL": {
+            "S": "https://..."
           },
           "AlbumID": {
             "S": "ALBUM#2"
+          },
+          "ArtistID": {
+            "S": "ARTIST#1"
+          },
+          "TrackTitle": {
+            "S": "Help"
           }
         },
         {
@@ -189,11 +251,23 @@
           "SK": {
             "S": "TRACK-002"
           },
-          "title": {
-            "S": "Yesterday"
+          "ArtistName": {
+            "S": "The Beatles"
+          },
+          "AlbumTitle": {
+            "S": "Help"
+          },
+          "TrackURL": {
+            "S": "https://..."
           },
           "AlbumID": {
             "S": "ALBUM#2"
+          },
+          "ArtistID": {
+            "S": "ARTIST#1"
+          },
+          "TrackTitle": {
+            "S": "Yesterday"
           }
         }
       ],
