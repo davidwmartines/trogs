@@ -6,108 +6,6 @@
           "SK": {
             "S": "000"
           },
-          "ArtistID": {
-            "S": "38slbc00bvxln93d"
-          },
-          "ArtistName": {
-            "S": "The Rolling Stones"
-          },
-          "PK": {
-            "S": "38slbc00bvxln93d"
-          },
-          "IsArtist": {
-            "N": "1"
-          }
-        }
-      }
-    },
-    {
-      "PutRequest": {
-        "Item": {
-          "SK": {
-            "S": "000"
-          },
-          "ArtistID": {
-            "S": "83e5h2oddoy49l4d"
-          },
-          "ArtistName": {
-            "S": "Led Zeppelin"
-          },
-          "PK": {
-            "S": "83e5h2oddoy49l4d"
-          },
-          "IsArtist": {
-            "N": "1"
-          }
-        }
-      }
-    },
-    {
-      "PutRequest": {
-        "Item": {
-          "AudioURL": {
-            "S": "https://..."
-          },
-          "ArtistID": {
-            "S": "56w5u0mmgnzp82sj"
-          },
-          "AlbumID": {
-            "S": "dg6zyx2qzmjxwh37"
-          },
-          "SK": {
-            "S": "TRACK-001"
-          },
-          "ArtistName": {
-            "S": "The Beatles"
-          },
-          "TrackTitle": {
-            "S": "Help"
-          },
-          "PK": {
-            "S": "0fqt5bccn0wgso1b"
-          },
-          "AlbumTitle": {
-            "S": "Help"
-          }
-        }
-      }
-    },
-    {
-      "PutRequest": {
-        "Item": {
-          "AudioURL": {
-            "S": "https://..."
-          },
-          "ArtistID": {
-            "S": "56w5u0mmgnzp82sj"
-          },
-          "AlbumID": {
-            "S": "3yt4hd98t8k2a0gr"
-          },
-          "SK": {
-            "S": "TRACK-002"
-          },
-          "ArtistName": {
-            "S": "The Beatles"
-          },
-          "TrackTitle": {
-            "S": "Eleanor Rigby"
-          },
-          "PK": {
-            "S": "a85u5e5m5nqitdzv"
-          },
-          "AlbumTitle": {
-            "S": "Revolver"
-          }
-        }
-      }
-    },
-    {
-      "PutRequest": {
-        "Item": {
-          "SK": {
-            "S": "000"
-          },
           "ArtistName": {
             "S": "The Beatles"
           },
@@ -143,6 +41,30 @@
           },
           "AlbumID": {
             "S": "dg6zyx2qzmjxwh37"
+          }
+        }
+      }
+    },
+    {
+      "PutRequest": {
+        "Item": {
+          "SK": {
+            "S": "1965-12-31"
+          },
+          "ArtistID": {
+            "S": "56w5u0mmgnzp82sj"
+          },
+          "ArtistName": {
+            "S": "The Beatles"
+          },
+          "PK": {
+            "S": "56w5u0mmgnzp82sj"
+          },
+          "AlbumTitle": {
+            "S": "Rubber Soul"
+          },
+          "AlbumID": {
+            "S": "0fj4ygp5b02j1zim"
           }
         }
       }
@@ -198,29 +120,29 @@
     {
       "PutRequest": {
         "Item": {
-          "AudioURL": {
-            "S": "https://..."
-          },
           "ArtistID": {
             "S": "56w5u0mmgnzp82sj"
           },
           "AlbumID": {
-            "S": "dg6zyx2qzmjxwh37"
+            "S": "0fj4ygp5b02j1zim"
           },
           "SK": {
-            "S": "TRACK-002"
+            "S": "TRACK-1099"
+          },
+          "TrackTitle": {
+            "S": "I'm Looking Through You"
           },
           "ArtistName": {
             "S": "The Beatles"
           },
-          "TrackTitle": {
-            "S": "Yesterday"
-          },
           "PK": {
-            "S": "0u5e23cypt375nap"
+            "S": "06wntfgnmppaze25"
           },
           "AlbumTitle": {
-            "S": "Help"
+            "S": "Rubber Soul"
+          },
+          "AudioURL": {
+            "S": "https://..."
           }
         }
       }
@@ -228,9 +150,36 @@
     {
       "PutRequest": {
         "Item": {
+          "ArtistID": {
+            "S": "56w5u0mmgnzp82sj"
+          },
+          "AlbumID": {
+            "S": "0fj4ygp5b02j1zim"
+          },
+          "SK": {
+            "S": "TRACK-999"
+          },
+          "TrackTitle": {
+            "S": "The Word"
+          },
+          "ArtistName": {
+            "S": "The Beatles"
+          },
+          "PK": {
+            "S": "eb0wzxicskigh8ch"
+          },
+          "AlbumTitle": {
+            "S": "Rubber Soul"
+          },
           "AudioURL": {
             "S": "https://..."
-          },
+          }
+        }
+      }
+    },
+    {
+      "PutRequest": {
+        "Item": {
           "ArtistID": {
             "S": "56w5u0mmgnzp82sj"
           },
@@ -251,6 +200,303 @@
           },
           "AlbumTitle": {
             "S": "Revolver"
+          },
+          "AudioURL": {
+            "S": "https://..."
+          }
+        }
+      }
+    },
+    {
+      "PutRequest": {
+        "Item": {
+          "ArtistID": {
+            "S": "dun7x76mqfy5a02t"
+          },
+          "AlbumID": {
+            "S": "4xu1jyx9xhc9bs5l"
+          },
+          "SK": {
+            "S": "TRACK-100"
+          },
+          "TrackTitle": {
+            "S": "Moonlight Serenade"
+          },
+          "ArtistName": {
+            "S": "Jorge VillaLobos"
+          },
+          "PK": {
+            "S": "b9ro2pb07yuz59zu"
+          },
+          "AlbumTitle": {
+            "S": "Solos"
+          },
+          "AudioURL": {
+            "S": "https://dxffd4gk9zzvk2.s3.us-east-2.amazonaws.com/solos/moonlight+serenade.flac"
+          }
+        }
+      }
+    },
+    {
+      "PutRequest": {
+        "Item": {
+          "SK": {
+            "S": "000"
+          },
+          "ArtistID": {
+            "S": "38slbc00bvxln93d"
+          },
+          "ArtistName": {
+            "S": "The Rolling Stones"
+          },
+          "PK": {
+            "S": "38slbc00bvxln93d"
+          },
+          "IsArtist": {
+            "N": "1"
+          }
+        }
+      }
+    },
+    {
+      "PutRequest": {
+        "Item": {
+          "ArtistID": {
+            "S": "56w5u0mmgnzp82sj"
+          },
+          "AlbumID": {
+            "S": "dg6zyx2qzmjxwh37"
+          },
+          "SK": {
+            "S": "TRACK-002"
+          },
+          "ArtistName": {
+            "S": "The Beatles"
+          },
+          "TrackTitle": {
+            "S": "Yesterday"
+          },
+          "PK": {
+            "S": "0u5e23cypt375nap"
+          },
+          "AlbumTitle": {
+            "S": "Help"
+          },
+          "AudioURL": {
+            "S": "https://..."
+          }
+        }
+      }
+    },
+    {
+      "PutRequest": {
+        "Item": {
+          "ArtistID": {
+            "S": "56w5u0mmgnzp82sj"
+          },
+          "AlbumID": {
+            "S": "dg6zyx2qzmjxwh37"
+          },
+          "SK": {
+            "S": "TRACK-001"
+          },
+          "ArtistName": {
+            "S": "The Beatles"
+          },
+          "TrackTitle": {
+            "S": "Help"
+          },
+          "PK": {
+            "S": "0fqt5bccn0wgso1b"
+          },
+          "AlbumTitle": {
+            "S": "Help"
+          },
+          "AudioURL": {
+            "S": "https://..."
+          }
+        }
+      }
+    },
+    {
+      "PutRequest": {
+        "Item": {
+          "SK": {
+            "S": "000"
+          },
+          "ArtistID": {
+            "S": "83e5h2oddoy49l4d"
+          },
+          "ArtistName": {
+            "S": "Led Zeppelin"
+          },
+          "PK": {
+            "S": "83e5h2oddoy49l4d"
+          },
+          "IsArtist": {
+            "N": "1"
+          }
+        }
+      }
+    },
+    {
+      "PutRequest": {
+        "Item": {
+          "SK": {
+            "S": "000"
+          },
+          "ArtistName": {
+            "S": "Jorge VillaLobos"
+          },
+          "PK": {
+            "S": "dun7x76mqfy5a02t"
+          },
+          "IsArtist": {
+            "N": "1"
+          }
+        }
+      }
+    },
+    {
+      "PutRequest": {
+        "Item": {
+          "SK": {
+            "S": "2020-01-01"
+          },
+          "ArtistID": {
+            "S": "dun7x76mqfy5a02t"
+          },
+          "ArtistName": {
+            "S": "Jorge VillaLobos"
+          },
+          "PK": {
+            "S": "dun7x76mqfy5a02t"
+          },
+          "AlbumTitle": {
+            "S": "Solos"
+          },
+          "AlbumID": {
+            "S": "4xu1jyx9xhc9bs5l"
+          }
+        }
+      }
+    },
+    {
+      "PutRequest": {
+        "Item": {
+          "ArtistID": {
+            "S": "56w5u0mmgnzp82sj"
+          },
+          "AlbumID": {
+            "S": "3yt4hd98t8k2a0gr"
+          },
+          "SK": {
+            "S": "TRACK-002"
+          },
+          "ArtistName": {
+            "S": "The Beatles"
+          },
+          "TrackTitle": {
+            "S": "Eleanor Rigby"
+          },
+          "PK": {
+            "S": "a85u5e5m5nqitdzv"
+          },
+          "AlbumTitle": {
+            "S": "Revolver"
+          },
+          "AudioURL": {
+            "S": "https://..."
+          }
+        }
+      }
+    },
+    {
+      "PutRequest": {
+        "Item": {
+          "ArtistID": {
+            "S": "dun7x76mqfy5a02t"
+          },
+          "AlbumID": {
+            "S": "4xu1jyx9xhc9bs5l"
+          },
+          "SK": {
+            "S": "TRACK-300"
+          },
+          "TrackTitle": {
+            "S": "Sun's Blood And Stars' Milk"
+          },
+          "ArtistName": {
+            "S": "Jorge VillaLobos"
+          },
+          "PK": {
+            "S": "4fh59celc6srb2x7"
+          },
+          "AlbumTitle": {
+            "S": "Solos"
+          },
+          "AudioURL": {
+            "S": "https://dxffd4gk9zzvk2.s3.us-east-2.amazonaws.com/solos/SunsBloodAndStarsMilk.flac"
+          }
+        }
+      }
+    },
+    {
+      "PutRequest": {
+        "Item": {
+          "ArtistID": {
+            "S": "56w5u0mmgnzp82sj"
+          },
+          "AlbumID": {
+            "S": "0fj4ygp5b02j1zim"
+          },
+          "SK": {
+            "S": "TRACK-100"
+          },
+          "TrackTitle": {
+            "S": "I've Just Seen A Face"
+          },
+          "ArtistName": {
+            "S": "The Beatles"
+          },
+          "PK": {
+            "S": "1wl1wm5tnu2t6vxl"
+          },
+          "AlbumTitle": {
+            "S": "Rubber Soul"
+          },
+          "AudioURL": {
+            "S": "https://..."
+          }
+        }
+      }
+    },
+    {
+      "PutRequest": {
+        "Item": {
+          "ArtistID": {
+            "S": "dun7x76mqfy5a02t"
+          },
+          "AlbumID": {
+            "S": "4xu1jyx9xhc9bs5l"
+          },
+          "SK": {
+            "S": "TRACK-200"
+          },
+          "TrackTitle": {
+            "S": "Summertime"
+          },
+          "ArtistName": {
+            "S": "Jorge VillaLobos"
+          },
+          "PK": {
+            "S": "9g7pzy0619imnuxy"
+          },
+          "AlbumTitle": {
+            "S": "Solos"
+          },
+          "AudioURL": {
+            "S": "https://dxffd4gk9zzvk2.s3.us-east-2.amazonaws.com/solos/summertime.flac"
           }
         }
       }
