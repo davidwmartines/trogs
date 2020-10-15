@@ -1,0 +1,26 @@
+body {
+  color: #00ffff;
+  background-color: #000000;
+}
+a {
+  color: #00ffff;
+}
+
+#home_link {
+  color: #00ff00;
+}
+
+.share {
+  color: #004949;
+}
+
+.playpause label {
+  border-color: transparent transparent transparent #00ffff;
+}
+
+.playpause input[type="checkbox"]:focus + label {
+  box-shadow: 0 0 5px #00ff00;
+}
+.currenttrack {
+  background-color: #424646;
+}
