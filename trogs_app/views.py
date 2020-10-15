@@ -32,3 +32,7 @@ def track(id):
     if(track is None):
         raise NotFound
     return render_template("track.html", track=track)
+
+@app.route("/favicon.ico")
+def favicon():
+    return app.send_static_file('favicon.ico')
