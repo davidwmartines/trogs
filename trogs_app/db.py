@@ -5,9 +5,9 @@ from botocore.exceptions import ClientError
 
 
 def get_table():
-    endpoint_url = os.environ["AWS_ENDPOINT_URL"]
-    if (endpoint_url != ''):
-        dynamodb = boto3.resource('dynamodb', endpoint_url=endpoint_url)
+  
+    if ("AWS_ENDPOINT_URL" in os.environ):
+        dynamodb = boto3.resource('dynamodb', endpoint_url=os.environ["AWS_ENDPOINT_URL"])
     else:
         dynamodb = boto3.resource("dynamodb")
     table = dynamodb.Table("art")
