@@ -1,0 +1,16 @@
+
+#home_link {
+  color: #000000;
+}
+
+.share {
+  color: #7f8080;
+}
+
+.playpause label {
+  border-color: transparent transparent transparent #242525;
+}
+
+.currenttrack {
+  background-color: #00ff00;
+}
