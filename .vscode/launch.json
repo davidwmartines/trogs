@@ -10,7 +10,7 @@
             "request": "launch",
             "module": "flask",
             "env": {
-                "FLASK_APP": "trogs_app.webapp",
+                "FLASK_APP": "trogs_app.application",
                 "FLASK_ENV": "development",
                 "FLASK_DEBUG": "0",
                 "AWS_PROFILE": "local",

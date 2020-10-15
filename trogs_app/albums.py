@@ -1,7 +1,7 @@
 import dateutil.parser
 from boto3.dynamodb.conditions import Key
 
-from . import db, ids
+import db, ids
 
 
 @db.handle_db_error

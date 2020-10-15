@@ -1,6 +1,6 @@
 from boto3.dynamodb.conditions import Key
 
-from . import db
+import db
 
 @db.handle_db_error
 def get_by_id(id):
