@@ -9,6 +9,7 @@
   <a class="share" data-clipboard-text="{{ url_for('album', id=album.albumId) }}" href="#"></a>
 </h1>
 <p>Album by <a href="{{ url_for('artist', id=album.artistId) }}">{{album.artistName}}</a>
+  •
 {{album.year}}</p>
 
 {% if album.tracks|length > 0 %}
