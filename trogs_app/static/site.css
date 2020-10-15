@@ -1,31 +1,34 @@
+body {
+  font-family: sans-serif;
+}
 .playpause label {
-    display: block;
-    box-sizing: border-box;
-    width: 0;
-    height: 74px;
-    border-color: transparent transparent transparent #202020;
-    transition: 100ms all ease;
-    cursor: pointer;
-    border-style: double;
-    border-width: 0px 0 0px 60px;
-  }
-  .playpause input[type="checkbox"] {
-    position: absolute;
-    left: -9999px;
-  }
-  .playpause input[type="checkbox"]:checked + label {
-    border-style: solid;
-    border-width: 37px 0 37px 60px;
-  }
-  .playpause input[type="checkbox"]:focus + label {
-    box-shadow: 0 0 5px chartreuse;
-  }
-  .currenttrack {
-    background-color: chartreuse;
-  }
-  .trackbox {
-    padding: 2px 5px 15px;
-  }
-  #audiocontainer {
-    padding: 10px 0;
-  }
+  display: block;
+  box-sizing: border-box;
+  width: 0;
+  height: 74px;
+  border-color: transparent transparent transparent #202020;
+  transition: 100ms all ease;
+  cursor: pointer;
+  border-style: double;
+  border-width: 0px 0 0px 60px;
+}
+.playpause input[type="checkbox"] {
+  position: absolute;
+  left: -9999px;
+}
+.playpause input[type="checkbox"]:checked + label {
+  border-style: solid;
+  border-width: 37px 0 37px 60px;
+}
+.playpause input[type="checkbox"]:focus + label {
+  box-shadow: 0 0 5px chartreuse;
+}
+.currenttrack {
+  background-color: chartreuse;
+}
+.trackbox {
+  padding: 2px 5px 15px;
+}
+#audiocontainer {
+  padding: 10px 0;
+}
