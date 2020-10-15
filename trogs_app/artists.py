@@ -39,6 +39,7 @@ def map_list_item(item):
 
 def map_detail(items):
     return {
+        'artistId': items[0]['PK'],
         'name': items[0]['ArtistName'],
         'albums': map(map_album, items[slice(1, len(items)+1)])
     }

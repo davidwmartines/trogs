@@ -5,7 +5,9 @@
 {% endblock%}
 
 {% block content %}
-<h1>{{track.trackTitle}}</h1>
+<h1>{{track.trackTitle}}
+  <a class="share" data-clipboard-text="{{ url_for('track', id=track.trackId) }}" href="#"></a>
+</h1>
 <p>
   From the album
   <a href="{{ url_for('album', id=track.albumId)}}">{{track.albumTitle}}</a>

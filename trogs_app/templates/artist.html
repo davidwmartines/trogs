@@ -3,7 +3,9 @@
 {{artist.name}}
 {% endblock %}
 {% block content %}
-<h1>{{artist.name}}</h1>
+<h1>{{artist.name}}
+    <a class="share" data-clipboard-text="{{ url_for('artist', id=artist.artistId) }}" href="#"></a>
+</h1>
 <ul>
     {% for album in artist.albums %}
     <li><a href="{{url_for('album', id=album.id)}}">{{album.title}}</a> ({{album.year}})</li>

@@ -20,6 +20,7 @@ def get_by_id(id):
 
 def map_album(items):
     return {
+        'albumId': items[0]['AlbumID'],
         'title': items[0]['AlbumTitle'],
         'artistName': items[0]['ArtistName'],
         'year': dateutil.parser.parse(items[0]['SK']).strftime('%Y'),
@@ -30,7 +31,7 @@ def map_album(items):
 
 def map_track(item):
     return {
-        'id': ids.to_id(item['PK']),
+        'trackId': ids.to_id(item['PK']),
         'title': item['TrackTitle'],
         'audioUrl': item['AudioURL']
     }

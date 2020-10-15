@@ -21,6 +21,13 @@ a:visited {
   font-weight: bolder;
 }
 
+.share {
+  color: #004949;
+}
+.share::before{
+  content: "➚";
+}
+
 .playpause label {
   display: block;
   box-sizing: border-box;

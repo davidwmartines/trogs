@@ -16,6 +16,7 @@ def get_by_id(id):
     item = res['Items'][0]
 
     return {
+        'trackId': item['PK'],
         'artistId': item['ArtistID'],
         'artistName': item['ArtistName'],
         'albumId': item['AlbumID'],

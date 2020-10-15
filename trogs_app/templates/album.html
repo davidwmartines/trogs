@@ -5,7 +5,9 @@
 {% endblock %}
 
 {% block content %}
-<h1>{{album.title}}</h1>
+<h1>{{album.title}}
+  <a class="share" data-clipboard-text="{{ url_for('album', id=album.albumId) }}" href="#"></a>
+</h1>
 <p>Album by <a href="{{ url_for('artist', id=album.artistId) }}">{{album.artistName}}</a>
 {{album.year}}</p>
 
@@ -18,7 +20,9 @@
 <div id="audiocontainer">
     {% for track in album.tracks %}
     <div class="trackbox">
-        <h4>{{track.title}}</h4>
+        <h4>{{track.title}}
+          <a class="share" data-clipboard-text="{{ url_for('track', id=track.trackId) }}" href="{{ url_for('track', id=track.trackId) }}"></a>
+        </h4>
         <div>
           <audio id="track_{{loop.index0}}" controls><source src="{{track.audioUrl}}"></audio>
         </div>
