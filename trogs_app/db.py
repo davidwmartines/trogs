@@ -4,14 +4,22 @@ import boto3
 from botocore.exceptions import ClientError
 
 
-def get_table():
-  
+def init_table():
     if ("AWS_ENDPOINT_URL" in os.environ):
-        dynamodb = boto3.resource('dynamodb', endpoint_url=os.environ["AWS_ENDPOINT_URL"])
+        dynamodb = boto3.resource(
+            'dynamodb', endpoint_url=os.environ["AWS_ENDPOINT_URL"])
     else:
         dynamodb = boto3.resource("dynamodb")
     table = dynamodb.Table("art")
+    print('dynamodb table resource initialized')
     return table
+
+
+_table = init_table()
+
+
+def get_table():
+    return _table
 
 
 def handle_db_error(wrapped_function):
