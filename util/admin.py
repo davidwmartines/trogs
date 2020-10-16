@@ -1,7 +1,11 @@
+import os
+import sys
+
 from boto3.dynamodb.conditions import Key
 
-from . import db, ids
-
+sys.path.insert(0, os.path.abspath(
+    os.path.join(os.path.dirname(__file__), '..')))
+from trogs_app import db, ids
 
 def create_artist(artistName):
     table = db.get_table()
