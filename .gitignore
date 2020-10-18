@@ -138,3 +138,7 @@ dmypy.json
 cython_debug/
 
 trogs_app/trogs_app.zip
+temp.jpg
+temp.mp3
+temp.wav
+temp.flac
