@@ -1,13 +1,15 @@
+from .import progress
+from trogs_app import db, ids
 import os
 import sys
-
+import boto3
 from boto3.dynamodb.conditions import Key
 
 sys.path.insert(0, os.path.abspath(
     os.path.join(os.path.dirname(__file__), '..')))
-from trogs_app import db, ids
 
-def create_artist(artistName):
+
+def create_artist(artistName, owner='', bio='', imageUrl=''):
     table = db.get_table()
 
     id = ids.new_id()
@@ -18,7 +20,10 @@ def create_artist(artistName):
         'PK': id,
         'SK': '000',
         'ArtistName': artistName,
-        'IsArtist': 1
+        'Owner': owner,
+        'IsArtist': 1,
+        'Bio': bio,
+        'ImageURL': imageUrl
     })
 
     query = table.query(
@@ -30,7 +35,7 @@ def create_artist(artistName):
     print(query["Items"][0])
 
 
-def create_album(artistName, albumTitle, releaseDateISO):
+def create_album(artistName, albumTitle, releaseDateISO, license, description='', imageUrl=''):
     table = db.get_table()
 
     res = table.query(
@@ -56,7 +61,10 @@ def create_album(artistName, albumTitle, releaseDateISO):
         'AlbumTitle': albumTitle,
         'AlbumID': id,
         'ArtistID': artist['PK'],
-        'ArtistName': artist['ArtistName']
+        'ArtistName': artist['ArtistName'],
+        'Description': description,
+        'License': license,
+        'ImageURL': imageUrl
     })
 
     query = table.query(
@@ -142,3 +150,23 @@ def add_track(artistName, albumTitle, trackTitle, audioUrl, sortNum=None):
 def attr_matches(attr, value, item):
     if(attr in item):
         return item[attr] == value
+
+
+def save_to_s3(local_file_path, object_name, bucket=None):
+    if(bucket is None):
+        if(os.environ["AWS_CONTENT_BUCKET"] is not None):
+            bucket = os.environ["AWS_CONTENT_BUCKET"]
+    if(bucket is None):
+        raise "No S3 bucket specified"
+
+    client = boto3.client('s3')
+    with open(local_file_path, 'rb') as f:
+        client.upload_fileobj(f, bucket, object_name,
+                              ExtraArgs={'ACL': 'public-read',
+                                         'ContentType': 'image/jpeg'},
+                              Callback=progress.UploadProgressCallback(local_file_path))
+    print('done')
+
+
+def safe_obj_name(val):
+    return val.lower().replace(' ', '-').replace('/', '-').replace('\\', '-').replace('#', '-')
