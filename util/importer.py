@@ -108,14 +108,18 @@ def import_artist(id):
     imageid = data[6]
     print("got data for '{0}'".format(artist_name))
 
-    imageUrl=''
+    imageUrl = ''
     if(imageid != ''):
         filename = "temp.jpg"
         print('downloading image data...')
         get_file(imageid, filename)
         print("created file '{0}'".format(filename))
-        
-        object_name = 'art/{0}/{0}.jpg'.format(admin.safe_obj_name(artist_name))
-        admin.save_to_s3('temp.jpg', object_name)
+
+        object_name = 'art/{0}/{0}.jpg'.format(
+            admin.safe_obj_name(artist_name))
+        full_url = admin.save_to_s3('temp.jpg', 'image/jpeg', object_name)
+        print(full_url)
+        # use the s3 object path for ImageURL
+        imageUrl = object_name
 
     admin.create_artist(artist_name, artist_owner, artist_bio, imageUrl)

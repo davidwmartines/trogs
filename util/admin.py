@@ -152,22 +152,32 @@ def attr_matches(attr, value, item):
         return item[attr] == value
 
 
-def save_to_s3(local_file_path, object_name, bucket=None):
+def save_to_s3(local_file_path, object_name, content_type, bucket=None):
+
+    # get bucket from param or config
     if(bucket is None):
         if(os.environ["AWS_CONTENT_BUCKET"] is not None):
             bucket = os.environ["AWS_CONTENT_BUCKET"]
     if(bucket is None):
         raise "No S3 bucket specified"
 
+    # upload
     client = boto3.client('s3')
     with open(local_file_path, 'rb') as f:
         client.upload_fileobj(f, bucket, object_name,
                               ExtraArgs={'ACL': 'public-read',
-                                         'ContentType': 'image/jpeg'},
+                                         'ContentType': content_type},
                               Callback=progress.UploadProgressCallback(local_file_path))
+
+    # show summary for verification
     resource = boto3.resource('s3')
     summary = resource.ObjectSummary(bucket, object_name)
     print(summary.size, summary.last_modified)
+
+    # return full url to file
+    location = client.get_bucket_location(Bucket=bucket)['LocationConstraint']
+    url = "https://s3-%s.amazonaws.com/%s/%s" % (location, bucket, object_name)
+    return url
 
 
 def safe_obj_name(val):

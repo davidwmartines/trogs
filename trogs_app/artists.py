@@ -33,7 +33,8 @@ def get_by_id(id):
 def map_list_item(item):
     return {
         'name': item['ArtistName'],
-        'id': ids.to_id(item['PK'])
+        'id': ids.to_id(item['PK']),
+        'image_url': item.get('ImageURL')
     }
 
 
@@ -41,6 +42,7 @@ def map_detail(items):
     return {
         'artistId': items[0]['PK'],
         'name': items[0]['ArtistName'],
+        'image_url': items[0].get('ImageURL'),
         'albums': map(map_album, items[slice(1, len(items)+1)])
     }
 

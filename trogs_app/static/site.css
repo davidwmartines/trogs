@@ -14,6 +14,19 @@ a:visited {
   font-family: "Calistoga", serif;
   font-weight: bolder;
 }
+
+.home_list_box{
+  display: table;
+  clear: both;
+}
+.home_list_box div {
+  float: left;
+}
+.home_list_box .title_box{
+  vertical-align: middle;
+  padding-left: 10px;
+}
+
 .share::before {
   content: "➚";
 }
