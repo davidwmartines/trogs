@@ -165,7 +165,9 @@ def save_to_s3(local_file_path, object_name, bucket=None):
                               ExtraArgs={'ACL': 'public-read',
                                          'ContentType': 'image/jpeg'},
                               Callback=progress.UploadProgressCallback(local_file_path))
-    print('done')
+    resource = boto3.resource('s3')
+    summary = resource.ObjectSummary(bucket, object_name)
+    print(summary.size, summary.last_modified)
 
 
 def safe_obj_name(val):
