@@ -73,7 +73,8 @@
         }
       ],
       "Projection": {
-        "ProjectionType": "KEYS_ONLY"
+        "ProjectionType": "INCLUDE",
+        "NonKeyAttributes": ["ImageURL"]
       },
       "ProvisionedThroughput": {
         "ReadCapacityUnits": 5,

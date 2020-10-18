@@ -1,0 +1,25 @@
+[
+  {
+    "Create": {
+      "IndexName": "IX_ARTIST",
+      "KeySchema": [
+        {
+          "AttributeName": "IsArtist",
+          "KeyType": "HASH"
+        },
+        {
+          "AttributeName": "ArtistName",
+          "KeyType": "RANGE"
+        }
+      ],
+      "Projection": {
+        "ProjectionType": "INCLUDE",
+        "NonKeyAttributes": ["ImageURL"]
+      },
+      "ProvisionedThroughput": {
+        "ReadCapacityUnits": 5,
+        "WriteCapacityUnits": 5
+      }
+    }
+  }
+]

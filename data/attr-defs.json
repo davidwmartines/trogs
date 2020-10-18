@@ -1,0 +1,10 @@
+[
+  {
+    "AttributeName": "IsArtist",
+    "AttributeType": "N"
+  },
+  {
+    "AttributeName": "ArtistName",
+    "AttributeType": "S"
+  }
+]
