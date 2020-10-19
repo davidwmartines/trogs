@@ -22,7 +22,7 @@
     {% for track in artist.featured_tracks %}
     <div class="trackbox">
         <p><b>{{track.title}}</b>
-            {%if track.album_id is not none %}
+            {%if track.album_id is defined and track.album_id is not none %}
             <span>
             <em>from the album</em> <a href="{{url_for('album', id=track.album_id)}}">{{track.album_title}}</a></span>
             {% endif %}

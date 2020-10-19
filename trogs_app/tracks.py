@@ -7,7 +7,7 @@ def get_by_id(id):
     table = db.get_table()
 
     res = table.query(
-        KeyConditionExpression=Key('PK').eq(id)
+        KeyConditionExpression=Key('PK').eq(id) & Key('SK').eq(id)
     )
 
     if(len(res['Items']) == 0):
@@ -15,12 +15,17 @@ def get_by_id(id):
 
     item = res['Items'][0]
 
-    return {
-        'trackId': item['PK'],
-        'artistId': item['ArtistID'],
-        'artistName': item['ArtistName'],
-        'albumId': item['AlbumID'],
-        'albumTitle': item['AlbumTitle'],
-        'trackTitle': item['TrackTitle'],
-        'audioUrl': item['AudioURL']
+    track= {
+        'id': item['PK'],
+        'artist_id': item['AC_PK'],
+        'artist_name': item['ArtistName'],
+        'track_title': item['TrackTitle'],
+        'audio_url': item['AudioURL']
     }
+    album_id =  item.get('AA_PK', None)
+    album_title = item.get('AlbumTitle', None)
+    if(album_id is not None and album_title is not None):
+        track['album_id'] = album_id
+        track['album_title'] = album_title
+
+    return track
