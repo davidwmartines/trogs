@@ -8,12 +8,14 @@
 <h1>{{album.title}}
   <a class="share" data-clipboard-text="{{ url_for('album', id=album.id) }}" href="#"></a>
 </h1>
+
+{% if album.image_url is not none and album.image_url|length %}
+<img src="{{ album.image_url|resize('200x200', placeholder=1) }}" alt="{{album.title}}" width="200" height="200">
+{% endif %}
+
 <p>Album by <a href="{{ url_for('artist', id=album.artist_id) }}">{{album.artist_name}}</a>
   •
 {{album.year}}</p>
-{% if album.image_url is not none and album.image_url|length %}
-<img src="{{ album.image_url|resize('160x160', fill=1, placeholder=1) }}" alt="{{album.title}}" width="160" height="160">
-{% endif %}
 
 {% if album.tracks|length > 0 %}
 <div class="playpause">

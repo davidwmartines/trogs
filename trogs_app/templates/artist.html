@@ -7,7 +7,7 @@
     <a class="share" data-clipboard-text="{{ url_for('artist', id=artist.artistId) }}" href="#"></a>
 </h1>
 {% if artist.image_url is not none and artist.image_url|length %}
-<img src="{{ artist.image_url|resize('160x160', fill=1, placeholder=1) }}" alt="{{artist.name}}" width="160" height="160">
+<img src="{{ artist.image_url|resize('200x200', fill=1, placeholder=1) }}" alt="{{artist.name}}" width="200" height="200">
 {% endif %}
 
 <div>
@@ -17,9 +17,9 @@
         <div class="list_box">
             <div>
                 {% if album.image_url is not none and album.image_url|length %}
-                <img src="{{ album.image_url|resize('50x50', placeholder=1) }}" alt="{{album.title}}" width="50" height="50">
+                <img src="{{ album.image_url|resize('80x80', placeholder=1) }}" alt="{{album.title}}" width="80" height="80">
                 {% else %}
-                <img width="50" height="50" src="{{url_for('static', filename='1x1.png')}}">
+                <img width="80" height="80" src="{{url_for('static', filename='1x1.png')}}">
                 {% endif %}
             </div>
             <div class="title_box">

@@ -117,39 +117,40 @@ def import_artist(id):
 
         object_name = 'art/{0}/{0}.jpg'.format(
             admin.safe_obj_name(artist_name))
-        full_url = admin.save_to_s3('temp.jpg', 'image/jpeg', object_name)
+        full_url = admin.save_to_s3('temp.jpg', object_name, 'image/jpeg')
         print(full_url)
         # use the s3 object path for ImageURL
         imageUrl = object_name
 
-    #admin.create_artist(artist_name, artist_owner, artist_bio, imageUrl)
+    admin.create_artist(artist_name, artist_owner, artist_bio, imageUrl)
 
 
 def import_album(id, conn=None):
+    print("getting data for album id '{0}'".format(id))
     if (conn is None):
         conn = get_conn()
     
     cursor = conn.cursor()
     with cursor.execute("""
-    SELECT
-        w.name,
-        w.releasedate,
-        w.description,
-        l.abbreviation as license, 
-        b.binaryfiledataid,
-        a.name as artistName
-    FROM mc.work w
-    LEFT JOIN mc.binaryfileinfo b ON b.id = w.binaryfileinfoid
-    LEFT JOIN mc.License l ON w.LicenseId = l.Id
-    JOIN mc.Artist a ON a.id = w.ArtistId
-    WHERE w.id = ?""", id):
+        SELECT
+            w.name,
+            w.releasedate,
+            w.description,
+            l.abbreviation as license, 
+            b.binaryfiledataid,
+            a.name as artistName
+        FROM mc.work w
+        LEFT JOIN mc.binaryfileinfo b ON b.id = w.binaryfileinfoid
+        LEFT JOIN mc.License l ON w.LicenseId = l.Id
+        JOIN mc.Artist a ON a.id = w.ArtistId
+        WHERE w.id = ?""", id):
         data = cursor.fetchone()
     
-    title = data[0],
-    releaseDate = data[1],
+    title = data[0]
+    releaseDate = data[1].strftime("%Y-%m-%d")
     description = data[2]
-    license = data[3],
-    imageId = data[4],
+    license = data[3]
+    imageId = data[4]
     artistName = data[5]
 
     print("got data for '{0}'".format(title))
@@ -163,7 +164,7 @@ def import_album(id, conn=None):
 
         object_name = 'art/{0}/{1}/{1}.jpg'.format(
             admin.safe_obj_name(artistName), admin.safe_obj_name(title))
-        full_url = admin.save_to_s3('temp.jpg', 'image/jpeg', object_name)
+        full_url = admin.save_to_s3('temp.jpg', object_name, 'image/jpeg')
         print(full_url)
         # use the s3 object path for ImageURL
         imageUrl = object_name
