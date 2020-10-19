@@ -19,30 +19,32 @@ def create_artist(artistName, owner='', bio='', imageUrl=''):
 
     table.put_item(Item={
         'PK': id,
-        'SK': '000',
-        'ArtistName': artistName,
+        'SK': id,
+        'AA_SK': artistName,
         'Owner': owner,
-        'IsArtist': 1,
+        'AA_PK': 'ARTISTS',
+        'AC_PK': id,
+        'AC_SK': '000',
         'Bio': bio,
         'ImageURL': imageUrl
     })
 
     query = table.query(
-        IndexName="IX_ARTIST",
-        KeyConditionExpression=Key('IsArtist').eq(
-            1) & Key('ArtistName').eq(artistName)
+        IndexName="IX_ARTISTS_ALBUMS",
+        KeyConditionExpression=Key('AA_PK').eq(
+            'ARTISTS') & Key('AA_SK').eq(artistName)
     )
 
     print(query["Items"][0])
 
 
-def create_album(artistName, albumTitle, releaseDateISO, license, description='', imageUrl=''):
+def create_album(artistName, albumTitle, releaseDateISO, license, description='', imageUrl='', ac_sort=None):
     table = db.get_table()
 
     res = table.query(
-        IndexName='IX_ARTIST',
-        KeyConditionExpression=Key('IsArtist').eq(
-            1) & Key('ArtistName').eq(artistName)
+        IndexName='IX_ARTISTS_ALBUMS',
+        KeyConditionExpression=Key('AA_PK').eq(
+            'ARTISTS') & Key('AA_SK').eq(artistName)
     )
 
     if(len(res['Items']) == 0):
@@ -54,23 +56,42 @@ def create_album(artistName, albumTitle, releaseDateISO, license, description=''
 
     id = ids.new_id()
 
-    print("creating '{0}', id '{1}'".format(albumTitle, id))
+    if(ac_sort is None):
+        res = table.query(
+            IndexName='IX_ARTIST_CONTENT',
+            ScanIndexForward=True,
+            KeyConditionExpression=Key('AC_PK').eq(
+                artist['PK']) & Key('AC_SK').begins_with('2')
+        )
+
+        if(len(res['Items']) > 0):
+            last_item = res['Items'][len(res['Items'])-1]
+            last_sort = int(last_item['AC_SK'])
+            ac_sort = str(last_sort + 1)
+        else:
+            ac_sort = '200'
+
+    print("creating '{0}', id '{1}', sort {2}".format(albumTitle, id, ac_sort))
 
     table.put_item(Item={
         'PK': artist['PK'],
-        'SK': releaseDateISO,
+        'AA_PK': id,
+        'AA_SK': '000',
+        'AC_PK': artist['PK'],
+        'AC_SK': ac_sort,
+        'ReleaseDate': releaseDateISO,
         'AlbumTitle': albumTitle,
-        'AlbumID': id,
-        'ArtistID': artist['PK'],
-        'ArtistName': artist['ArtistName'],
+        'SK': id,
+        'PK': artist['PK'],
+        'ArtistName': artist['AA_SK'],
         'Description': description,
         'License': license,
         'ImageURL': imageUrl
     })
 
     query = table.query(
-        IndexName="IX_ALBUM",
-        KeyConditionExpression=Key('AlbumID').eq(id)
+        IndexName="IX_ARTISTS_ALBUMS",
+        KeyConditionExpression=Key('AA_PK').eq(id)
     )
 
     print(query["Items"][0])
@@ -80,9 +101,9 @@ def add_track(artistName, albumTitle, trackTitle, audioUrl, sortNum=None):
     table = db.get_table()
 
     res = table.query(
-        IndexName='IX_ARTIST',
-        KeyConditionExpression=Key('IsArtist').eq(
-            1) & Key('ArtistName').eq(artistName)
+        IndexName='IX_ARTISTS_ALBUMS',
+        KeyConditionExpression=Key('AA_PK').eq(
+            'ARTISTS') & Key('AA_SK').eq(artistName)
     )
 
     if(len(res['Items']) == 0):
@@ -94,8 +115,9 @@ def add_track(artistName, albumTitle, trackTitle, audioUrl, sortNum=None):
     print(artist)
 
     res = table.query(
+        IndexName='IX_ARTIST_CONTENT',
         ScanIndexForward=True,
-        KeyConditionExpression=Key('PK').eq(artist['PK'])
+        KeyConditionExpression=Key('AC_PK').eq(artist['PK']) & Key('AC_SK').begins_with('2')
     )
 
     albums = list(filter(lambda item: attr_matches(
@@ -112,19 +134,19 @@ def add_track(artistName, albumTitle, trackTitle, audioUrl, sortNum=None):
 
     if(sortNum is None):
         res = table.query(
-            IndexName='IX_ALBUM',
+            IndexName='IX_ARTISTS_ALBUMS',
             ScanIndexForward=True,
-            KeyConditionExpression=Key('AlbumID').eq(album['AlbumID'])
+            KeyConditionExpression=Key('AA_PK').eq(album['AA_PK']) & Key('AA_SK').begins_with('1')
         )
 
-        if(len(res['Items']) > 1):
-            lastTrack = res['Items'][len(res['Items'])-1]
-            lastSortNum = int(lastTrack['SK'].split('TRACK-')[1])
-            sort = 'TRACK-' + str(lastSortNum + 100)
+        if(len(res['Items']) > 0):
+            last_track = res['Items'][len(res['Items'])-1]
+            last_sort = int(last_track['AA_SK'])
+            sort = str(last_sort + 1)
         else:
-            sort = 'TRACK-100'
+            sort = '100'
     else:
-        sort = 'TRACK-' + str(sortNum)
+        sort = str(sortNum)
 
     id = ids.new_id()
 
@@ -132,12 +154,14 @@ def add_track(artistName, albumTitle, trackTitle, audioUrl, sortNum=None):
 
     table.put_item(Item={
         'PK': id,
-        'SK': sort,
+        'SK': id,
+        'AA_PK': album['AA_PK'],
+        'AA_SK': sort,
         'TrackTitle': trackTitle,
         'AudioURL': audioUrl,
         'AlbumTitle': albumTitle,
-        'AlbumID': album['AlbumID'],
-        'ArtistID': album['ArtistID'],
+        'AlbumID': album['AA_PK'],
+        'ArtistID': album['PK'],
         'ArtistName': album['ArtistName']
     })
 
@@ -182,5 +206,4 @@ def save_to_s3(local_file_path, object_name, content_type, bucket=None):
 
 
 def safe_obj_name(val):
-    return re.sub(r'\W+','', val.lower().replace(' ', '_').replace('-', '_')).replace("_", "-")
-    
+    return re.sub(r'\W+', '', val.lower().replace(' ', '_').replace('-', '_')).replace("_", "-")
