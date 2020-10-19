@@ -3,7 +3,7 @@
   "ModelMetadata": {
     "Author": "",
     "DateCreated": "Oct 19, 2020, 08:38 AM",
-    "DateLastModified": "Oct 19, 2020, 10:23 AM",
+    "DateLastModified": "Oct 19, 2020, 01:24 PM",
     "Description": "",
     "Version": "1.0"
   },
@@ -42,11 +42,11 @@
           "AttributeType": "S"
         },
         {
-          "AttributeName": "GSI1PK",
+          "AttributeName": "AA_PK",
           "AttributeType": "S"
         },
         {
-          "AttributeName": "GSI1SK",
+          "AttributeName": "AA_SK",
           "AttributeType": "S"
         },
         {
@@ -58,28 +58,36 @@
           "AttributeType": "S"
         },
         {
-          "AttributeName": "GSI2PK",
+          "AttributeName": "AC_PK",
           "AttributeType": "S"
         },
         {
-          "AttributeName": "GSI2SK",
+          "AttributeName": "AC_SK",
           "AttributeType": "S"
         },
         {
           "AttributeName": "Description",
           "AttributeType": "S"
+        },
+        {
+          "AttributeName": "ReleaseDate",
+          "AttributeType": "S"
+        },
+        {
+          "AttributeName": "Featured",
+          "AttributeType": "BOOL"
         }
       ],
       "GlobalSecondaryIndexes": [
         {
-          "IndexName": "GSI1",
+          "IndexName": "IX_ARTISTS_ALBUMS",
           "KeyAttributes": {
             "PartitionKey": {
-              "AttributeName": "GSI1PK",
+              "AttributeName": "AA_PK",
               "AttributeType": "S"
             },
             "SortKey": {
-              "AttributeName": "GSI1SK",
+              "AttributeName": "AA_SK",
               "AttributeType": "S"
             }
           },
@@ -88,14 +96,14 @@
           }
         },
         {
-          "IndexName": "GSI2",
+          "IndexName": "IX_ARTIST_CONTENT",
           "KeyAttributes": {
             "PartitionKey": {
-              "AttributeName": "GSI2PK",
+              "AttributeName": "AC_PK",
               "AttributeType": "S"
             },
             "SortKey": {
-              "AttributeName": "GSI2SK",
+              "AttributeName": "AC_SK",
               "AttributeType": "S"
             }
           },
@@ -112,16 +120,16 @@
           "SK": {
             "S": "artist1"
           },
-          "GSI1PK": {
+          "AA_PK": {
             "S": "ARTISTS"
           },
-          "GSI1SK": {
+          "AA_SK": {
             "S": "The Beatles"
           },
-          "GSI2PK": {
+          "AC_PK": {
             "S": "artist1"
           },
-          "GSI2SK": {
+          "AC_SK": {
             "S": "000"
           }
         },
@@ -132,13 +140,13 @@
           "SK": {
             "S": "artist2"
           },
-          "GSI1PK": {
+          "AA_PK": {
             "S": "ARTISTS"
           },
-          "GSI1SK": {
+          "AA_SK": {
             "S": "Yes"
           },
-          "GSI2PK": {
+          "AC_PK": {
             "S": "artist2"
           }
         },
@@ -155,17 +163,20 @@
           "AlbumTitle": {
             "S": "Revolver"
           },
-          "GSI1PK": {
+          "AA_PK": {
             "S": "album1"
           },
-          "GSI1SK": {
+          "AA_SK": {
             "S": "000"
           },
-          "GSI2PK": {
+          "AC_PK": {
             "S": "artist1"
           },
-          "GSI2SK": {
-            "S": "1966"
+          "AC_SK": {
+            "S": "200"
+          },
+          "ReleaseDate": {
+            "S": "1966-01-01"
           }
         },
         {
@@ -184,10 +195,10 @@
           "TrackTitle": {
             "S": "Taxman"
           },
-          "GSI1PK": {
+          "AA_PK": {
             "S": "album1"
           },
-          "GSI1SK": {
+          "AA_SK": {
             "S": "001"
           },
           "Count": {
@@ -195,6 +206,15 @@
           },
           "ArtistID": {
             "S": "artist1"
+          },
+          "AC_PK": {
+            "S": "artist1"
+          },
+          "AC_SK": {
+            "S": "100"
+          },
+          "Featured": {
+            "BOOL": true
           }
         },
         {
@@ -213,10 +233,10 @@
           "TrackTitle": {
             "S": "Eleanor Rigby"
           },
-          "GSI1PK": {
+          "AA_PK": {
             "S": "album1"
           },
-          "GSI1SK": {
+          "AA_SK": {
             "S": "002"
           },
           "ArtistID": {
@@ -236,11 +256,14 @@
           "TrackTitle": {
             "S": "Free as a bird"
           },
-          "GSI2PK": {
+          "AC_PK": {
             "S": "artist1"
           },
-          "GSI2SK": {
-            "S": "1999"
+          "AC_SK": {
+            "S": "300"
+          },
+          "ReleaseDate": {
+            "S": "1998-12-31"
           }
         },
         {

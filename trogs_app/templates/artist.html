@@ -10,7 +10,37 @@
 <img src="{{ artist.image_url|resize('200x200', fill=1, placeholder=1) }}" alt="{{artist.name}}" width="200" height="200">
 {% endif %}
 
+<!-- featured tracks -->
+{% if artist.featured_tracks|length > 0 %}
+
+<div class="playpause">
+    <input type="checkbox" value="None" id="playpause" name="check" checked />
+    <label for="playpause" tabindex="1"></label>
+</div>
+<h3>Featured</h3>
+<div id="audiocontainer">
+    {% for track in artist.featured_tracks %}
+    <div class="trackbox">
+        <p><b>{{track.title}}</b>
+            {%if track.album_id is not none %}
+            <span>
+            <em>from the album</em> <a href="{{url_for('album', id=track.album_id)}}">{{track.album_title}}</a></span>
+            {% endif %}
+          <a class="share" data-clipboard-text="{{ url_for('track', id=track.id) }}" href="{{ url_for('track', id=track.id) }}"></a>
+            </p>
+       
+        <div>
+          <audio id="track_{{loop.index0}}" controls><source src="{{track.audio_url}}"></audio>
+        </div>
+      </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+
 <!-- list albums-->
+{% if artist.albums|length > 0 %}
+<h3>Albums</h3>
 <div>
 {% for album in artist.albums %}
     <a href="{{url_for('album', id=album.id)}}">
@@ -30,8 +60,12 @@
     </a>
 {% endfor %}
 </div>
+{% endif %}
 
 <!-- list singles-->
+{% if artist.singles|length > 0 %}
+<h3>Singles</h3>
+
 <div>
     {% for track in artist.singles %}
         <a href="{{url_for('track', id=track.id)}}">
@@ -46,6 +80,10 @@
             </div>
         </a>
     {% endfor %}
-    </div>
+ </div>
+{% endif %}
+{% endblock %}
 
+{% block scripts %}
+<script src="{{ url_for('static', filename='playlist.js')}}"></script>
 {% endblock %}
