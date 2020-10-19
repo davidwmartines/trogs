@@ -8,9 +8,9 @@ import db, ids
 def list_all():
     table = db.get_table()
     response = table.query(
-        IndexName='IX_ARTIST',
+        IndexName='GSI1',
         ScanIndexForward=True,
-        KeyConditionExpression=Key('IsArtist').eq(1)
+        KeyConditionExpression=Key('GSI1PK').eq('ARTISTS')
     )
     return map(map_list_item, response['Items'])
 
@@ -20,8 +20,9 @@ def get_by_id(id):
     pk = ids.from_id(id)
     table = db.get_table()
     response = table.query(
+        IndexName='GSI2',
         ScanIndexForward=True,
-        KeyConditionExpression=Key('PK').eq(pk)
+        KeyConditionExpression=Key('GSI2PK').eq(pk)
     )
     if(len(response['Items']) == 0):
         return None
@@ -32,25 +33,42 @@ def get_by_id(id):
 
 def map_list_item(item):
     return {
-        'name': item['ArtistName'],
+        'name': item['GSI1SK'],
         'id': ids.to_id(item['PK']),
         'image_url': item.get('ImageURL')
     }
 
 
 def map_detail(items):
+    artist = items[0]
+    children = items[slice(1, len(items)+1)]
     return {
-        'artistId': items[0]['PK'],
-        'name': items[0]['ArtistName'],
-        'image_url': items[0].get('ImageURL'),
-        'albums': list(map(map_album, items[slice(1, len(items)+1)]))
+        'artistId': artist['PK'],
+        'name': artist['GSI1SK'],
+        'image_url': artist.get('ImageURL'),
+        'albums': list(map(map_album, filter(is_album, children))),
+        'tracks': list(map(map_single, filter(is_single, children)))
     }
+
+def is_album(item):
+    return 'GSI1PK' in item
+
+
+def is_single(item):
+    return not is_album(item)
 
 
 def map_album(item):
     return {
         'title': item['AlbumTitle'],
-        'year': dateutil.parser.parse(item['SK']).strftime('%Y'),
-        'id': ids.to_id(item['AlbumID']),
+        'year': dateutil.parser.parse(item['GSI2SK']).strftime('%Y'),
+        'id': ids.to_id(item['SK']),
         'image_url': item.get('ImageURL')
+    }
+
+def map_single(item):
+    return {
+        'title': item['TrackTitle'],
+        'year': dateutil.parser.parse(item['GSI2SK']).strftime('%Y'),
+        'id': ids.to_id(item['SK'])
     }

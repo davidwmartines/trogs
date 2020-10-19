@@ -36,6 +36,9 @@
           "GSI2PK": {
             "S": "artist2"
           },
+          "GSI2SK": {
+            "S": "000"
+          },
           "GSI1PK": {
             "S": "ARTISTS"
           },
