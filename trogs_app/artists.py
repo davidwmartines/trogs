@@ -47,7 +47,7 @@ def map_detail(items):
         'name': artist['GSI1SK'],
         'image_url': artist.get('ImageURL'),
         'albums': list(map(map_album, filter(is_album, children))),
-        'tracks': list(map(map_single, filter(is_single, children)))
+        'singles': list(map(map_single, filter(is_single, children)))
     }
 
 def is_album(item):

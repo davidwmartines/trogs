@@ -10,9 +10,9 @@
 <img src="{{ artist.image_url|resize('200x200', fill=1, placeholder=1) }}" alt="{{artist.name}}" width="200" height="200">
 {% endif %}
 
+<!-- list albums-->
 <div>
 {% for album in artist.albums %}
-
     <a href="{{url_for('album', id=album.id)}}">
         <div class="list_box">
             <div>
@@ -30,4 +30,22 @@
     </a>
 {% endfor %}
 </div>
+
+<!-- list singles-->
+<div>
+    {% for track in artist.singles %}
+        <a href="{{url_for('track', id=track.id)}}">
+            <div class="list_box">
+                <div>
+                    <img width="80" height="80" src="{{url_for('static', filename='1x1.png')}}">
+                </div>
+                <div class="title_box">
+                    <p>{{track.title}} •
+                    {{track.year}}</p>
+                </div>
+            </div>
+        </a>
+    {% endfor %}
+    </div>
+
 {% endblock %}
