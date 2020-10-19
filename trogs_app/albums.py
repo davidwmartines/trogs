@@ -9,9 +9,9 @@ def get_by_id(id):
     albumId = ids.from_id(id)
     table = db.get_table()
     response = table.query(
-        IndexName="IX_ALBUM",
+        IndexName="IX_ARTISTS_ALBUMS",
         ScanIndexForward=True,
-        KeyConditionExpression=Key('AlbumID').eq(albumId)
+        KeyConditionExpression=Key('AA_PK').eq(albumId)
     )
     if(len(response['Items']) < 1):
         return None
@@ -21,11 +21,11 @@ def get_by_id(id):
 def map_album(items):
     album = items[0]
     return {
-        'id': album['AlbumID'],
+        'id': album['AA_PK'],
         'title': album['AlbumTitle'],
         'artist_name': album['ArtistName'],
-        'year': dateutil.parser.parse(album['SK']).strftime('%Y'),
-        'artist_id': ids.to_id(album['ArtistID']),
+        'year': dateutil.parser.parse(album['ReleaseDate']).strftime('%Y'),
+        'artist_id': ids.to_id(album['PK']),
         'image_url': album.get('ImageURL'),
         'tracks': list(map(map_track, items[slice(1, len(items)+1)]))
     }

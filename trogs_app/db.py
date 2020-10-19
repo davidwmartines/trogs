@@ -10,7 +10,7 @@ def init_table():
             'dynamodb', endpoint_url=os.environ["AWS_ENDPOINT_URL"])
     else:
         dynamodb = boto3.resource("dynamodb")
-    table = dynamodb.Table("art")
+    table = dynamodb.Table("art2")
     print('dynamodb table resource initialized')
     return table
 

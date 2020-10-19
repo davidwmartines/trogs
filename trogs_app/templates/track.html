@@ -1,17 +1,21 @@
 {% extends "layout.html" %}
 
 {% block title %}
-{{track.trackTitle}}
+{{track.track_title}}
 {% endblock%}
 
 {% block content %}
-<h1>{{track.trackTitle}}
-  <a class="share" data-clipboard-text="{{ url_for('track', id=track.trackId) }}" href="#"></a>
+
+<h1>{{track.track_title}}
+  <a class="share" data-clipboard-text="{{ url_for('track', id=track.id) }}" href="#"></a>
 </h1>
+
 <p>
+  {%if track.album_id is not none and track.album_id|length %}
   From the album
-  <a href="{{ url_for('album', id=track.albumId)}}">{{track.albumTitle}}</a>
-  by <a href="{{url_for('artist', id=track.artistId)}}">{{track.artistName}}</a>
+  <a href="{{ url_for('album', id=track.album_id)}}">{{track.album_title}}</a>
+  {% endif %}
+  by <a href="{{url_for('artist', id=track.artist_id)}}">{{track.artist_name}}</a>
 </p>
-<audio id="track" controls><source src="{{track.audioUrl}}" /></audio>
+<audio id="track" controls><source src="{{track.audio_url}}" /></audio>
 {% endblock %}

@@ -1,10 +1,10 @@
 {
-  "ModelName": "Music 6",
+  "ModelName": "Music7",
   "ModelMetadata": {
-    "Author": "David Martines",
-    "DateCreated": "Oct 13, 2020, 11:21 AM",
-    "DateLastModified": "Oct 13, 2020, 09:21 PM",
-    "Description": "Iteration 6 of design, for use in NoSQL Workbench",
+    "Author": "",
+    "DateCreated": "Oct 19, 2020, 08:38 AM",
+    "DateLastModified": "Oct 19, 2020, 01:24 PM",
+    "Description": "",
     "Version": "1.0"
   },
   "DataModel": [
@@ -30,15 +30,27 @@
           "AttributeType": "S"
         },
         {
+          "AttributeName": "TrackTitle",
+          "AttributeType": "S"
+        },
+        {
+          "AttributeName": "ImageURL",
+          "AttributeType": "S"
+        },
+        {
           "AttributeName": "AudioURL",
           "AttributeType": "S"
         },
         {
-          "AttributeName": "AlbumID",
+          "AttributeName": "AA_PK",
           "AttributeType": "S"
         },
         {
-          "AttributeName": "IsArtist",
+          "AttributeName": "AA_SK",
+          "AttributeType": "S"
+        },
+        {
+          "AttributeName": "Count",
           "AttributeType": "N"
         },
         {
@@ -46,20 +58,36 @@
           "AttributeType": "S"
         },
         {
-          "AttributeName": "TrackTitle",
+          "AttributeName": "AC_PK",
           "AttributeType": "S"
+        },
+        {
+          "AttributeName": "AC_SK",
+          "AttributeType": "S"
+        },
+        {
+          "AttributeName": "Description",
+          "AttributeType": "S"
+        },
+        {
+          "AttributeName": "ReleaseDate",
+          "AttributeType": "S"
+        },
+        {
+          "AttributeName": "Featured",
+          "AttributeType": "BOOL"
         }
       ],
       "GlobalSecondaryIndexes": [
         {
-          "IndexName": "IX_ALBUM",
+          "IndexName": "IX_ARTISTS_ALBUMS",
           "KeyAttributes": {
             "PartitionKey": {
-              "AttributeName": "AlbumID",
+              "AttributeName": "AA_PK",
               "AttributeType": "S"
             },
             "SortKey": {
-              "AttributeName": "SK",
+              "AttributeName": "AA_SK",
               "AttributeType": "S"
             }
           },
@@ -68,132 +96,133 @@
           }
         },
         {
-          "IndexName": "IX_ARTIST",
+          "IndexName": "IX_ARTIST_CONTENT",
           "KeyAttributes": {
             "PartitionKey": {
-              "AttributeName": "IsArtist",
-              "AttributeType": "N"
+              "AttributeName": "AC_PK",
+              "AttributeType": "S"
             },
             "SortKey": {
-              "AttributeName": "ArtistName",
+              "AttributeName": "AC_SK",
               "AttributeType": "S"
             }
           },
           "Projection": {
-            "ProjectionType": "KEYS_ONLY"
+            "ProjectionType": "ALL"
           }
         }
       ],
       "TableData": [
         {
           "PK": {
-            "S": "ARTIST#1"
+            "S": "artist1"
           },
           "SK": {
+            "S": "artist1"
+          },
+          "AA_PK": {
+            "S": "ARTISTS"
+          },
+          "AA_SK": {
+            "S": "The Beatles"
+          },
+          "AC_PK": {
+            "S": "artist1"
+          },
+          "AC_SK": {
+            "S": "000"
+          }
+        },
+        {
+          "PK": {
+            "S": "artist2"
+          },
+          "SK": {
+            "S": "artist2"
+          },
+          "AA_PK": {
+            "S": "ARTISTS"
+          },
+          "AA_SK": {
+            "S": "Yes"
+          },
+          "AC_PK": {
+            "S": "artist2"
+          }
+        },
+        {
+          "PK": {
+            "S": "artist1"
+          },
+          "SK": {
+            "S": "album1"
+          },
+          "ArtistName": {
+            "S": "The Beatles"
+          },
+          "AlbumTitle": {
+            "S": "Revolver"
+          },
+          "AA_PK": {
+            "S": "album1"
+          },
+          "AA_SK": {
             "S": "000"
           },
-          "ArtistName": {
-            "S": "The Beatles"
+          "AC_PK": {
+            "S": "artist1"
           },
-          "IsArtist": {
-            "N": "1"
+          "AC_SK": {
+            "S": "200"
           },
-          "ArtistID": {
-            "S": "ARTIST#1"
-          }
-        },
-        {
-          "PK": {
-            "S": "ARTIST#1"
-          },
-          "SK": {
+          "ReleaseDate": {
             "S": "1966-01-01"
+          }
+        },
+        {
+          "PK": {
+            "S": "track1"
+          },
+          "SK": {
+            "S": "track1"
           },
           "ArtistName": {
             "S": "The Beatles"
           },
           "AlbumTitle": {
             "S": "Revolver"
-          },
-          "AlbumID": {
-            "S": "ALBUM#1"
-          },
-          "ArtistID": {
-            "S": "ARTIST#1"
-          }
-        },
-        {
-          "PK": {
-            "S": "ARTIST#1"
-          },
-          "SK": {
-            "S": "1965-01-01"
-          },
-          "ArtistName": {
-            "S": "The Beatles"
-          },
-          "AlbumTitle": {
-            "S": "Help"
-          },
-          "AlbumID": {
-            "S": "ALBUM#2"
-          },
-          "ArtistID": {
-            "S": "ARTIST#1"
-          }
-        },
-        {
-          "PK": {
-            "S": "ARTIST#1"
-          },
-          "SK": {
-            "S": "1967-01-01"
-          },
-          "ArtistName": {
-            "S": "The Beatles"
-          },
-          "AlbumTitle": {
-            "S": "Sgt. Pepper"
-          },
-          "AlbumID": {
-            "S": "ALBUM#3"
-          },
-          "ArtistID": {
-            "S": "ARTIST#1"
-          }
-        },
-        {
-          "PK": {
-            "S": "TRACK#1"
-          },
-          "SK": {
-            "S": "TRACK-001"
-          },
-          "ArtistName": {
-            "S": "The Beatles"
-          },
-          "AlbumTitle": {
-            "S": "Revolver"
-          },
-          "AudioURL": {
-            "S": "https://..."
-          },
-          "AlbumID": {
-            "S": "ALBUM#1"
-          },
-          "ArtistID": {
-            "S": "ARTIST#1"
           },
           "TrackTitle": {
             "S": "Taxman"
+          },
+          "AA_PK": {
+            "S": "album1"
+          },
+          "AA_SK": {
+            "S": "001"
+          },
+          "Count": {
+            "N": "11"
+          },
+          "ArtistID": {
+            "S": "artist1"
+          },
+          "AC_PK": {
+            "S": "artist1"
+          },
+          "AC_SK": {
+            "S": "100"
+          },
+          "Featured": {
+            "BOOL": true
           }
         },
         {
           "PK": {
-            "S": "TRACK#2"
+            "S": "track2"
           },
           "SK": {
-            "S": "TRACK-002"
+            "S": "track2"
           },
           "ArtistName": {
             "S": "The Beatles"
@@ -201,69 +230,62 @@
           "AlbumTitle": {
             "S": "Revolver"
           },
-          "AudioURL": {
-            "S": "https://..."
-          },
-          "AlbumID": {
-            "S": "ALBUM#1"
-          },
-          "ArtistID": {
-            "S": "ARTIST#1"
-          },
           "TrackTitle": {
             "S": "Eleanor Rigby"
+          },
+          "AA_PK": {
+            "S": "album1"
+          },
+          "AA_SK": {
+            "S": "002"
+          },
+          "ArtistID": {
+            "S": "artist1"
           }
         },
         {
           "PK": {
-            "S": "TRACK#3"
+            "S": "track3"
           },
           "SK": {
-            "S": "TRACK-001"
+            "S": "track3"
           },
           "ArtistName": {
             "S": "The Beatles"
           },
-          "AlbumTitle": {
-            "S": "Help"
-          },
-          "AudioURL": {
-            "S": "https://..."
-          },
-          "AlbumID": {
-            "S": "ALBUM#2"
-          },
-          "ArtistID": {
-            "S": "ARTIST#1"
-          },
           "TrackTitle": {
-            "S": "Help"
+            "S": "Free as a bird"
+          },
+          "AC_PK": {
+            "S": "artist1"
+          },
+          "AC_SK": {
+            "S": "300"
+          },
+          "ReleaseDate": {
+            "S": "1998-12-31"
           }
         },
         {
           "PK": {
-            "S": "TRACK#4"
+            "S": "track1"
           },
           "SK": {
-            "S": "TRACK-002"
+            "S": "jan2020"
           },
-          "ArtistName": {
-            "S": "The Beatles"
+          "Count": {
+            "N": "5"
+          }
+        },
+        {
+          "PK": {
+            "S": "track1"
           },
-          "AlbumTitle": {
-            "S": "Help"
+          "SK": {
+            "S": "feb2020"
           },
-          "AudioURL": {
-            "S": "https://..."
-          },
-          "AlbumID": {
-            "S": "ALBUM#2"
-          },
-          "ArtistID": {
-            "S": "ARTIST#1"
-          },
-          "TrackTitle": {
-            "S": "Yesterday"
+          "Count": {
+            "N": "6"
           }
         }
       ],

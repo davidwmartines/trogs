@@ -9,15 +9,19 @@
       "AttributeType": "S"
     },
     {
-      "AttributeName": "AlbumID",
+      "AttributeName": "AA_PK",
       "AttributeType": "S"
     },
     {
-      "AttributeName": "IsArtist",
-      "AttributeType": "N"
+      "AttributeName": "AA_SK",
+      "AttributeType": "S"
     },
     {
-      "AttributeName": "ArtistName",
+      "AttributeName": "AC_PK",
+      "AttributeType": "S"
+    },
+    {
+      "AttributeName": "AC_SK",
       "AttributeType": "S"
     }
   ],
@@ -32,23 +36,20 @@
       "KeyType": "RANGE"
     }
   ],
- 
   "ProvisionedThroughput": {
-
     "ReadCapacityUnits": 5,
     "WriteCapacityUnits": 5
   },
-
   "GlobalSecondaryIndexes": [
     {
-      "IndexName": "IX_ALBUM",
+      "IndexName": "IX_ARTIST_CONTENT",
       "KeySchema": [
         {
-          "AttributeName": "AlbumID",
+          "AttributeName": "AC_PK",
           "KeyType": "HASH"
         },
         {
-          "AttributeName": "SK",
+          "AttributeName": "AC_SK",
           "KeyType": "RANGE"
         }
       ],
@@ -61,20 +62,19 @@
       }
     },
     {
-      "IndexName": "IX_ARTIST",
+      "IndexName": "IX_ARTISTS_ALBUMS",
       "KeySchema": [
         {
-          "AttributeName": "IsArtist",
+          "AttributeName": "AA_PK",
           "KeyType": "HASH"
         },
         {
-          "AttributeName": "ArtistName",
+          "AttributeName": "AA_SK",
           "KeyType": "RANGE"
         }
       ],
       "Projection": {
-        "ProjectionType": "INCLUDE",
-        "NonKeyAttributes": ["ImageURL"]
+        "ProjectionType": "ALL"
       },
       "ProvisionedThroughput": {
         "ReadCapacityUnits": 5,
