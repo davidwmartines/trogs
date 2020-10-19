@@ -6,10 +6,28 @@
 <h1>{{artist.name}}
     <a class="share" data-clipboard-text="{{ url_for('artist', id=artist.artistId) }}" href="#"></a>
 </h1>
-<ul>
-    {% for album in artist.albums %}
-    <li><a href="{{url_for('album', id=album.id)}}">{{album.title}}</a> ({{album.year}})</li>
-    {% endfor %}
-</ul>
+{% if artist.image_url is not none and artist.image_url|length %}
+<img src="{{ artist.image_url|resize('160x160', fill=1, placeholder=1) }}" alt="{{artist.name}}" width="160" height="160">
+{% endif %}
 
+<div>
+{% for album in artist.albums %}
+
+    <a href="{{url_for('album', id=album.id)}}">
+        <div class="list_box">
+            <div>
+                {% if album.image_url is not none and album.image_url|length %}
+                <img src="{{ album.image_url|resize('50x50', placeholder=1) }}" alt="{{album.title}}" width="50" height="50">
+                {% else %}
+                <img width="50" height="50" src="{{url_for('static', filename='1x1.png')}}">
+                {% endif %}
+            </div>
+            <div class="title_box">
+                <p>{{album.title}} •
+                {{album.year}}</p>
+            </div>
+        </div>
+    </a>
+{% endfor %}
+</div>
 {% endblock %}

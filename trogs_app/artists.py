@@ -43,7 +43,7 @@ def map_detail(items):
         'artistId': items[0]['PK'],
         'name': items[0]['ArtistName'],
         'image_url': items[0].get('ImageURL'),
-        'albums': map(map_album, items[slice(1, len(items)+1)])
+        'albums': list(map(map_album, items[slice(1, len(items)+1)]))
     }
 
 
@@ -51,5 +51,6 @@ def map_album(item):
     return {
         'title': item['AlbumTitle'],
         'year': dateutil.parser.parse(item['SK']).strftime('%Y'),
-        'id': ids.to_id(item['AlbumID'])
+        'id': ids.to_id(item['AlbumID']),
+        'image_url': item.get('ImageURL')
     }

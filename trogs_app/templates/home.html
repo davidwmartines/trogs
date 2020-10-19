@@ -9,10 +9,10 @@ Mushmud
 <div >
     {% for artist in artists %}
     <a href="{{url_for('artist', id=artist.id)}}">
-        <div class="home_list_box">
+        <div class="list_box">
             <div>
                 {% if artist.image_url is not none and artist.image_url|length %}
-                <img src="{{ artist.image_url|resize('50x50') }}" alt="{{artist.name}}" width="50" height="50">
+                <img src="{{ artist.image_url|resize('50x50', placeholder=1) }}" alt="{{artist.name}}" width="50" height="50">
                 {% else %}
                 <img width="50" height="50" src="{{url_for('static', filename='1x1.png')}}">
                 {% endif %}
