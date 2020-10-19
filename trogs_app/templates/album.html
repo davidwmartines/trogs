@@ -6,11 +6,14 @@
 
 {% block content %}
 <h1>{{album.title}}
-  <a class="share" data-clipboard-text="{{ url_for('album', id=album.albumId) }}" href="#"></a>
+  <a class="share" data-clipboard-text="{{ url_for('album', id=album.id) }}" href="#"></a>
 </h1>
-<p>Album by <a href="{{ url_for('artist', id=album.artistId) }}">{{album.artistName}}</a>
+<p>Album by <a href="{{ url_for('artist', id=album.artist_id) }}">{{album.artist_name}}</a>
   •
 {{album.year}}</p>
+{% if album.image_url is not none and album.image_url|length %}
+<img src="{{ album.image_url|resize('160x160', fill=1, placeholder=1) }}" alt="{{album.title}}" width="160" height="160">
+{% endif %}
 
 {% if album.tracks|length > 0 %}
 <div class="playpause">
@@ -22,10 +25,10 @@
     {% for track in album.tracks %}
     <div class="trackbox">
         <h4>{{track.title}}
-          <a class="share" data-clipboard-text="{{ url_for('track', id=track.trackId) }}" href="{{ url_for('track', id=track.trackId) }}"></a>
+          <a class="share" data-clipboard-text="{{ url_for('track', id=track.id) }}" href="{{ url_for('track', id=track.id) }}"></a>
         </h4>
         <div>
-          <audio id="track_{{loop.index0}}" controls><source src="{{track.audioUrl}}"></audio>
+          <audio id="track_{{loop.index0}}" controls><source src="{{track.audio_url}}"></audio>
         </div>
       </div>
     {% endfor %}
