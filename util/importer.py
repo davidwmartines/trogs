@@ -46,14 +46,23 @@ def list_tracks(album_id):
     conn = get_conn()
     cursor = conn.cursor()
     with cursor.execute("""SELECT
-    w.id, w.name, b.fileformat, b.binaryfiledataid 
+    w.id, w.name, b.binaryfiledataid,
+    a.name,
+    ww.name
     FROM mc.work w 
     JOIN mc.binaryfileinfo b ON w.binaryfileinfoid = b.id 
+    JOIN mc.artist a on a.id = w.artistid
+    JOIN (SELECT id, name FROM mc.work WHERE id = ?) ww ON ww.id = w.parentworkid
     WHERE w.parentworkid = ? AND w.worktype ='audio'
-    ORDER BY w.ViewOrder""", album_id):
+    ORDER BY w.ViewOrder""", album_id, album_id):
         row = cursor.fetchone()
         while row:
-            print(row)
+            yield {
+                'title': row[1],
+                'fileId': row[2],
+                'albumTitle': row[4],
+                'artistName': row[3]
+            }
             row = cursor.fetchone()
 
 
@@ -171,3 +180,28 @@ def import_album(id, conn=None):
 
     admin.create_album(artistName, title, releaseDate, license, description, imageUrl)
 
+    import_tracks(id)
+
+
+def import_tracks(album_id):
+    track_list = list_tracks(album_id)
+    for track in track_list:
+        import_track(track)
+
+
+def import_track(track):
+    print('importing track {0}'.format(track['title']))
+
+    print('downloading audio data...')
+    filename = "temp.mp3"
+    get_file(track['fileId'], filename)
+    print("created file '{0}'".format(filename))
+
+    object_name = 'art/{0}/{1}/{2}.mp3'.format(
+        admin.safe_obj_name(track['artistName']),
+        admin.safe_obj_name(track['albumTitle']),
+        admin.safe_obj_name(track['title']))
+    full_url = admin.save_to_s3('temp.mp3', object_name, 'audio/mpeg')
+    print(full_url)
+
+    admin.add_track(track['artistName'], track['albumTitle'], track['title'], full_url)

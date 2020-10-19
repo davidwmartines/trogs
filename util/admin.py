@@ -3,6 +3,7 @@ from trogs_app import db, ids
 import os
 import sys
 import boto3
+import re
 from boto3.dynamodb.conditions import Key
 
 sys.path.insert(0, os.path.abspath(
@@ -181,4 +182,5 @@ def save_to_s3(local_file_path, object_name, content_type, bucket=None):
 
 
 def safe_obj_name(val):
-    return val.lower().replace(' ', '-').replace('/', '-').replace('\\', '-').replace('#', '-')
+    return re.sub(r'\W+','', val.lower().replace(' ', '_').replace('-', '_')).replace("_", "-")
+    
