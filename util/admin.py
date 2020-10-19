@@ -181,7 +181,7 @@ def save_to_s3(local_file_path, object_name, content_type, bucket=None):
 
     # get bucket from param or config
     if(bucket is None):
-        if(os.environ["AWS_CONTENT_BUCKET"] is not None):
+        if("AWS_CONTENT_BUCKET" in os.environ ):
             bucket = os.environ["AWS_CONTENT_BUCKET"]
     if(bucket is None):
         raise "No S3 bucket specified"
