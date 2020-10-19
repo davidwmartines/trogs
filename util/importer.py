@@ -1,10 +1,10 @@
 from . import admin
-
+import os
 import pyodbc
 
 
 def get_conn():
-    return pyodbc.connect('DRIVER={ODBC Driver 17 for SQL Server};SERVER=flax.arvixe.com;PORT=1433;DATABASE=MusicCompany_Production;UID=mushmudexport;PWD=mushmud2020')
+    return pyodbc.connect(os.environ["MUSHMUD_SQL"])
 
 
 def list_artists():
@@ -38,7 +38,7 @@ def list_albums(artist_id):
     WHERE w.artistid = ? AND w.worktype ='collection'""", artist_id):
         row = cursor.fetchone()
         while row:
-            print(row)
+            yield row
             row = cursor.fetchone()
 
 
@@ -122,4 +122,51 @@ def import_artist(id):
         # use the s3 object path for ImageURL
         imageUrl = object_name
 
-    admin.create_artist(artist_name, artist_owner, artist_bio, imageUrl)
+    #admin.create_artist(artist_name, artist_owner, artist_bio, imageUrl)
+
+
+def import_album(id, conn=None):
+    if (conn is None):
+        conn = get_conn()
+    
+    cursor = conn.cursor()
+    with cursor.execute("""
+    SELECT
+        w.name,
+        w.releasedate,
+        w.description,
+        l.abbreviation as license, 
+        b.binaryfiledataid,
+        a.name as artistName
+    FROM mc.work w
+    LEFT JOIN mc.binaryfileinfo b ON b.id = w.binaryfileinfoid
+    LEFT JOIN mc.License l ON w.LicenseId = l.Id
+    JOIN mc.Artist a ON a.id = w.ArtistId
+    WHERE w.id = ?""", id):
+        data = cursor.fetchone()
+    
+    title = data[0],
+    releaseDate = data[1],
+    description = data[2]
+    license = data[3],
+    imageId = data[4],
+    artistName = data[5]
+
+    print("got data for '{0}'".format(title))
+
+    imageUrl = ''
+    if(imageId != ''):
+        filename = "temp.jpg"
+        print('downloading image data...')
+        get_file(imageId, filename)
+        print("created file '{0}'".format(filename))
+
+        object_name = 'art/{0}/{1}/{1}.jpg'.format(
+            admin.safe_obj_name(artistName), admin.safe_obj_name(title))
+        full_url = admin.save_to_s3('temp.jpg', 'image/jpeg', object_name)
+        print(full_url)
+        # use the s3 object path for ImageURL
+        imageUrl = object_name
+
+    admin.create_album(artistName, title, releaseDate, license, description, imageUrl)
+
