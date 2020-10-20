@@ -17,7 +17,7 @@ def get_by_id(id):
 
     track= {
         'id': item['PK'],
-        'artist_id': item['AC_PK'],
+        'artist_id': item['ArtistID'],
         'artist_name': item['ArtistName'],
         'track_title': item['TrackTitle'],
         'audio_url': item['AudioURL']
