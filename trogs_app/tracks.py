@@ -10,7 +10,7 @@ def get_by_id(id):
         KeyConditionExpression=Key('PK').eq(id) & Key('SK').eq(id)
     )
 
-    if(len(res['Items']) == 0):
+    if len(res['Items']) == 0:
         return None
 
     item = res['Items'][0]
@@ -24,7 +24,7 @@ def get_by_id(id):
     }
     album_id =  item.get('AA_PK', None)
     album_title = item.get('AlbumTitle', None)
-    if(album_id is not None and album_title is not None):
+    if album_id is not None and album_title is not None:
         track['album_id'] = album_id
         track['album_title'] = album_title
 

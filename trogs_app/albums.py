@@ -13,7 +13,7 @@ def get_by_id(id):
         ScanIndexForward=True,
         KeyConditionExpression=Key('AA_PK').eq(albumId)
     )
-    if(len(response['Items']) < 1):
+    if len(response['Items']) < 1:
         return None
     return map_album(response['Items'])
 

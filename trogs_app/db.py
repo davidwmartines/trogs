@@ -5,7 +5,7 @@ from botocore.exceptions import ClientError
 
 
 def init_table():
-    if ("AWS_ENDPOINT_URL" in os.environ):
+    if "AWS_ENDPOINT_URL" in os.environ:
         dynamodb = boto3.resource(
             'dynamodb', endpoint_url=os.environ["AWS_ENDPOINT_URL"])
     else:

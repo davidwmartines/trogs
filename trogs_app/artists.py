@@ -25,7 +25,7 @@ def get_by_id(id):
         ScanIndexForward=True,
         KeyConditionExpression=Key('AC_PK').eq(pk)
     )
-    if(len(response['Items']) == 0):
+    if len(response['Items']) == 0:
         return None
 
     detail = map_detail(response['Items'])
@@ -83,10 +83,10 @@ def map_track(item):
         'title': item['TrackTitle'],
         'id': ids.to_id(item['PK'])
     }
-    if(is_single(item)):
+    if is_single(item):
         release_date = item['ReleaseDate']
         track['year'] = dateutil.parser.parse(release_date).strftime('%Y')
-    if(not is_single(item)):
+    if not is_single(item):
         track['album_title'] = item['AlbumTitle']
         track['album_id'] = item['AA_PK']
 
