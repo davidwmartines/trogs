@@ -1,6 +1,6 @@
 from boto3.dynamodb.conditions import Key
 
-import db
+import db, licenses
 
 @db.handle_db_error
 def get_by_id(id):
@@ -27,5 +27,10 @@ def get_by_id(id):
     if(album_id is not None and album_title is not None):
         track['album_id'] = album_id
         track['album_title'] = album_title
+
+    license  = item.get('License')
+    if license is not None:
+        track["license"] = license
+        track["license_name"] = licenses.names[license]
 
     return track

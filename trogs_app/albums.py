@@ -1,7 +1,7 @@
 import dateutil.parser
 from boto3.dynamodb.conditions import Key
 
-import db, ids
+import db, ids, licenses
 
 
 @db.handle_db_error
@@ -20,6 +20,7 @@ def get_by_id(id):
 
 def map_album(items):
     album = items[0]
+    license = album.get('License', 'by-nc-nd')
     return {
         'id': album['AA_PK'],
         'title': album['AlbumTitle'],
@@ -27,6 +28,8 @@ def map_album(items):
         'year': dateutil.parser.parse(album['ReleaseDate']).strftime('%Y'),
         'artist_id': ids.to_id(album['PK']),
         'image_url': album.get('ImageURL'),
+        'license': license,
+        'license_name': licenses.names[license],
         'tracks': list(map(map_track, items[slice(1, len(items)+1)]))
     }
 
