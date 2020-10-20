@@ -28,8 +28,10 @@ a:visited {
 }
 
 .share::before {
-  content: "➚";
+  content: "⁞";
+  padding-left: 10px;
 }
+
 .playpause label {
   display: block;
   box-sizing: border-box;
