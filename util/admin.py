@@ -1,4 +1,4 @@
-from .import progress
+from . import progress
 from trogs_app import db, ids
 import os
 import sys
