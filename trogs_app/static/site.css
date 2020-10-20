@@ -15,14 +15,18 @@ a:visited {
   font-weight: bolder;
 }
 
-.list_box{
+h3 {
+  margin-top: 30px;
+}
+
+.list_box {
   display: table;
   clear: both;
 }
 .list_box div {
   float: left;
 }
-.list_box .title_box{
+.list_box .title_box {
   vertical-align: middle;
   padding-left: 10px;
 }
@@ -56,6 +60,6 @@ a:visited {
 #audiocontainer {
   padding: 10px 0;
 }
-.license{
+.license {
   font-size: x-small;
 }

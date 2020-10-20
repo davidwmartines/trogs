@@ -9,6 +9,14 @@ from boto3.dynamodb.conditions import Key
 sys.path.insert(0, os.path.abspath(
     os.path.join(os.path.dirname(__file__), '..')))
 
+#
+# ArtistContent sort key (AC_SK):
+#   000  : the artist itself
+#   100+ : featured tracks
+#   200+ : albums
+#   300+ : singles
+#
+
 
 def create_artist(artistName, owner='', bio='', imageUrl=''):
     table = db.get_table()
@@ -164,6 +172,62 @@ def add_track(artistName, albumTitle, trackTitle, audioUrl, sortNum=None):
         'ArtistID': album['PK'],
         'ArtistName': album['ArtistName'],
         'License': album['License']
+    })
+
+    res = table.query(
+        KeyConditionExpression=Key('PK').eq(id)
+    )
+
+    print(res["Items"][0])
+
+
+def add_single(artistName, trackTitle, audioUrl, releaseDataISO, license, sortNum=None):
+    table = db.get_table()
+
+    res = table.query(
+        IndexName='IX_ARTISTS_ALBUMS',
+        KeyConditionExpression=Key('AA_PK').eq(
+            'ARTISTS') & Key('AA_SK').eq(artistName)
+    )
+
+    if len(res['Items']) == 0:
+        print("Error: No artist found named '{0}'.".format(artistName))
+        return
+
+    artist = res['Items'][0]
+
+    print(artist)
+
+    if sortNum is None:
+        res = table.query(
+        IndexName='IX_ARTIST_CONTENT',
+        ScanIndexForward=True,
+        KeyConditionExpression=Key('AC_PK').eq(artist['PK']) & Key('AC_SK').begins_with('3')
+    )
+        if len(res['Items']) > 0:
+            last_track = res['Items'][len(res['Items'])-1]
+            last_sort = int(last_track['AC_SK'])
+            sort = str(last_sort + 1)
+        else:
+            sort = '300'
+    else:
+        sort = str(sortNum)
+
+    id = ids.new_id()
+
+    print("creating '{0}', id '{1}', sort {2}".format(trackTitle, id, sort))
+
+    table.put_item(Item={
+        'PK': id,
+        'SK': id,
+        'AC_PK': artist['PK'],
+        'AC_SK': sort,
+        'TrackTitle': trackTitle,
+        'AudioURL': audioUrl,
+        'ArtistID': artist['PK'],
+        'ArtistName': artist['AA_SK'],
+        'License': license,
+        'ReleaseDate': releaseDataISO
     })
 
     res = table.query(

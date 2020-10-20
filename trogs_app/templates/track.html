@@ -16,6 +16,10 @@
   <a href="{{ url_for('album', id=track.album_id)}}">{{track.album_title}}</a>
   {% endif %}
   by <a href="{{url_for('artist', id=track.artist_id)}}">{{track.artist_name}}</a>
+  {% if track.year is not none and track.year|length %}
+  •
+  {{track.year}}
+  {% endif %}
 </p>
 
 {% if track.license|length %}
@@ -25,6 +29,9 @@
     This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/{{track.license}}/4.0/" target="_blank">{{track.license_name}}</a>.
   </p>
 {% endif %}
-
-<audio id="track" controls><source src="{{track.audio_url}}" /></audio>
+<div id="audiocontainer">
+  <div class="trackbox">
+    <audio id="track" controls><source src="{{track.audio_url}}" /></audio>
+  </div>  
+</div>
 {% endblock %}
