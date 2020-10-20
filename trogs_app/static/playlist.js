@@ -70,9 +70,11 @@ $(() => {
   });
 
   // try to start playing selected track!
-  $(`#${currentTrackId}`)[0]
-    .play()
-    .catch((e) => console.log(e.toString()));
+  if ($(`#${currentTrackId}`).length) {
+    $(`#${currentTrackId}`)[0]
+      .play()
+      .catch((e) => console.log(e.toString()));
+  }
 
   // main button cick handler
   $("#playpause").on("click", (e) => {
