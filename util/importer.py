@@ -118,7 +118,7 @@ def import_artist(id):
     print("got data for '{0}'".format(artist_name))
 
     imageUrl = ''
-    if(imageid != ''):
+    if imageid != '':
         filename = "temp.jpg"
         print('downloading image data...')
         get_file(imageid, filename)
@@ -165,7 +165,7 @@ def import_album(id, conn=None):
     print("got data for '{0}'".format(title))
 
     imageUrl = ''
-    if(imageId != ''):
+    if imageId != '':
         filename = "temp.jpg"
         print('downloading image data...')
         get_file(imageId, filename)

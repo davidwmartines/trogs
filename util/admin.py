@@ -47,7 +47,7 @@ def create_album(artistName, albumTitle, releaseDateISO, license, description=''
             'ARTISTS') & Key('AA_SK').eq(artistName)
     )
 
-    if(len(res['Items']) == 0):
+    if len(res['Items']) == 0:
         print("Error: No artist found named '{0}'.".format(artistName))
         return
 
@@ -56,7 +56,7 @@ def create_album(artistName, albumTitle, releaseDateISO, license, description=''
 
     id = ids.new_id()
 
-    if(ac_sort is None):
+    if ac_sort is None:
         res = table.query(
             IndexName='IX_ARTIST_CONTENT',
             ScanIndexForward=True,
@@ -64,7 +64,7 @@ def create_album(artistName, albumTitle, releaseDateISO, license, description=''
                 artist['PK']) & Key('AC_SK').begins_with('2')
         )
 
-        if(len(res['Items']) > 0):
+        if len(res['Items']) > 0:
             last_item = res['Items'][len(res['Items'])-1]
             last_sort = int(last_item['AC_SK'])
             ac_sort = str(last_sort + 1)
@@ -106,7 +106,7 @@ def add_track(artistName, albumTitle, trackTitle, audioUrl, sortNum=None):
             'ARTISTS') & Key('AA_SK').eq(artistName)
     )
 
-    if(len(res['Items']) == 0):
+    if len(res['Items']) == 0:
         print("Error: No artist found named '{0}'.".format(artistName))
         return
 
@@ -123,7 +123,7 @@ def add_track(artistName, albumTitle, trackTitle, audioUrl, sortNum=None):
     albums = list(filter(lambda item: attr_matches(
         'AlbumTitle', albumTitle, item), res['Items']))
 
-    if(len(albums) == 0):
+    if len(albums) == 0:
         print("Error: No album found by '{0}' with title '{1}'.".format(
             artist["ArtistName"], albumTitle))
         return
@@ -132,14 +132,14 @@ def add_track(artistName, albumTitle, trackTitle, audioUrl, sortNum=None):
 
     print(album)
 
-    if(sortNum is None):
+    if sortNum is None:
         res = table.query(
             IndexName='IX_ARTISTS_ALBUMS',
             ScanIndexForward=True,
             KeyConditionExpression=Key('AA_PK').eq(album['AA_PK']) & Key('AA_SK').begins_with('1')
         )
 
-        if(len(res['Items']) > 0):
+        if len(res['Items']) > 0:
             last_track = res['Items'][len(res['Items'])-1]
             last_sort = int(last_track['AA_SK'])
             sort = str(last_sort + 1)
@@ -174,17 +174,17 @@ def add_track(artistName, albumTitle, trackTitle, audioUrl, sortNum=None):
 
 
 def attr_matches(attr, value, item):
-    if(attr in item):
+    if attr in item:
         return item[attr] == value
 
 
 def save_to_s3(local_file_path, object_name, content_type, bucket=None):
 
     # get bucket from param or config
-    if(bucket is None):
-        if("AWS_CONTENT_BUCKET" in os.environ ):
+    if bucket is None:
+        if "AWS_CONTENT_BUCKET" in os.environ:
             bucket = os.environ["AWS_CONTENT_BUCKET"]
-    if(bucket is None):
+    if bucket is None:
         raise "No S3 bucket specified"
 
     # upload
