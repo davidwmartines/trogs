@@ -5,11 +5,13 @@ $(() => {
   let currentTrackId = firstTrackId;
 
   const buttonPlaying = () => {
-    $("#playpause").prop("checked", false);
+    $("#playpause").prop("checked", false)
+      .next().attr('title', 'Stop');
   };
 
   const buttonPaused = () => {
-    $("#playpause").prop("checked", true);
+    $("#playpause").prop("checked", true)
+      .next().attr('title', 'Play');
   };
 
   const getNextTrackId = (current) => {
