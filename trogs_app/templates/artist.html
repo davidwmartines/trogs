@@ -64,7 +64,9 @@
 
 <!-- list singles-->
 {% if artist.singles|length > 0 %}
-<h3>More</h3>
+<h3>
+{% if artist.albums|length > 0 or artist.featured|length > 0 %}More{% endif %}
+</h3>
 
 <div>
     {% for track in artist.singles %}
