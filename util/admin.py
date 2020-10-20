@@ -162,7 +162,8 @@ def add_track(artistName, albumTitle, trackTitle, audioUrl, sortNum=None):
         'AlbumTitle': albumTitle,
         'AlbumID': album['AA_PK'],
         'ArtistID': album['PK'],
-        'ArtistName': album['ArtistName']
+        'ArtistName': album['ArtistName'],
+        'License': album['License']
     })
 
     res = table.query(
