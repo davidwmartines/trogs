@@ -10,7 +10,7 @@
 </h1>
 
 {% if album.image_url is not none and album.image_url|length %}
-<img src="{{ album.image_url|resize('200x200', placeholder=1) }}" alt="{{album.title}}" width="200" height="200">
+<img src="{{ album.image_url|resize('300x300', placeholder=1) }}" alt="{{album.title}}" width="300" height="300">
 {% endif %}
 
 <p>Album by <a href="{{ url_for('artist', id=album.artist_id) }}">{{album.artist_name}}</a>
