@@ -13,7 +13,7 @@
 <img src="{{ album.image_url|resize('300x300', placeholder=1) }}" alt="{{album.title}}" width="300" height="300">
 {% endif %}
 
-<p>Album by <a href="{{ url_for('artist', id=album.artist_id) }}">{{album.artist_name}}</a>
+<p>Album by <a href="{{ url_for('artist', id=album.artist_id) }}" title="{{album.artist_name}}">{{album.artist_name}}</a>
   •
 {{album.year}}</p>
 <p class="license">

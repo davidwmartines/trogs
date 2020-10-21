@@ -53,7 +53,7 @@
 <h3>Albums</h3>
 <div>
 {% for album in artist.albums %}
-    <a href="{{url_for('album', id=album.id)}}">
+    <a href="{{url_for('album', id=album.id)}}" title="{{album.title}}">
         <div class="list_box">
             <div>
                 {% if album.image_url is not none and album.image_url|length %}
@@ -80,7 +80,7 @@
 
 <div>
     {% for track in artist.singles %}
-        <a href="{{url_for('track', id=track.id)}}">
+        <a href="{{url_for('track', id=track.id)}}" title="{{track.title}}">
             <div class="list_box">
                 <div>
                     <img width="0" height="80" src="{{url_for('static', filename='1x1.png')}}">
