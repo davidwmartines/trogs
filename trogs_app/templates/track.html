@@ -29,9 +29,17 @@
     This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/{{track.license}}/4.0/" target="_blank">{{track.license_name}}</a>.
   </p>
 {% endif %}
+<div class="playpause">
+  <input type="checkbox" value="None" id="playpause" name="check" checked />
+  <label for="playpause" tabindex="1"></label>
+</div>
 <div id="audiocontainer">
-  <div class="trackbox">
-    <audio id="track" controls><source src="{{track.audio_url}}" /></audio>
+  <div>
+    <audio id="track_0" controls><source src="{{track.audio_url}}" /></audio>
   </div>  
 </div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='playlist.js')}}"></script>
 {% endblock %}
