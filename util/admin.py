@@ -348,6 +348,19 @@ def unfeature_track(id):
     print(res)
 
 
+def delete_track(id):
+    table = db.get_table()
+
+    key = {
+        'PK': id,
+        'SK': id
+    }
+    
+    res = table.delete_item(
+        Key = key
+    )
+
+    print(res)
 
 
 def attr_matches(attr, value, item):
