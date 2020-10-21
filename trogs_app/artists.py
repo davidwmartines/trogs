@@ -1,8 +1,7 @@
 import dateutil.parser
 from boto3.dynamodb.conditions import Key
 
-import db
-import ids
+import db, ids, licenses
 
 
 @db.handle_db_error
@@ -43,14 +42,15 @@ def map_list_item(item):
 def map_detail(items):
     artist = items[0]
     children = items[slice(1, len(items)+1)]
-    return {
+    artist_detail = {
         'artistId': artist['AC_PK'],
         'name': artist['AA_SK'],
         'image_url': artist.get('ImageURL'),
         'featured_tracks': list(map(map_track, filter(is_featured, children))),
         'albums': list(map(map_album, filter(is_album, children))),
-        'singles': list(map(map_track, filter(is_single, children)))
+        'singles': list(map(map_track, filter(not_featured, filter(is_single, children))))
     }
+    return artist_detail
 
 
 def is_album(item):
@@ -63,6 +63,10 @@ def is_track(item):
 
 def is_featured(item):
     return is_track(item) and item.get('Featured', False) == True
+
+
+def not_featured(item):
+    return not is_featured(item)
 
 
 def is_single(item):
@@ -81,7 +85,8 @@ def map_album(item):
 def map_track(item):
     track = {
         'title': item['TrackTitle'],
-        'id': ids.to_id(item['PK'])
+        'id': ids.to_id(item['PK']),
+        'audio_url': item["AudioURL"]
     }
     if is_single(item):
         release_date = item['ReleaseDate']
@@ -89,5 +94,11 @@ def map_track(item):
     if not is_single(item):
         track['album_title'] = item['AlbumTitle']
         track['album_id'] = item['AA_PK']
+    
+    license = item.get('License')
+    if license:
+        track["license"] = license
+        track["license_name"] = licenses.names[license]
 
     return track
+

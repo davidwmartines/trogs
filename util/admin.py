@@ -125,7 +125,8 @@ def add_track(artistName, albumTitle, trackTitle, audioUrl, sortNum=None):
     res = table.query(
         IndexName='IX_ARTIST_CONTENT',
         ScanIndexForward=True,
-        KeyConditionExpression=Key('AC_PK').eq(artist['PK']) & Key('AC_SK').begins_with('2')
+        KeyConditionExpression=Key('AC_PK').eq(
+            artist['PK']) & Key('AC_SK').begins_with('2')
     )
 
     albums = list(filter(lambda item: attr_matches(
@@ -144,7 +145,8 @@ def add_track(artistName, albumTitle, trackTitle, audioUrl, sortNum=None):
         res = table.query(
             IndexName='IX_ARTISTS_ALBUMS',
             ScanIndexForward=True,
-            KeyConditionExpression=Key('AA_PK').eq(album['AA_PK']) & Key('AA_SK').begins_with('1')
+            KeyConditionExpression=Key('AA_PK').eq(
+                album['AA_PK']) & Key('AA_SK').begins_with('1')
         )
 
         if len(res['Items']) > 0:
@@ -200,10 +202,11 @@ def add_single(artistName, trackTitle, audioUrl, releaseDataISO, license, sortNu
 
     if sortNum is None:
         res = table.query(
-        IndexName='IX_ARTIST_CONTENT',
-        ScanIndexForward=True,
-        KeyConditionExpression=Key('AC_PK').eq(artist['PK']) & Key('AC_SK').begins_with('3')
-    )
+            IndexName='IX_ARTIST_CONTENT',
+            ScanIndexForward=True,
+            KeyConditionExpression=Key('AC_PK').eq(
+                artist['PK']) & Key('AC_SK').begins_with('3')
+        )
         if len(res['Items']) > 0:
             last_track = res['Items'][len(res['Items'])-1]
             last_sort = int(last_track['AC_SK'])
@@ -235,6 +238,116 @@ def add_single(artistName, trackTitle, audioUrl, releaseDataISO, license, sortNu
     )
 
     print(res["Items"][0])
+
+
+def feature_track(id):
+
+    table = db.get_table()
+
+    # get track
+    res = table.query(
+        KeyConditionExpression=Key('PK').eq(id) & Key('SK').eq(id)
+    )
+    if len(res['Items']) == 0:
+        print('no track found by id', id)
+        return
+    track = res['Items'][0]
+
+    # determine feature sort
+    sort = '100'
+    res = table.query(
+        IndexName='IX_ARTIST_CONTENT',
+        ScanIndexForward=True,
+        KeyConditionExpression=Key('AC_PK').eq(
+            track['ArtistID']) & Key('AC_SK').begins_with('1')
+    )
+    if len(res['Items']) > 0:
+        last_track = res['Items'][len(res['Items'])-1]
+        last_sort = int(last_track['AC_SK'])
+        sort = str(last_sort + 1)
+
+
+    # define update
+    update_exp = 'set AC_PK = :AC_PK, AC_SK = :AC_SK, Featured= :Featured'
+    update_exp_vals = {
+            ':AC_PK': track['ArtistID'],
+            ':AC_SK': sort,
+            ':Featured': True
+        }
+
+    # update
+    res = table.update_item(
+        Key={
+            'PK': id,
+            'SK': id
+        },
+        UpdateExpression=update_exp,
+        ExpressionAttributeValues=update_exp_vals,
+        ReturnValues='UPDATED_NEW'
+    )
+
+    print(res)
+
+
+def unfeature_track(id):
+
+    table = db.get_table()
+
+     # get track
+    res = table.query(
+        KeyConditionExpression=Key('PK').eq(id) & Key('SK').eq(id)
+    )
+    if len(res['Items']) == 0:
+        print('no track found by id', id)
+        return
+    track = res['Items'][0]
+
+    # define update
+    key = {
+            'PK': id,
+            'SK': id
+        }
+    update_exp = 'remove Featured'
+    update_exp_vals = None
+
+    # if album track, ok to remove from AC
+    if 'AlbumID' in track:
+        update_exp + ', AC_SK, AC_PK'
+    else:
+        # determine sort for single
+        sort = '300'
+        res = table.query(
+            IndexName='IX_ARTIST_CONTENT',
+            ScanIndexForward=True,
+            KeyConditionExpression=Key('AC_PK').eq(
+                track['ArtistID']) & Key('AC_SK').begins_with('3')
+        )
+        if len(res['Items']) > 0:
+            last_track = res['Items'][len(res['Items'])-1]
+            last_sort = int(last_track['AC_SK'])
+            sort = str(last_sort + 1)
+        update_exp += ' set AC_SK = :AC_SK'
+        update_exp_vals = {':AC_SK': sort}
+
+    # update
+    
+    if update_exp_vals:
+        res = table.update_item(
+            Key=key,
+            UpdateExpression=update_exp,
+            ExpressionAttributeValues=update_exp_vals,
+            ReturnValues='UPDATED_NEW'
+        )
+    else:
+        res = table.update_item(
+            Key=key,
+            UpdateExpression=update_exp,
+            ReturnValues='UPDATED_NEW'
+        )
+
+    print(res)
+
+
 
 
 def attr_matches(attr, value, item):

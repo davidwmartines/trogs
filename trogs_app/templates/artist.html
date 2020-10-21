@@ -12,23 +12,33 @@
 
 <!-- featured tracks -->
 {% if artist.featured_tracks|length > 0 %}
-
+<!-- <h3>Featured</h3> -->
 <div class="playpause">
     <input type="checkbox" value="None" id="playpause" name="check" checked />
     <label for="playpause" tabindex="1"></label>
 </div>
-<h3>Featured</h3>
+
 <div id="audiocontainer">
     {% for track in artist.featured_tracks %}
     <div class="trackbox">
-        <p><b>{{track.title}}</b>
+        <p>
+            <b>{{track.title}}</b>
             {%if track.album_id is defined and track.album_id is not none %}
-            <span>
-            <em>from the album</em> <a href="{{url_for('album', id=track.album_id)}}">{{track.album_title}}</a></span>
+            <span>from the album <a href="{{url_for('album', id=track.album_id)}}">{{track.album_title}}</a></span>
+            {% endif %}
+            {% if track.year is not none and track.year|length %}
+            •
+            {{track.year}}
             {% endif %}
           <a class="share" data-clipboard-text="{{ url_for('track', id=track.id) }}" href="{{ url_for('track', id=track.id) }}"></a>
+        </p>
+        {% if track.license|length %}
+        <p class="license">
+            <a rel="license" href="http://creativecommons.org/licenses/{{track.license}}/4.0/" target="_blank">
+            <img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/{{track.license}}/4.0/80x15.png" /></a>
+            This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/{{track.license}}/4.0/" target="_blank">{{track.license_name}}</a>.
             </p>
-       
+        {% endif %}
         <div>
           <audio id="track_{{loop.index0}}" controls><source src="{{track.audio_url}}"></audio>
         </div>
@@ -65,7 +75,7 @@
 <!-- list singles-->
 {% if artist.singles|length > 0 %}
 <h3>
-{% if artist.albums|length > 0 or artist.featured|length > 0 %}More{% endif %}
+{% if artist.albums|length > 0 or artist.featured_tracks|length > 0 %}More{% endif %}
 </h3>
 
 <div>
