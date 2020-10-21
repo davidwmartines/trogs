@@ -14,7 +14,7 @@ Mushmud
                 {% if artist.image_url is not none and artist.image_url|length %}
                 <img src="{{ artist.image_url|resize('50x50', placeholder=1) }}" alt="{{artist.name}}" width="50" height="50">
                 {% else %}
-                <img width="50" height="50" src="{{url_for('static', filename='1x1.png')}}">
+                <div class="placeholder box50"></div>
                 {% endif %}
             </div>
             <div class="title_box">

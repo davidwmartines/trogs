@@ -35,13 +35,13 @@ h3 {
 .list_box .title_box {
   padding-left: 10px;
   white-space: normal;
-  width: 80%
+  width: 80%;
 }
 .list_box .title_box p {
   margin-top: initial;
 }
-.list_box .narrow{
-  width: 75%
+.list_box .narrow {
+  width: 75%;
 }
 
 .share::before {
@@ -76,4 +76,13 @@ h3 {
 
 .license {
   font-size: x-small;
+}
+
+.box80 {
+  width: 80px;
+  height: 80px;
+}
+.box50 {
+  width: 50px;
+  height: 50px;
 }

@@ -59,7 +59,7 @@
                 {% if album.image_url is not none and album.image_url|length %}
                 <img src="{{ album.image_url|resize('80x80', placeholder=1) }}" alt="{{album.title}}" width="80" height="80">
                 {% else %}
-                <img width="80" height="80" src="{{url_for('static', filename='1x1.png')}}">
+                <div class="placeholder box80"></div>
                 {% endif %}
             </div>
             <div class="title_box narrow">
