@@ -20,15 +20,28 @@ h3 {
 }
 
 .list_box {
-  display: table;
+  /* display: table; */
   clear: both;
+  /* float: left; */
+  white-space: nowrap;
+  /* overflow: visible; */
 }
 .list_box div {
-  float: left;
+  display: inline-block;
+}
+.list_box .image_box {
+  vertical-align: middle;
 }
 .list_box .title_box {
-  vertical-align: middle;
   padding-left: 10px;
+  white-space: normal;
+  width: 80%
+}
+.list_box .title_box p {
+  margin-top: initial;
+}
+.list_box .narrow{
+  width: 75%
 }
 
 .share::before {
@@ -60,6 +73,7 @@ h3 {
 #audiocontainer {
   padding: 10px 0;
 }
+
 .license {
   font-size: x-small;
 }

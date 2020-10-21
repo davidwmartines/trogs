@@ -6,11 +6,11 @@ Mushmud
 
 {% block content %}
 
-<div >
+<div class="list_container" >
     {% for artist in artists %}
     <a href="{{url_for('artist', id=artist.id)}}">
         <div class="list_box">
-            <div>
+            <div class="image_box">
                 {% if artist.image_url is not none and artist.image_url|length %}
                 <img src="{{ artist.image_url|resize('50x50', placeholder=1) }}" alt="{{artist.name}}" width="50" height="50">
                 {% else %}
@@ -18,7 +18,7 @@ Mushmud
                 {% endif %}
             </div>
             <div class="title_box">
-                <h4>{{artist.name}}</h4>
+                <p>{{artist.name}}</p>
             </div>
         </div>
     </a>
