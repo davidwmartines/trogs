@@ -70,16 +70,24 @@ def list_singles(artist_id):
     conn = get_conn()
     cursor = conn.cursor()
     with cursor.execute("""SELECT 
-    w.id, w.name, 
-    l.abbreviation as license,
-    b.fileformat, b.binaryfiledataid 
+    w.id, w.name, b.binaryfiledataid, 
+    a.name,
+    w.releasedate,
+    l.abbreviation as license
     FROM mc.work w 
+    JOIN mc.artist a on a.id = w.artistid
     JOIN mc.binaryfileinfo b ON w.binaryfileinfoid = b.id
     LEFT JOIN mc.License l ON w.LicenseId = l.Id
     WHERE w.artistid = ? AND w.parentworkid IS NULL AND w.worktype ='audio'""", artist_id):
         row = cursor.fetchone()
         while row:
-            print(row)
+            yield {
+                'title': row[1],
+                'fileId': row[2],
+                'artistName': row[3],
+                'releaseDate': row[4].strftime("%Y-%m-%d"),
+                'license': row[5]
+            }
             row = cursor.fetchone()
 
 
@@ -111,6 +119,8 @@ def import_artist(id):
         WHERE a.id =?""", id):
         data = cursor.fetchone()
 
+    print(data)
+
     artist_name = data[1]
     artist_bio = data[2]
     artist_owner = data[4]
@@ -118,7 +128,7 @@ def import_artist(id):
     print("got data for '{0}'".format(artist_name))
 
     imageUrl = ''
-    if imageid != '':
+    if imageid:
         filename = "temp.jpg"
         print('downloading image data...')
         get_file(imageid, filename)
@@ -205,3 +215,21 @@ def import_track(track):
     print(full_url)
 
     admin.add_track(track['artistName'], track['albumTitle'], track['title'], full_url)
+
+
+def import_single(track):
+    print('importing single track {0}'.format(track['title']))
+
+    print('downloading audio data...')
+    filename = "temp.mp3"
+    get_file(track['fileId'], filename)
+    print("created file '{0}'".format(filename))
+
+    object_name = 'art/{0}/{1}.mp3'.format(
+        admin.safe_obj_name(track['artistName']),
+        admin.safe_obj_name(track['title']))
+    full_url = admin.save_to_s3('temp.mp3', object_name, 'audio/mpeg')
+    print(full_url)
+
+    id = admin.add_single(track['artistName'], track['title'], full_url, track['releaseDate'], track['license'])
+    admin.feature_track(id)

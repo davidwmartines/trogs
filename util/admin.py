@@ -45,6 +45,8 @@ def create_artist(artistName, owner='', bio='', imageUrl=''):
 
     print(query["Items"][0])
 
+    return id
+
 
 def create_album(artistName, albumTitle, releaseDateISO, license, description='', imageUrl='', ac_sort=None):
     table = db.get_table()
@@ -103,6 +105,8 @@ def create_album(artistName, albumTitle, releaseDateISO, license, description=''
     )
 
     print(query["Items"][0])
+
+    return id
 
 
 def add_track(artistName, albumTitle, trackTitle, audioUrl, sortNum=None):
@@ -182,6 +186,8 @@ def add_track(artistName, albumTitle, trackTitle, audioUrl, sortNum=None):
 
     print(res["Items"][0])
 
+    return id
+
 
 def add_single(artistName, trackTitle, audioUrl, releaseDataISO, license, sortNum=None):
     table = db.get_table()
@@ -238,6 +244,8 @@ def add_single(artistName, trackTitle, audioUrl, releaseDataISO, license, sortNu
     )
 
     print(res["Items"][0])
+
+    return id
 
 
 def feature_track(id):
