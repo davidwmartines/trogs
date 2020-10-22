@@ -45,4 +45,4 @@ def create_routes(application):
         }
         return redirect(auth0.api_base_url + '/v2/logout?' + urlencode(params))
 
-    return {'login': login, 'callback': callback, 'logout': logout}
+    return {'/login': login, '/callback': callback, '/logout': logout}
