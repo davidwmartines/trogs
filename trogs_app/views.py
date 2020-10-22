@@ -2,7 +2,10 @@
 from flask import Flask, render_template
 from werkzeug.exceptions import NotFound
 
-import albums, artists, tracks
+import albums
+import artists
+import tracks
+import auth
 
 
 def home():
@@ -19,7 +22,7 @@ def artist(id):
 
 def album(id):
     album = albums.get_by_id(id)
-    if album is None :
+    if album is None:
         raise NotFound
     return render_template("album.html", album=album)
 
@@ -31,3 +34,6 @@ def track(id):
     return render_template("track.html", track=track)
 
 
+@auth.requires_auth
+def create():
+    return render_template('admin_home.html')

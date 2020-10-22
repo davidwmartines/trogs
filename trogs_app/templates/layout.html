@@ -12,9 +12,18 @@
     <body>
         <div class="body-content">
             <nav>
-                <a href="{{url_for('home')}}" id="home_link" title="MushMud">MushMud</a>
+                <div class="left">
+                    <a href="{{url_for('home')}}" id="home_link" title="MushMud">MushMud</a>
+                </div>
+                <div class="right">
+                    <a href="/create">Create</a>
+                    {% if session['profile'] %}
+                        |
+                        <a href="{{url_for('logout')}}" title="Log out {{ session['profile']['name'] }}">Log Out</a>
+                    {% endif %}
+                </div>
             </nav>
-            <hr>
+            <hr id="topline">
             {% block content %}
             {% endblock %}
             <footer>

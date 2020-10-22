@@ -4,11 +4,23 @@ body {
 a {
   font-weight: bold;
 }
-a:link {
-  text-decoration: none;
-}
+a:link,
 a:visited {
   text-decoration: none;
+  color: blue;
+}
+nav {
+  display: table;
+  clear: both;
+  width: 100%;
+}
+nav .left {
+  float: left;
+}
+nav .right {
+  float: right;
+  text-align: right;
+  font-size: small;
 }
 #home_link {
   font-family: "Calistoga", serif;
