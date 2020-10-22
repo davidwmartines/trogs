@@ -15,6 +15,7 @@
                 <a href="{{url_for('home')}}" id="home_link" title="MushMud">MushMud</a>
                 {% if session['profile'] %}
                     {{ session['profile']['name'] }}
+                    <a href="/admin">Your Music</a>
                     <a href="{{url_for('logout')}}">log out</a>
                 {% else %}
                     <a href="{{url_for('login')}}">log in</a>
