@@ -3,6 +3,7 @@ import os
 from authlib.integrations.flask_client import OAuth
 from flask import redirect, session, url_for
 from six.moves.urllib.parse import urlencode
+from functools import wraps
 
 
 def add_url_rules(application):
@@ -48,3 +49,13 @@ def add_url_rules(application):
     application.add_url_rule('/login', view_func=login)
     application.add_url_rule('/callback', view_func=callback)
     application.add_url_rule('/logout', view_func=logout)
+
+
+def requires_auth(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        if 'profile' not in session:
+            return redirect(url_for('login'))
+        return f(*args, **kwargs)
+
+    return decorated
