@@ -5,6 +5,7 @@ from werkzeug.exceptions import NotFound
 import albums
 import artists
 import tracks
+import auth
 
 
 def home():
@@ -31,3 +32,8 @@ def track(id):
     if track is None:
         raise NotFound
     return render_template("track.html", track=track)
+
+
+@auth.requires_auth
+def create():
+    return render_template('admin_home.html')

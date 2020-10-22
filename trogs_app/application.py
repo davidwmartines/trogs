@@ -15,6 +15,7 @@ application.add_url_rule('/', view_func=views.home)
 application.add_url_rule('/artist/<id>', view_func=views.artist)
 application.add_url_rule('/album/<id>', view_func=views.album)
 application.add_url_rule('/track/<id>', view_func=views.track)
+application.add_url_rule('/create', view_func=views.create)
 
 auth.add_url_rules(application)
 
