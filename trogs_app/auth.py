@@ -36,7 +36,7 @@ def add_url_rules(application):
             'name': userinfo.get('name'),
             'email': userinfo.get('email')
         }
-        return redirect(url_for('home'))
+        return redirect(url_for('create'))
 
     def logout():
         session.clear()
