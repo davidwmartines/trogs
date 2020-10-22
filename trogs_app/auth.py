@@ -5,7 +5,7 @@ from flask import redirect, session, url_for
 from six.moves.urllib.parse import urlencode
 
 
-def create_routes(application):
+def add_url_rules(application):
 
     oauth = OAuth(application)
 
@@ -45,4 +45,6 @@ def create_routes(application):
         }
         return redirect(auth0.api_base_url + '/v2/logout?' + urlencode(params))
 
-    return {'/login': login, '/callback': callback, '/logout': logout}
+    application.add_url_rule('/login', view_func=login)
+    application.add_url_rule('/callback', view_func=callback)
+    application.add_url_rule('/logout', view_func=logout)
