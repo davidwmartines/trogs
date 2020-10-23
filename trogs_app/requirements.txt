@@ -18,6 +18,8 @@ Jinja2==2.11.2
 jmespath==0.10.0
 lazy-object-proxy==1.4.3
 MarkupSafe==1.1.1
+marshmallow==3.8.0
+marshmallow-jsonapi==0.23.2
 mccabe==0.6.1
 pilkit==2.0
 Pillow==8.0.0
