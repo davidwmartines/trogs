@@ -1,7 +1,7 @@
 [
   {
     "Delete": {
-      "IndexName": "IX_ARTIST"
+      "IndexName": "IX_ARTISTS_BY_OWNER"
     }
   }
 ]

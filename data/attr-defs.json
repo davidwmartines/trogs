@@ -1,10 +1,10 @@
 [
   {
-    "AttributeName": "IsArtist",
-    "AttributeType": "N"
+    "AttributeName": "Owner",
+    "AttributeType": "S"
   },
   {
-    "AttributeName": "ArtistName",
+    "AttributeName": "PK",
     "AttributeType": "S"
   }
 ]

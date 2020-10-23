@@ -1,5 +1,5 @@
 {
-  "art": [
+  "art2": [
     {
       "PutRequest": {
         "Item": {
@@ -44,6 +44,9 @@
           },
           "AA_SK": {
             "S": "Yes"
+          },
+          "Owner": {
+            "S": "test@test.com"
           }
         }
       }
@@ -173,6 +176,9 @@
           },
           "AC_SK": {
             "S": "000"
+          },
+          "Owner": {
+            "S": "davidwmartines@gmail.com"
           }
         }
       }

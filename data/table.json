@@ -23,6 +23,10 @@
     {
       "AttributeName": "AC_SK",
       "AttributeType": "S"
+    },
+    {
+      "AttributeName": "Owner",
+      "AttributeType": "S"
     }
   ],
   "TableName": "art2",
@@ -70,6 +74,26 @@
         },
         {
           "AttributeName": "AA_SK",
+          "KeyType": "RANGE"
+        }
+      ],
+      "Projection": {
+        "ProjectionType": "ALL"
+      },
+      "ProvisionedThroughput": {
+        "ReadCapacityUnits": 5,
+        "WriteCapacityUnits": 5
+      }
+    },
+    {
+      "IndexName": "IX_ARTISTS_BY_OWNER",
+      "KeySchema": [
+        {
+          "AttributeName": "Owner",
+          "KeyType": "HASH"
+        },
+        {
+          "AttributeName": "PK",
           "KeyType": "RANGE"
         }
       ],

@@ -1,20 +1,19 @@
 [
   {
     "Create": {
-      "IndexName": "IX_ARTIST",
+      "IndexName": "IX_ARTISTS_BY_OWNER",
       "KeySchema": [
         {
-          "AttributeName": "IsArtist",
+          "AttributeName": "Owner",
           "KeyType": "HASH"
         },
         {
-          "AttributeName": "ArtistName",
+          "AttributeName": "PK",
           "KeyType": "RANGE"
         }
       ],
       "Projection": {
-        "ProjectionType": "INCLUDE",
-        "NonKeyAttributes": ["ImageURL"]
+        "ProjectionType": "ALL"
       },
       "ProvisionedThroughput": {
         "ReadCapacityUnits": 5,
