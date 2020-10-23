@@ -1,10 +1,106 @@
-{% extends "layout.html" %}
+{% extends "layout.html" %} {% block title %} Create on MushMud {% endblock %}
+{% block content %} {{ session['profile']['email']}} {% raw %}
 
-{% block title %}
-Create on MushMud
-{% endblock %}
+<section id="app">
+  <router-view></router-view>
+</section>
 
-{% block content %}
+<component id="ArtistList" style="display: none">
+  <div>
+    <h1>My Artists</h1>
+    <div v-for="artist in artists" :key="artist.id">
+      <router-link :to="`/artist/${artist.id}`">{{ artist.attributes.name}}</router-link>
+    </div>
+  </div>
+</component>
 
-start
+<component id="ArtistDetail" style="display: none">
+  <div>
+    <p><router-link to="/"><- Back to My Artists</router-link></p>
+    <h1>{{ artist.attributes.name }}</h1>
+    <div>name, image, bio, save</div>
+
+    <div>
+      <h3>
+        <router-link :to="`/artist/${artist.id}/albums`">Albums</router-link>
+      </h3>
+      <h3>
+        <router-link :to="`/artist/${artist.id}/singles`">Singles</router-link>
+      </h3>
+      <h3>
+        <router-link :to="`/artist/${artist.id}/featured`">Featured Tracks</router-link>
+      </h3>
+
+      <div>
+        <a href="#">Delete</a>
+      </div>
+    </div>
+  </div>
+</component>
+
+{% endraw %} {% endblock %} {% block scripts %} {% if env == 'development' %}
+<script src="https://cdn.jsdelivr.net/npm/vue@2.6.12/dist/vue.js"></script>
+<script src="https://unpkg.com/vue-router/dist/vue-router.js"></script>
+{% else %}
+<script src="https://cdn.jsdelivr.net/npm/vue@2.6.12/dist/vue.min.js"></script>
+<script src="https://unpkg.com/vue-router/dist/vue-router.min.js"></script>
+{% endif %}
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+<script>
+  const ArtistList = {
+    data: function () {
+      return {
+        artists: [],
+      };
+    },
+    mounted() {
+      console.log("artist list mounted");
+      axios
+        .get("/api/v1/me/artists")
+        .then((response) => (this.artists = response.data.data))
+        .catch((e) => console.error(e));
+    },
+    template: "#ArtistList",
+  };
+
+  const ArtistDetail = {
+    data: function () {
+      return {
+        artist: { id: "", attributes: { name: "" } },
+      };
+    },
+    mounted() {
+      console.log("artist detail mounted");
+      axios
+        .get(`/api/v1/me/artists/${this.$route.params.id}`)
+        .then((response) => (this.artist = response.data.data))
+        .catch((e) => console.error(e));
+    },
+    template: "#ArtistDetail",
+  };
+
+  const AlbumList = { template: "<div>albums</div>" };
+
+  const SingleList = { template: "<div>singles</div>" };
+
+  const Featured = { template: "<div>featured</div>" };
+
+  const routes = [
+    { path: "/", component: ArtistList },
+    { path: "/artist/:id", component: ArtistDetail },
+    { path: "/artist/:id/albums", component: AlbumList },
+    { path: "/artist/:id/singles", component: SingleList },
+    { path: "/artist/:id/featured", component: Featured },
+  ];
+  const router = new VueRouter({
+    routes,
+  });
+
+  new Vue({
+    router,
+    el: "#app",
+    data: {},
+  });
+</script>
+
 {% endblock %}

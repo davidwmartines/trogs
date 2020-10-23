@@ -11,7 +11,7 @@ application.config['RESIZE_S3_BUCKET'] = os.environ['AWS_CONTENT_BUCKET']
 resize = flask_resize.Resize(application)
 
 with application.app_context():
-    import views, auth
+    import views, auth, api
 
 @application.route('/favicon.ico')
 def favicon():
