@@ -10,7 +10,8 @@ def list_all():
     response = table.query(
         IndexName='IX_ARTISTS_ALBUMS',
         ScanIndexForward=True,
-        KeyConditionExpression=Key('AA_PK').eq('ARTISTS')
+        KeyConditionExpression=Key('AA_PK').eq('ARTISTS'),
+        ProjectionExpression='PK, AA_SK, ImageURL'
     )
     return map(map_list_item, response['Items'])
 
