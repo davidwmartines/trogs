@@ -1,0 +1,10 @@
+[
+  {
+    "AttributeName": "AC_PK",
+    "AttributeType": "S"
+  },
+  {
+    "AttributeName": "AC_SK",
+    "AttributeType": "S"
+  }
+]

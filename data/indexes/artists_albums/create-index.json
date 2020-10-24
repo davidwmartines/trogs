@@ -1,0 +1,24 @@
+[
+  {
+    "Create": {
+      "IndexName": "IX_ARTISTS_ALBUMS",
+      "KeySchema": [
+        {
+          "AttributeName": "AA_PK",
+          "KeyType": "HASH"
+        },
+        {
+          "AttributeName": "AA_SK",
+          "KeyType": "RANGE"
+        }
+      ],
+      "Projection": {
+        "ProjectionType": "ALL"
+      },
+      "ProvisionedThroughput": {
+        "ReadCapacityUnits": 5,
+        "WriteCapacityUnits": 5
+      }
+    }
+  }
+]
