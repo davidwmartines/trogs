@@ -24,12 +24,24 @@ AWS_CONTENT_BUCKET
 
 # set to 'development' for local debug mode.
 FLASK_ENV
+
+# for session
+FLASK_SECRET_KEY
 ```
 
 optional:
 ```
+# override the default aws profile, e.g. use 'local' for development:
 AWS_PROFILE
+# when using local, need this:
 AWS_ENDPOINT_URL
+
+# these override the applied aws profile with settings specific to connecting to S3.
+# these are used locally so we can connect to remote S3 for images and uploading,
+# but still use the current aws profile for DynamoDB.
+AWS_CONTENT_ACCESS_KEY_ID
+AWS_CONTENT_SECRET_ACCESS_KEY
+AWS_CONTENT_REGION
 ```
 
 3. (optional) setup a local DynamoDB:
