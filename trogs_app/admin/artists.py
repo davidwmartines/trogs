@@ -1,5 +1,6 @@
 import ids
 import db
+from . import names
 from boto3.dynamodb.conditions import Key
 
 
@@ -38,7 +39,8 @@ def artist_to_item(artist):
         'AC_PK': artist.id,
         'AC_SK': '000',
         'Bio': artist.bio,
-        'ImageURL': artist.image_url
+        'ImageURL': artist.image_url,
+        'NormalizedName': artist.normalized_name
     }
 
 
@@ -76,7 +78,7 @@ def by_id_for_owner(id, owner):
     return item_to_artist(res['Items'][0])
 
 
-def create(data):
+def create(data, id=None):
     """
     Creates a new artist from the supplied data, and saves to database.
 
@@ -84,15 +86,20 @@ def create(data):
     ----------
     data: dict
         Dictionary of attribute values.
+    
+    id: str
+        Option ID to use, otherwise generated.
 
     Returns
     -------
         The new Artist instance.
     """
-    id = ids.new_id()
-    artist = Artist(id=id, **data)
 
-    if name_is_taken(artist.name):
+    id = id or ids.new_id()
+    artist = Artist(id=id, **data)
+    artist.normalized_name = names.safe_obj_name(artist.name)
+
+    if name_is_taken(artist.normalized_name):
         raise NameIsTaken
 
     item = artist_to_item(artist)
@@ -119,13 +126,11 @@ def name_is_taken(test_name, exclude_id=None):
 
     """
 
-    # This approach does NOT account for casing variations.  
-    # Need to use separate index with RANGE key on a normalized version of the name, i.e. all lowercased.
     table = db.get_table()
     result = table.query(
-        IndexName="IX_ARTISTS_ALBUMS",
-        KeyConditionExpression=Key('AA_PK').eq(
-            'ARTISTS') & Key('AA_SK').eq(test_name))
+        IndexName="IX_ARTISTS_NAMES",
+        KeyConditionExpression=Key('NormalizedName').eq(test_name)
+        )
 
     if len(result['Items']) == 0:
         return False

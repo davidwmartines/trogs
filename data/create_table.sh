@@ -17,3 +17,8 @@ aws dynamodb update-table --table-name art2 \
  --global-secondary-index-updates file://indexes/artists_by_owner/create-index.json \
  --attribute-definitions file://indexes/artists_by_owner/attr-defs.json \
  --profile local --endpoint-url http://localhost:8042 ;
+
+ aws dynamodb update-table --table-name art2 \
+ --global-secondary-index-updates file://indexes/artists_names/create-index.json \
+ --attribute-definitions file://indexes/artists_names/attr-defs.json \
+ --profile local --endpoint-url http://localhost:8042 ;

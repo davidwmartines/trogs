@@ -1,11 +1,10 @@
 import os
 import sys
 import boto3
-import re
 from boto3.dynamodb.conditions import Key
 
-bucket = os.environ["AWS_CONTENT_BUCKET"]
 
+bucket = os.environ["AWS_CONTENT_BUCKET"]
 
 
 def save(file_data, object_name, content_type):
@@ -24,10 +23,6 @@ def save(file_data, object_name, content_type):
     location = client.get_bucket_location(Bucket=bucket)['LocationConstraint']
     url = "https://s3-%s.amazonaws.com/%s/%s" % (location, bucket, object_name)
     return url
-
-
-def safe_obj_name(val):
-    return re.sub(r'\W+', '', val.lower().replace(' ', '_').replace('-', '_')).replace("_", "-")
 
 
 def _get_client():

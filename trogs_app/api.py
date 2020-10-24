@@ -9,7 +9,9 @@ from werkzeug.exceptions import Forbidden, NotFound, UnprocessableEntity
 
 import admin.artists
 import admin.files
+import admin.names
 import auth
+import ids
 
 
 class ArtistSchema(Schema):
@@ -71,11 +73,13 @@ def add_my_artist():
     # do not take image_url as input... must be set server-side based on uploaded file
     input_data["data"]["attributes"]["image_url"] = ""
 
+    artist_id = ids.new_id()
+
     if 'image_file' in request.files:
-        safe_name = admin.files.safe_obj_name(
+        safe_name = admin.names.safe_obj_name(
             input_data["data"]["attributes"]["name"])
         file_data = request.files['image_file']
-        object_name = 'art/{0}/{0}.jpg'.format(safe_name)
+        object_name = 'art/{0}-{1}/{1}.jpg'.format(artist_id, safe_name)
         admin.files.save(file_data, object_name, content_type='image/jpeg')
         input_data["data"]["attributes"]["image_url"] = object_name
 
@@ -87,7 +91,7 @@ def add_my_artist():
         return J(err.messages), 422
 
     try:
-        artist = admin.artists.create(data)
+        artist = admin.artists.create(data, artist_id)
     except admin.artists.NameIsTaken as err:
         return J(to_error_object(err.message)), 422
 

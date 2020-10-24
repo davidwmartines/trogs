@@ -1,0 +1,24 @@
+[
+  {
+    "Create": {
+      "IndexName": "IX_ARTISTS_NAMES",
+      "KeySchema": [
+        {
+          "AttributeName": "NormalizedName",
+          "KeyType": "HASH"
+        },
+        {
+          "AttributeName": "PK",
+          "KeyType": "RANGE"
+        }
+      ],
+      "Projection": {
+        "ProjectionType": "KEYS_ONLY"
+      },
+      "ProvisionedThroughput": {
+        "ReadCapacityUnits": 5,
+        "WriteCapacityUnits": 5
+      }
+    }
+  }
+]
