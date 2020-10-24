@@ -28,14 +28,14 @@
     <p><router-link to="/"><- Back to My Artists</router-link></p>
 
     <div v-if="editing">
-      <h1>Add New Artist</h1>
+      <h1>Add a new artist</h1>
       <div>
-        <div><label for="artist-name">Name</label></div>
+        <div><label for="artist-name">Artist Name</label></div>
         <input v-model="artist.attributes.name" id="artist-name" />
       </div>
       <div>
         <div><label for="artist-bio">Bio</label></div>
-        <input v-model="artist.attributes.bio" id="artist-bio" />
+        <textarea v-model="artist.attributes.bio" id="artist-bio"></textarea>
       </div>
       <div>
         <div><label for="file">Image</label></div>
