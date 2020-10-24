@@ -4,7 +4,7 @@ import flask_resize
 from flask import Flask, redirect, session
 
 application = Flask(__name__)
-application.secret_key = 'Troglodytes42'
+application.secret_key = os.environ["FLASK_SECRET_KEY"]
 
 application.config['RESIZE_STORAGE_BACKEND'] = 's3'
 application.config['RESIZE_S3_BUCKET'] = os.environ['AWS_CONTENT_BUCKET']
