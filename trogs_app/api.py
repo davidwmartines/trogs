@@ -86,7 +86,15 @@ def add_my_artist():
     except ValidationError as err:
         return J(err.messages), 422
 
-    artist = admin.artists.create(data)
+    try:
+        artist = admin.artists.create(data)
+    except admin.artists.NameIsTaken as err:
+        return J(to_error_object(err.message)), 422
 
     data = schema.dump(artist)
     return J(data)
+
+
+def to_error_object(message):
+    """ make a JSONAPI error object from a single message string """
+    return {'errors': [{'detail': message}]}
