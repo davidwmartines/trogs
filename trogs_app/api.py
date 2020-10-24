@@ -72,7 +72,7 @@ def add_my_artist():
     input_data["data"]["attributes"]["image_url"] = ""
 
     if 'image_file' in request.files:
-        safe_name = admin.file_save.safe_obj_name(
+        safe_name = admin.files.safe_obj_name(
             input_data["data"]["attributes"]["name"])
         file_data = request.files['image_file']
         object_name = 'art/{0}/{0}.jpg'.format(safe_name)
