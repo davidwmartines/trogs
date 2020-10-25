@@ -3,7 +3,12 @@
   color: #000000;
 }
 
-.share {
+a:link,
+a:visited {
+  color: blue;
+}
+
+.share:link, .share:visited {
   color: #a7a6a6;
 }
 
