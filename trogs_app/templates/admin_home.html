@@ -36,8 +36,38 @@
 
 <component id="ArtistList" style="display: none">
   <div>
-    <h1>My Artists</h1>
-
+    <b-container>
+      <b-row>
+        <b-col>
+          <h1>My Artists</h1>
+        </b-col>
+      </b-row>
+      <b-row v-for="artist in artists" :key="artist.id" class="mb-2" align-v="center">
+        <b-col col lg="1" class="pr-0">
+          <router-link :to="`/artist/${artist.id}`">
+            <img v-if="artist.attributes.thumbnail_image_url" :src="artist.attributes.thumbnail_image_url" width="50" height="50"/>
+            <div v-if="!artist.attributes.thumbnail_image_url" class="placeholder box50"></div>
+          </router-link>
+          </b-col>
+          <b-col cols="10" md="auto" class="pl-0">
+            <router-link :to="`/artist/${artist.id}`">
+              <p>{{artist.attributes.name}}</p>
+            </router-link>
+          </b-col>
+        </b-row>
+      </b-row>
+    </b-container>
+    <b-container>
+      <b-row>
+        <b-col>
+          <router-link to="/artist/new">
+            <b-button variant="primary">+ Add New Artist</b-button>
+          </router-link>
+        </b-col>
+      </b-row>
+    </b-container>
+   
+<!-- 
     <div>
       <div v-for="artist in artists" :key="artist.id">
         <router-link :to="`/artist/${artist.id}`">
@@ -65,7 +95,7 @@
 
     <div>
       <router-link to="/artist/new"> + Add</router-link>
-    </div>
+    </div> -->
   </div>
 </component>
 
