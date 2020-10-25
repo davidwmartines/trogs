@@ -81,7 +81,10 @@
         <textarea v-model="artist.attributes.bio" id="artist-bio"></textarea>
       </div>
       <div>
-        <b-button variant="primary" v-on:click="save()">Save</b-button>
+        <b-button variant="primary" v-on:click="save()" :disabled="saving">
+          <b-spinner small v-if="saving"></b-spinner>
+         {{ saving ? "Saving..." : "Save"}}
+        </b-button>
 
         <b-button v-on:click="cancel()">Cancel</b-button>
       </div>
@@ -92,7 +95,7 @@
         <h1>{{artist.attributes.name}}</h1>
         <p>{{artist.attributes.bio}}</p>
         <div>
-          <b-button v-on:click="edit()">Edit</b-button>
+          <b-button variant="primary" v-on:click="edit()">Edit</b-button>
         </div>
       </div>
       <div>
@@ -119,7 +122,8 @@
               v-on:input="handleFileUpload()"
             ></b-form-file>
             <div v-show="uploading">
-              Uploading
+              <b-spinner small></b-spinner>
+              Saving picture...
               <progress max="100" :value.prop="uploadPercentage"></progress>
             </div>
           </div>
@@ -189,6 +193,7 @@
         fileToUpload: null,
         uploadPercentage: 0,
         uploading: false,
+        saving: false,
         artist: {
           id: "",
           type: "artist",
@@ -260,6 +265,7 @@
       },
       save() {
         console.log("saving");
+        this.saving = true;
         postData = {
           data: {
             type: "artist",
@@ -277,8 +283,10 @@
             router.push(`/artist/${response.data.data.id}`);
             this.showSuccess = 5;
             this.successMessage = "Artist created.";
+            this.saving = false;
           })
           .catch((e) => {
+            this.saving = false;
             this.showError = true;
             if (e.response && e.response.data && e.response.data.errors) {
               this.errorMessage = e.response.data.errors[0].detail;
