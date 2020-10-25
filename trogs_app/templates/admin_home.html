@@ -12,12 +12,26 @@
 />
 {% endblock %} {% block content %}
 
-<div>{{ session['profile']['email']}}</div>
-
-{% raw %}
-
 <section id="app">
-  <router-view></router-view>
+  <b-container>
+    <b-row>
+      <b-col>
+        {{ session['profile']['email']}}{% raw %}
+      </b-col>
+    </b-row>
+    <b-row>
+      <b-col>
+        <b-breadcrumb>
+           <b-breadcrumb-item to="/">My Artists</b-breadcrumb-item> 
+        </b-breadcrumb>
+      </b-col>
+    </b-row>
+    <b-row>
+      <b-col>
+        <router-view></router-view>
+      </b-col>
+    </b-row>
+  </b-container>
 </section>
 
 <component id="ArtistList" style="display: none">
@@ -68,90 +82,105 @@
       @dismissed="showError=false"
       >{{errorMessage}}</b-alert
     >
-    <p><router-link to="/"><- Back to My Artists</router-link></p>
+   
 
-    <div v-if="editing">
-      <h1 v-if="$route.params.id === 'new'">Add a new artist</h1>
-      <div>
-        <div><label for="artist-name">Artist Name</label></div>
-        <input v-model="artist.attributes.name" id="artist-name" />
-      </div>
-      <div>
-        <div><label for="artist-bio">Bio</label></div>
-        <textarea v-model="artist.attributes.bio" id="artist-bio"></textarea>
-      </div>
-      <div>
-        <b-button variant="primary" v-on:click="save()" :disabled="saving">
-          <b-spinner small v-if="saving"></b-spinner>
-         {{ saving ? "Saving..." : "Save"}}
-        </b-button>
-
-        <b-button v-on:click="cancel()">Cancel</b-button>
-      </div>
-    </div>
-
-    <div v-if="!editing">
-      <div>
-        <h1>{{artist.attributes.name}}</h1>
-        <p>{{artist.attributes.bio}}</p>
-        <div>
-          <b-button variant="primary" v-on:click="edit()">Edit</b-button>
-        </div>
-      </div>
-      <div>
-        <img
-          v-if="artist.attributes.profile_image_url"
-          :src="artist.attributes.profile_image_url"
-          width="300"
-        />
-        <div
-          v-if="!artist.attributes.profile_image_url"
-          class="placeholder box300"
-        ></div>
-        <div>
-          <div>
-            <b-form-file
-              v-model="fileToUpload"
-              size="sm"
-              placeholder=""
-              browse-text="Change Picture"
-              style="width: 300px"
-              id="file"
-              ref="file"
-              accept=".jpg"
-              v-on:input="handleFileUpload()"
-            ></b-form-file>
-            <div v-show="uploading">
-              <b-spinner small></b-spinner>
-              Saving picture...
-              <progress max="100" :value.prop="uploadPercentage"></progress>
+    <b-container v-if="editing">
+      <b-row>
+          <b-col>
+            <h1 v-if="$route.params.id === 'new'">Add a new artist</h1>
+            <div>
+              <div><label for="artist-name">Artist Name</label></div>
+              <input v-model="artist.attributes.name" id="artist-name" />
             </div>
+            <div>
+              <div><label for="artist-bio">Bio</label></div>
+              <textarea v-model="artist.attributes.bio" id="artist-bio"></textarea>
+            </div>
+            <div>
+              <b-button variant="primary" v-on:click="save()" :disabled="saving">
+                <b-spinner small v-if="saving"></b-spinner>
+              {{ saving ? "Saving..." : "Save"}}
+              </b-button>
+
+              <b-button v-on:click="cancel()">Cancel</b-button>
+            </div>
+        </b-col>
+      </b-row>
+    </b-container>
+
+    <b-container v-if="!editing">
+      <b-row class="mb-2">
+        <b-col>
+          <h1>{{artist.attributes.name}}</h1>
+          <p>{{artist.attributes.bio}}</p>
+          <div>
+            <b-button variant="primary" v-on:click="edit()">Edit</b-button>
           </div>
-        </div>
-      </div>
-    </div>
+        </b-col>
+      </b-row >
+      <b-row>
+        <b-col>
+          
+            <img
+              v-if="artist.attributes.profile_image_url"
+              :src="artist.attributes.profile_image_url"
+              width="300"
+            />
+            <div
+              v-if="!artist.attributes.profile_image_url"
+              class="placeholder box300"
+            ></div>
+            <div>
+              <div>
+                <b-form-file
+                  v-model="fileToUpload"
+                  size="sm"
+                  placeholder=""
+                  browse-text="Change Picture"
+                  style="width: 300px"
+                  id="file"
+                  ref="file"
+                  accept=".jpg"
+                  v-on:input="handleFileUpload()"
+                ></b-form-file>
+                <div v-show="uploading">
+                  <b-spinner small></b-spinner>
+                  Saving picture...
+                  <progress max="100" :value.prop="uploadPercentage"></progress>
+                </div>
+              </div>
+            </div>
+         
+        </b-col>
+      </b-row>
+    </b-container>
 
-    <div v-if="$route.params.id !== 'new'">
-      <div>
-        <h3>
-          <router-link :to="`/artist/${artist.id}/albums`">Albums</router-link>
-        </h3>
-        <h3>
-          <router-link :to="`/artist/${artist.id}/singles`"
-            >Singles</router-link
-          >
-        </h3>
-        <h3>
-          <router-link :to="`/artist/${artist.id}/featured`"
-            >Featured Tracks</router-link
-          >
-        </h3>
+    <b-container v-if="$route.params.id !== 'new'">
+      <b-row>
+        <b-col>
+          <h3>
+            <router-link :to="`/artist/${artist.id}/albums`">Albums</router-link>
+          </h3>
+          <h3>
+            <router-link :to="`/artist/${artist.id}/singles`"
+              >Singles</router-link
+            >
+          </h3>
+          <h3>
+            <router-link :to="`/artist/${artist.id}/featured`"
+              >Featured Tracks</router-link
+            >
+          </h3>
 
-        <div>
-          <b-button variant="danger" size="sm">Delete</b-button>
-        </div>
-      </div>
-    </div>
+          <div class="mt-4">
+ 
+             <b-button variant="danger" size="sm">Delete</b-button>
+
+            
+          </div>
+        </b-col>
+      </b-row>
+    </b-container>
   </div>
 </component>
 
@@ -319,7 +348,9 @@
   new Vue({
     router,
     el: "#app",
-    data: {},
+    data: {
+     
+    }
   });
 </script>
 
