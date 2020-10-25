@@ -97,17 +97,53 @@ def add_my_artist():
     return J(data)
 
 
-@current_app.route('/api/v1/me/artists/<artist_id>/image', methods=['POST'])
+@current_app.route('/api/v1/me/artists/<artist_id>', methods=['PATCH'])
 @auth.requires_auth
-def add_image(artist_id):
+def edit_my_artist(artist_id):
 
-    if 'image_file' not in request.files:
-        return J(to_error_object('no image_file posted')), 400
+    # load data and schema-validate
+    schema = ArtistSchema()
+    input_data = request.get_json() or {}
+    try:
+        data = schema.load(input_data)
+    except ValidationError as err:
+        return J(err.messages), 422
 
+    # get artist
     artist = admin.artists.by_id_for_owner(artist_id, current_user_email())
     if not artist:
         raise Forbidden
 
+    # save
+    try:
+        artist = admin.artists.update(artist, data)
+    except admin.artists.NameIsTaken as err:
+        return J(to_error_object(err.message)), 422
+
+    # return result
+    artist.profile_image_url = get_resized_image_url(
+        artist.image_url, '300')
+    data = schema.dump(artist)
+    return J(data)
+
+
+
+@current_app.route('/api/v1/me/artists/<artist_id>/image', methods=['POST'])
+@auth.requires_auth
+def add_image(artist_id):
+
+    # validate posted data
+    if 'image_file' not in request.files:
+        return J(to_error_object('no image_file posted')), 400
+
+    # todo VERIFY jpeg
+
+    # get artist
+    artist = admin.artists.by_id_for_owner(artist_id, current_user_email())
+    if not artist:
+        raise Forbidden
+
+    # persist image
     file_data = request.files['image_file']
     object_name = 'art/{0}/{1}.jpg'.format(
         artist.id, ids.new_id())
@@ -115,11 +151,12 @@ def add_image(artist_id):
     if artist.image_url:
         admin.files.delete(artist.image_url)
 
+    # update artist with new image_url
     admin.artists.update_image_url(artist_id, object_name)
 
+    # return entity with new profile_url
     artist.profile_image_url = get_resized_image_url(
         object_name, '300')
-
     data = ArtistSchema().dump(artist)
     return J(data)
 

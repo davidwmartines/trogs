@@ -109,6 +109,49 @@ def create(data):
     return artist
 
 
+
+def update(artist, data):
+    """
+    Updates attributes of the artist from the supplied data.
+
+    Parameters
+    ----------
+    artist: Artist
+        The Artist instance to update.
+    data: dict
+        Dictionary of attribute values.
+
+    Returns
+    -------
+        The modified Artist instance.
+    """
+    print('updating artist', artist.id)
+
+    # if neither of these attributes changed, just return
+    if data['name'] == artist.name and data["bio"] == artist.bio:
+        return artist
+
+   
+    if data['name'] == artist.name:
+        # just update bio
+        table = db.get_table()
+
+        table.update_item(
+            Key={
+                'PK': artist.id,
+                'SK': artist.id
+            },
+            UpdateExpression='set Bio = :bio',
+            ExpressionAttributeValues={
+                ':bio': data["bio"]
+            }
+        )
+        artist.bio = data['bio']
+        return artist
+    else:
+        raise Exception("can't change artist names yet.")
+
+
 def update_image_url(artist_id, image_url):
     print('updating image url', artist_id, image_url)
     table = db.get_table()
@@ -120,8 +163,7 @@ def update_image_url(artist_id, image_url):
         UpdateExpression='set ImageURL = :image_url',
         ExpressionAttributeValues={
             ':image_url': image_url
-        },
-        ReturnValues='UPDATED_NEW'
+        }
     )
     print('done')
 

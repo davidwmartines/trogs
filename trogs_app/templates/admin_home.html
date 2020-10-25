@@ -66,36 +66,6 @@
         </b-col>
       </b-row>
     </b-container>
-   
-<!-- 
-    <div>
-      <div v-for="artist in artists" :key="artist.id">
-        <router-link :to="`/artist/${artist.id}`">
-          <div class="list_box">
-            <div class="image_box">
-              <img
-                v-if="artist.attributes.thumbnail_image_url"
-                :src="artist.attributes.thumbnail_image_url"
-                width="50"
-                height="50"
-              />
-
-              <div
-                v-if="!artist.attributes.thumbnail_image_url"
-                class="placeholder box50"
-              ></div>
-            </div>
-            <div class="title_box">
-              <p>{{artist.attributes.name}}</p>
-            </div>
-          </div>
-        </router-link>
-      </div>
-    </div>
-
-    <div>
-      <router-link to="/artist/new"> + Add</router-link>
-    </div> -->
   </div>
 </component>
 
@@ -120,14 +90,14 @@
             <h1 v-if="$route.params.id === 'new'">Add a new artist</h1>
             <div>
               <div><label for="artist-name">Artist Name</label></div>
-              <input v-model="artist.attributes.name" id="artist-name" />
+              <input v-model="artist.attributes.name" id="artist-name" :disabled="$route.params.id !== 'new'" />
             </div>
             <div>
               <div><label for="artist-bio">Bio</label></div>
               <textarea v-model="artist.attributes.bio" id="artist-bio"></textarea>
             </div>
             <div>
-              <b-button variant="primary" v-on:click="save()" :disabled="saving">
+              <b-button variant="primary" v-on:click="saveFunction" :disabled="saving">
                 <b-spinner small v-if="saving"></b-spinner>
               {{ saving ? "Saving..." : "Save"}}
               </b-button>
@@ -253,6 +223,9 @@
         uploadPercentage: 0,
         uploading: false,
         saving: false,
+        saveFunction: this.create,
+        origName: '',
+        origBio: '',
         artist: {
           id: "",
           type: "artist",
@@ -267,8 +240,13 @@
       } else {
         axios
           .get(`/api/v1/me/artists/${this.$route.params.id}`)
-          .then((response) => (this.artist = response.data.data))
+          .then((response) => {
+            this.artist = response.data.data;
+            this.origBio = this.artist.attributes.bio;
+            this.origName = this.artist.attributes.name
+          })
           .catch((e) => console.error(e));
+          this.saveFunction = this.update;
       }
     },
     methods: {
@@ -279,6 +257,9 @@
         this.editing = false;
         if (this.$route.params.id === "new") {
           router.push("/");
+        } else {
+          this.artist.attributes.name = this.origName;
+          this.artist.attributes.bio = this.origBio;
         }
       },
       handleFileUpload() {
@@ -322,10 +303,10 @@
             }
           });
       },
-      save() {
-        console.log("saving");
+      create() {
+        console.log("creating");
         this.saving = true;
-        postData = {
+        const postData = {
           data: {
             type: "artist",
             attributes: {
@@ -338,10 +319,44 @@
           .post("/api/v1/me/artists", postData)
           .then((response) => {
             this.artist = response.data.data;
+            this.origBio = this.artist.attributes.bio;
+            this.origName = this.artist.attributes.name
             this.editing = false;
             router.push(`/artist/${response.data.data.id}`);
             this.showSuccess = 5;
             this.successMessage = "Artist created.";
+            this.saving = false;
+            this.saveFunction = this.update;
+          })
+          .catch((e) => {
+            this.saving = false;
+            this.showError = true;
+            if (e.response && e.response.data && e.response.data.errors) {
+              this.errorMessage = e.response.data.errors[0].detail;
+            } else {
+              this.errorMessage = e;
+            }
+          });
+      },
+      update() {
+        console.log("updating");
+        this.saving = true;
+        const patchData = {
+          data: {
+            type: "artist",
+            attributes: {
+              name: this.artist.attributes.name,
+              bio: this.artist.attributes.bio,
+            },
+          },
+        };
+        axios
+          .patch(`/api/v1/me/artists/${this.$route.params.id}`, patchData)
+          .then((response) => {
+            this.artist = response.data.data;
+            this.editing = false;
+            this.showSuccess = 5;
+            this.successMessage = "Artist updated.";
             this.saving = false;
           })
           .catch((e) => {
