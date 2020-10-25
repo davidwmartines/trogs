@@ -2,9 +2,10 @@
 <html lang="">
     <head>
         <meta charset="utf-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
         <link href='https://fonts.googleapis.com/css?family=Capriola' rel='stylesheet'>
         <link href='https://fonts.googleapis.com/css?family=Calistoga' rel='stylesheet'>
+        {% block head %}{% endblock %}
         <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='theme-default.css')}}" />
         <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='site.css')}}" />
         <title>{% block title %}{% endblock %}</title>

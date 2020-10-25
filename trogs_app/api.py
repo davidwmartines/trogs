@@ -66,7 +66,7 @@ def my_artist_by_id(id):
         raise NotFound
 
     artist.profile_image_url = get_resized_image_url(
-        artist.image_url, '300x300', fill=1)
+        artist.image_url, '300')
     data = ArtistSchema().dump(artist)
     return data
 
@@ -117,7 +117,7 @@ def add_image(artist_id):
     admin.artists.update_image_url(artist_id, object_name)
 
     artist.profile_image_url = get_resized_image_url(
-        object_name, '300x300', fill=1)
+        object_name, '300')
 
     data = ArtistSchema().dump(artist)
     return J(data)

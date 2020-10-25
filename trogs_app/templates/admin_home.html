@@ -1,5 +1,13 @@
 {% extends "layout.html" %} {% block title %} Create on MushMud {% endblock %}
-{% block content %} {{ session['profile']['email']}} {% raw %}
+{% block head %}
+<link type="text/css" rel="stylesheet" href="https://unpkg.com/bootstrap/dist/css/bootstrap.min.css"/>
+<link type="text/css" rel="stylesheet" href="https://unpkg.com/bootstrap-vue@latest/dist/bootstrap-vue.min.css"/>
+{% endblock %}
+{% block content %} 
+
+<div>{{ session['profile']['email']}} </div>
+
+{% raw %}
 
 <section id="app">
   <router-view></router-view>
@@ -49,8 +57,9 @@
         <textarea v-model="artist.attributes.bio" id="artist-bio"></textarea>
       </div>
       <div>
-        <button v-on:click="save()">Save</button>
-        <button v-on:click="cancel()">Cancel</button>
+        <b-button variant="primary" v-on:click="save()">Save</b-button>
+
+        <b-button v-on:click="cancel()">Cancel</b-button>
       </div>
     </div>
 
@@ -59,18 +68,20 @@
         <h1>{{artist.attributes.name}}</h1>
         <p>{{artist.attributes.bio}}</p>
         <div>
-          <button v-on:click="edit()">Edit</button>
+          <b-button v-on:click="edit()">Edit</b-button>
         </div>
       </div>
       <div>
-        <img v-if="artist.attributes.profile_image_url" :src="artist.attributes.profile_image_url" width="300" height="300">
+        <img v-if="artist.attributes.profile_image_url" :src="artist.attributes.profile_image_url" width="300">
         <div v-if="!artist.attributes.profile_image_url" class="placeholder box300"></div>
         <div>
-          <button v-if="!editingImage" v-on:click="editImage()">Change Image</button>
-          <div v-if="editingImage">
-            <input type="file"  id="file"  ref="file" v-on:change="handleFileUpload()"/>
-            <button v-on:click="saveImage">Save</button>
-            <button v-on:click="cancelEditImage()">Cancel</button>
+          <div>
+            <b-form-file v-model="file" size="sm" placeholder="" browse-text="Change Picture" style="width:300px;" id="file" ref="file" accept=".jpg" v-on:input="handleFileUpload()"></b-form-file>
+            <div v-show="uploading">
+              Uploading
+              <progress max="100" :value.prop="uploadPercentage"  ></progress>
+            </div>
+           
           </div>
         </div>
       </div>
@@ -94,7 +105,7 @@
         </h3>
 
         <div>
-          <a href="#">Delete</a>
+          <b-button variant="danger" size="sm">Delete</b-button>
         </div>
       </div>
     </div>
@@ -104,9 +115,11 @@
 {% endraw %} {% endblock %} {% block scripts %} {% if env == 'development' %}
 <script src="https://cdn.jsdelivr.net/npm/vue@2.6.12/dist/vue.js"></script>
 <script src="https://unpkg.com/vue-router/dist/vue-router.js"></script>
+<script src="https://unpkg.com/bootstrap-vue@latest/dist/bootstrap-vue.js"></script>
 {% else %}
 <script src="https://cdn.jsdelivr.net/npm/vue@2.6.12/dist/vue.min.js"></script>
 <script src="https://unpkg.com/vue-router/dist/vue-router.min.js"></script>
+<script src="https://unpkg.com/bootstrap-vue@latest/dist/bootstrap-vue.min.js"></script>
 {% endif %}
 <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
 <script>
@@ -130,8 +143,9 @@
     data: function () {
       return {
         editing: false,
-        editingImage: false,
-        file: "",
+        file: null,
+        uploadPercentage: 0,
+        uploading: false,
         artist: { id: "", type: "artist", attributes: { name: "", bio: "", image_url: "" } },
       };
     },
@@ -157,7 +171,34 @@
         }
       },
       handleFileUpload() {
-        this.file = this.$refs.file.files[0];
+        //this.file = this.$refs.file.value;
+        if(!this.file){
+          console.log('no file selected');
+          return;
+        }
+        this.uploading = true;
+        const formData = new FormData();
+        formData.append("image_file", this.file);
+        axios
+          .post(`/api/v1/me/artists/${this.artist.id}/image`, formData, {
+            headers: {
+              "Content-Type": "multipart/form-data",
+            },
+            onUploadProgress: function( progressEvent ) {
+              this.uploadPercentage = parseInt(Math.round((progressEvent.loaded / progressEvent.total) * 80 ));
+            }.bind(this)
+          })
+          .then((response) => {
+            this.file = null;
+            this.uploading = false;
+            this.$refs.file.reset();
+            this.uploadPercentage = 0;
+            this.artist.attributes.profile_image_url = response.data.data.attributes.profile_image_url;
+          })
+          .catch((e) => {
+            console.error(e);
+            this.uploading = false;
+          });
       },
       save() {
         console.log("saving");
@@ -186,24 +227,7 @@
         this.editingImage = false;
       },
       saveImage(){
-        if(!this.file){
-          console.log('no file selected');
-          this.editingImage = false;
-          return;
-        }
-        const formData = new FormData();
-        formData.append("image_file", this.file);
-        axios
-          .post(`/api/v1/me/artists/${this.artist.id}/image`, formData, {
-            headers: {
-              "Content-Type": "multipart/form-data",
-            },
-          })
-          .then((response) => {
-            this.editingImage =false;
-            this.artist.attributes.profile_image_url = response.data.data.attributes.profile_image_url;
-          })
-          .catch((e) => console.error(e)); 
+         
       }
     },
     template: "#ArtistDetail",
