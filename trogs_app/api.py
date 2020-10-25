@@ -17,9 +17,9 @@ import ids
 class ArtistSchema(Schema):
     id = fields.Str(dump_only=True)
     name = fields.Str(required=True)
-    owner = fields.Str(required=True)
-    image_url = fields.Str()
     bio = fields.Str()
+    profile_image_url = fields.Str(dump_only=True)
+    thumbnail_image_url = fields.Str(dump_only=True)
 
     class Meta:
         type_ = "artist"
@@ -38,11 +38,21 @@ def current_user_email():
     return session['profile']['email']
 
 
+def get_resized_image_url(path, dim, **kwargs):
+    if not path:
+        return ''
+
+    return current_app.resize(path, dim, **kwargs)
+
+
 @current_app.route('/api/v1/me/artists')
 @auth.requires_auth
 def my_artists():
     owner = current_user_email()
     artists = admin.artists.list_for_owner(owner)
+    for artist in artists:
+        artist.thumbnail_image_url = get_resized_image_url(
+            artist.image_url, '50x50')
     data = ArtistSchema(many=True).dump(artists)
     return data
 
@@ -55,6 +65,8 @@ def my_artist_by_id(id):
     if artist is None:
         raise NotFound
 
+    artist.profile_image_url = get_resized_image_url(
+        artist.image_url, '300x300', fill=1)
     data = ArtistSchema().dump(artist)
     return data
 
@@ -62,40 +74,52 @@ def my_artist_by_id(id):
 @current_app.route('/api/v1/me/artists', methods=['POST'])
 @auth.requires_auth
 def add_my_artist():
+
+    # load data and schema-validate
     schema = ArtistSchema()
-
-    input_data = json.loads(request.form['data']) or {}
-    input_data["data"]["attributes"]["owner"] = current_user_email()
-
-    # id should be dump_only, so if client sends it, ignore it
-    del input_data["data"]["id"]
-
-    # do not take image_url as input... must be set server-side based on uploaded file
-    input_data["data"]["attributes"]["image_url"] = ""
-
-    artist_id = ids.new_id()
-
-    if 'image_file' in request.files:
-        safe_name = admin.names.safe_obj_name(
-            input_data["data"]["attributes"]["name"])
-        file_data = request.files['image_file']
-        object_name = 'art/{0}-{1}/{1}.jpg'.format(artist_id, safe_name)
-        admin.files.save(file_data, object_name, content_type='image/jpeg')
-        input_data["data"]["attributes"]["image_url"] = object_name
-
-    print("input_data", input_data)
-
+    input_data = request.get_json() or {}
     try:
         data = schema.load(input_data)
     except ValidationError as err:
         return J(err.messages), 422
 
+    # set owner
+    data['owner'] = current_user_email()
+
+    # save
     try:
-        artist = admin.artists.create(data, artist_id)
+        artist = admin.artists.create(data)
     except admin.artists.NameIsTaken as err:
         return J(to_error_object(err.message)), 422
 
+    # return result
     data = schema.dump(artist)
+    return J(data)
+
+
+@current_app.route('/api/v1/me/artists/<artist_id>/image', methods=['POST'])
+@auth.requires_auth
+def add_image(artist_id):
+    if 'image_file' not in request.files:
+        return J(to_error_object('no image_file posted')), 400
+
+    artist = admin.artists.by_id_for_owner(artist_id, current_user_email())
+    if not artist:
+        raise Forbidden
+
+    file_data = request.files['image_file']
+    object_name = 'art/{0}/{1}.jpg'.format(
+        artist.id, ids.new_id())
+    admin.files.save(file_data, object_name, content_type='image/jpeg')
+    if artist.image_url:
+        admin.files.delete(artist.image_url)
+
+    admin.artists.update_image_url(artist_id, object_name)
+
+    artist.profile_image_url = get_resized_image_url(
+        object_name, '300x300', fill=1)
+
+    data = ArtistSchema().dump(artist)
     return J(data)
 
 

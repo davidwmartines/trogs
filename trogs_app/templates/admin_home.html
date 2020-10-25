@@ -11,9 +11,20 @@
 
     <div>
       <div v-for="artist in artists" :key="artist.id">
-        <router-link :to="`/artist/${artist.id}`"
-          >{{ artist.attributes.name}}</router-link
-        >
+        <router-link :to="`/artist/${artist.id}`">
+          
+          <div class="list_box">
+            <div class="image_box">
+               
+                <img v-if="artist.attributes.thumbnail_image_url" :src="artist.attributes.thumbnail_image_url" width="50" height="50">
+
+                <div v-if="!artist.attributes.thumbnail_image_url"  class="placeholder box50"></div>
+            </div>
+            <div class="title_box">
+                <p>{{artist.attributes.name}}</p>
+            </div>
+        </div>
+      </router-link>
       </div>
     </div>
 
@@ -28,7 +39,7 @@
     <p><router-link to="/"><- Back to My Artists</router-link></p>
 
     <div v-if="editing">
-      <h1>Add a new artist</h1>
+      <h1 v-if="$route.params.id === 'new'">Add a new artist</h1>
       <div>
         <div><label for="artist-name">Artist Name</label></div>
         <input v-model="artist.attributes.name" id="artist-name" />
@@ -38,27 +49,32 @@
         <textarea v-model="artist.attributes.bio" id="artist-bio"></textarea>
       </div>
       <div>
-        <div><label for="file">Image</label></div>
-        <input
-          type="file"
-          id="file"
-          ref="file"
-          v-on:change="handleFileUpload()"
-        />
-      </div>
-      <div>
         <button v-on:click="save()">Save</button>
         <button v-on:click="cancel()">Cancel</button>
       </div>
     </div>
+
     <div v-if="!editing">
       <div>
         <h1>{{artist.attributes.name}}</h1>
         <p>{{artist.attributes.bio}}</p>
+        <div>
+          <button v-on:click="edit()">Edit</button>
+        </div>
       </div>
       <div>
-        <button v-on:click="edit()">Edit</button>
+        <img v-if="artist.attributes.profile_image_url" :src="artist.attributes.profile_image_url" width="300" height="300">
+        <div v-if="!artist.attributes.profile_image_url" class="placeholder box300"></div>
+        <div>
+          <button v-if="!editingImage" v-on:click="editImage()">Change Image</button>
+          <div v-if="editingImage">
+            <input type="file"  id="file"  ref="file" v-on:change="handleFileUpload()"/>
+            <button v-on:click="saveImage">Save</button>
+            <button v-on:click="cancelEditImage()">Cancel</button>
+          </div>
+        </div>
       </div>
+      
     </div>
 
     <div v-if="$route.params.id !== 'new'">
@@ -114,6 +130,7 @@
     data: function () {
       return {
         editing: false,
+        editingImage: false,
         file: "",
         artist: { id: "", type: "artist", attributes: { name: "", bio: "", image_url: "" } },
       };
@@ -144,19 +161,17 @@
       },
       save() {
         console.log("saving");
-        const formData = new FormData();
-        formData.append('data', JSON.stringify({ 
-          data: this.artist
-        }));
-        if (this.file) {
-          formData.append("image_file", this.file);
-        }
+        postData = { 
+          data: {
+            type: 'artist',
+            attributes: {
+               name: this.artist.attributes.name,
+               bio: this.artist.attributes.bio
+             }
+          }
+        };
         axios
-          .post("/api/v1/me/artists", formData, {
-            headers: {
-              "Content-Type": "multipart/form-data",
-            },
-          })
+          .post("/api/v1/me/artists", postData)
           .then((response) => {
             this.artist = response.data.data;
             this.editing = false;
@@ -164,6 +179,32 @@
           })
           .catch((e) => console.error(e));
       },
+      editImage(){
+        this.editingImage = true;
+      },
+      cancelEditImage(){
+        this.editingImage = false;
+      },
+      saveImage(){
+        if(!this.file){
+          console.log('no file selected');
+          this.editingImage = false;
+          return;
+        }
+        const formData = new FormData();
+        formData.append("image_file", this.file);
+        axios
+          .post(`/api/v1/me/artists/${this.artist.id}/image`, formData, {
+            headers: {
+              "Content-Type": "multipart/form-data",
+            },
+          })
+          .then((response) => {
+            this.editingImage =false;
+            this.artist.attributes.profile_image_url = response.data.data.attributes.profile_image_url;
+          })
+          .catch((e) => console.error(e)); 
+      }
     },
     template: "#ArtistDetail",
   };

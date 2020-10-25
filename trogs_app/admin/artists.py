@@ -1,7 +1,8 @@
-import ids
 import db
-from . import names
+import ids
 from boto3.dynamodb.conditions import Key
+
+from . import names
 
 
 class Model:
@@ -22,7 +23,10 @@ def item_to_artist(item):
         id=item['PK'],
         name=item['AA_SK'],
         bio=item.get('Bio', ''),
-        image_url=item.get('ImageURL', '')
+        normalized_name=item.get('NormalizedName'),
+        image_url=item.get('ImageURL'),
+        profile_image_url='',
+        thumbnail_image_url=''
     )
 
 
@@ -52,7 +56,7 @@ def list_for_owner(owner):
     table = db.get_table()
 
     res = table.query(
-        IndexName="IX_ARTISTS_BY_OWNER",
+        IndexName='IX_ARTISTS_BY_OWNER',
         KeyConditionExpression=Key('Owner').eq(owner)
     )
 
@@ -67,7 +71,7 @@ def by_id_for_owner(id, owner):
     table = db.get_table()
 
     res = table.query(
-        IndexName="IX_ARTISTS_BY_OWNER",
+        IndexName='IX_ARTISTS_BY_OWNER',
         KeyConditionExpression=Key('Owner').eq(owner)
         & Key('PK').eq(id)
     )
@@ -78,7 +82,7 @@ def by_id_for_owner(id, owner):
     return item_to_artist(res['Items'][0])
 
 
-def create(data, id=None):
+def create(data):
     """
     Creates a new artist from the supplied data, and saves to database.
 
@@ -86,18 +90,15 @@ def create(data, id=None):
     ----------
     data: dict
         Dictionary of attribute values.
-    
-    id: str
-        Option ID to use, otherwise generated.
 
     Returns
     -------
         The new Artist instance.
     """
 
-    id = id or ids.new_id()
-    artist = Artist(id=id, **data)
+    artist = Artist(id=ids.new_id(), **data)
     artist.normalized_name = names.safe_obj_name(artist.name)
+    artist.image_url = ''
 
     if name_is_taken(artist.normalized_name):
         raise NameIsTaken
@@ -106,6 +107,23 @@ def create(data, id=None):
     table = db.get_table()
     table.put_item(Item=item)
     return artist
+
+
+def update_image_url(artist_id, image_url):
+    print('updating image url', artist_id, image_url)
+    table = db.get_table()
+    table.update_item(
+        Key={
+            'PK': artist_id,
+            'SK': artist_id
+        },
+        UpdateExpression='set ImageURL = :image_url',
+        ExpressionAttributeValues={
+            ':image_url': image_url
+        },
+        ReturnValues='UPDATED_NEW'
+    )
+    print('done')
 
 
 def name_is_taken(test_name, exclude_id=None):
@@ -128,9 +146,9 @@ def name_is_taken(test_name, exclude_id=None):
 
     table = db.get_table()
     result = table.query(
-        IndexName="IX_ARTISTS_NAMES",
+        IndexName='IX_ARTISTS_NAMES',
         KeyConditionExpression=Key('NormalizedName').eq(test_name)
-        )
+    )
 
     if len(result['Items']) == 0:
         return False
@@ -142,5 +160,4 @@ def name_is_taken(test_name, exclude_id=None):
 
 
 class NameIsTaken(Exception):
-    message ="Artist name is not available."
-    
+    message = 'Artist name is not available.'
