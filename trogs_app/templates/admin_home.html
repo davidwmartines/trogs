@@ -1,11 +1,18 @@
 {% extends "layout.html" %} {% block title %} Create on MushMud {% endblock %}
 {% block head %}
-<link type="text/css" rel="stylesheet" href="https://unpkg.com/bootstrap/dist/css/bootstrap.min.css"/>
-<link type="text/css" rel="stylesheet" href="https://unpkg.com/bootstrap-vue@latest/dist/bootstrap-vue.min.css"/>
-{% endblock %}
-{% block content %} 
+<link
+  type="text/css"
+  rel="stylesheet"
+  href="https://unpkg.com/bootstrap/dist/css/bootstrap.min.css"
+/>
+<link
+  type="text/css"
+  rel="stylesheet"
+  href="https://unpkg.com/bootstrap-vue@latest/dist/bootstrap-vue.min.css"
+/>
+{% endblock %} {% block content %}
 
-<div>{{ session['profile']['email']}} </div>
+<div>{{ session['profile']['email']}}</div>
 
 {% raw %}
 
@@ -20,19 +27,25 @@
     <div>
       <div v-for="artist in artists" :key="artist.id">
         <router-link :to="`/artist/${artist.id}`">
-          
           <div class="list_box">
             <div class="image_box">
-               
-                <img v-if="artist.attributes.thumbnail_image_url" :src="artist.attributes.thumbnail_image_url" width="50" height="50">
+              <img
+                v-if="artist.attributes.thumbnail_image_url"
+                :src="artist.attributes.thumbnail_image_url"
+                width="50"
+                height="50"
+              />
 
-                <div v-if="!artist.attributes.thumbnail_image_url"  class="placeholder box50"></div>
+              <div
+                v-if="!artist.attributes.thumbnail_image_url"
+                class="placeholder box50"
+              ></div>
             </div>
             <div class="title_box">
-                <p>{{artist.attributes.name}}</p>
+              <p>{{artist.attributes.name}}</p>
             </div>
-        </div>
-      </router-link>
+          </div>
+        </router-link>
       </div>
     </div>
 
@@ -44,6 +57,17 @@
 
 <component id="ArtistDetail" style="display: none">
   <div>
+    <b-alert :show="showSuccess" dismissible fade variant="success"
+    @dismissed="showSuccess=0"
+      >{{successMessage}}</b-alert
+    >
+    <b-alert
+      :show="showError"
+      dismissible
+      variant="danger"
+      @dismissed="showError=false"
+      >{{errorMessage}}</b-alert
+    >
     <p><router-link to="/"><- Back to My Artists</router-link></p>
 
     <div v-if="editing">
@@ -72,20 +96,35 @@
         </div>
       </div>
       <div>
-        <img v-if="artist.attributes.profile_image_url" :src="artist.attributes.profile_image_url" width="300">
-        <div v-if="!artist.attributes.profile_image_url" class="placeholder box300"></div>
+        <img
+          v-if="artist.attributes.profile_image_url"
+          :src="artist.attributes.profile_image_url"
+          width="300"
+        />
+        <div
+          v-if="!artist.attributes.profile_image_url"
+          class="placeholder box300"
+        ></div>
         <div>
           <div>
-            <b-form-file v-model="file" size="sm" placeholder="" browse-text="Change Picture" style="width:300px;" id="file" ref="file" accept=".jpg" v-on:input="handleFileUpload()"></b-form-file>
+            <b-form-file
+              v-model="fileToUpload"
+              size="sm"
+              placeholder=""
+              browse-text="Change Picture"
+              style="width: 300px"
+              id="file"
+              ref="file"
+              accept=".jpg"
+              v-on:input="handleFileUpload()"
+            ></b-form-file>
             <div v-show="uploading">
               Uploading
-              <progress max="100" :value.prop="uploadPercentage"  ></progress>
+              <progress max="100" :value.prop="uploadPercentage"></progress>
             </div>
-           
           </div>
         </div>
       </div>
-      
     </div>
 
     <div v-if="$route.params.id !== 'new'">
@@ -142,11 +181,19 @@
   const ArtistDetail = {
     data: function () {
       return {
+        showSuccess: 0,
+        successMessage: "",
+        errorMessage: "",
+        showError: false,
         editing: false,
-        file: null,
+        fileToUpload: null,
         uploadPercentage: 0,
         uploading: false,
-        artist: { id: "", type: "artist", attributes: { name: "", bio: "", image_url: "" } },
+        artist: {
+          id: "",
+          type: "artist",
+          attributes: { name: "", bio: "", image_url: "" },
+        },
       };
     },
     mounted() {
@@ -171,45 +218,56 @@
         }
       },
       handleFileUpload() {
-        //this.file = this.$refs.file.value;
-        if(!this.file){
-          console.log('no file selected');
+        if (!this.fileToUpload) {
+          console.log("no file selected");
           return;
         }
         this.uploading = true;
         const formData = new FormData();
-        formData.append("image_file", this.file);
+        formData.append("image_file", this.fileToUpload);
         axios
           .post(`/api/v1/me/artists/${this.artist.id}/image`, formData, {
             headers: {
               "Content-Type": "multipart/form-data",
             },
-            onUploadProgress: function( progressEvent ) {
-              this.uploadPercentage = parseInt(Math.round((progressEvent.loaded / progressEvent.total) * 80 ));
-            }.bind(this)
+            onUploadProgress: function (progressEvent) {
+              this.uploadPercentage = parseInt(
+                Math.round((progressEvent.loaded / progressEvent.total) * 80)
+              );
+            }.bind(this),
           })
           .then((response) => {
-            this.file = null;
             this.uploading = false;
+            this.uploadPercentage = 0;
             this.$refs.file.reset();
             this.uploadPercentage = 0;
-            this.artist.attributes.profile_image_url = response.data.data.attributes.profile_image_url;
+            this.artist.attributes.profile_image_url =
+              response.data.data.attributes.profile_image_url;
+            this.showSuccess = 5;
+            this.successMessage = "New picture saved.";
           })
           .catch((e) => {
-            console.error(e);
             this.uploading = false;
+            this.uploadPercentage = 0;
+            this.$refs.file.reset();
+            this.showError = true;
+            if (e.response && e.response.data && e.response.data.errors) {
+              this.errorMessage = e.response.data.errors[0].detail;
+            } else {
+              this.errorMessage = e;
+            }
           });
       },
       save() {
         console.log("saving");
-        postData = { 
+        postData = {
           data: {
-            type: 'artist',
+            type: "artist",
             attributes: {
-               name: this.artist.attributes.name,
-               bio: this.artist.attributes.bio
-             }
-          }
+              name: this.artist.attributes.name,
+              bio: this.artist.attributes.bio,
+            },
+          },
         };
         axios
           .post("/api/v1/me/artists", postData)
@@ -217,18 +275,18 @@
             this.artist = response.data.data;
             this.editing = false;
             router.push(`/artist/${response.data.data.id}`);
+            this.showSuccess = 5;
+            this.successMessage = "Artist created.";
           })
-          .catch((e) => console.error(e));
+          .catch((e) => {
+            this.showError = true;
+            if (e.response && e.response.data && e.response.data.errors) {
+              this.errorMessage = e.response.data.errors[0].detail;
+            } else {
+              this.errorMessage = e;
+            }
+          });
       },
-      editImage(){
-        this.editingImage = true;
-      },
-      cancelEditImage(){
-        this.editingImage = false;
-      },
-      saveImage(){
-         
-      }
     },
     template: "#ArtistDetail",
   };

@@ -100,6 +100,7 @@ def add_my_artist():
 @current_app.route('/api/v1/me/artists/<artist_id>/image', methods=['POST'])
 @auth.requires_auth
 def add_image(artist_id):
+
     if 'image_file' not in request.files:
         return J(to_error_object('no image_file posted')), 400
 
