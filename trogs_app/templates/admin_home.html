@@ -74,19 +74,8 @@
 
 <component id="ArtistDetail" style="display: none">
   <div>
-    <b-alert :show="showSuccess" dismissible fade variant="success"
-    @dismissed="showSuccess=0"
-      >{{successMessage}}</b-alert
-    >
-    <b-alert
-      :show="showError"
-      dismissible
-      variant="danger"
-      @dismissed="showError=false"
-      >{{errorMessage}}</b-alert
-    >
-   
-
+    <b-alert :show="showSuccess" dismissible fade variant="success" @dismissed="showSuccess=0" >{{successMessage}}</b-alert>
+    <b-alert :show="showError" dismissible variant="danger" @dismissed="showError=false">{{errorMessage}}</b-alert>
     <b-container v-if="editing">
       <b-row>
           <b-col>
