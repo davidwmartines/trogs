@@ -159,33 +159,25 @@
     </b-container>
 
     <b-container v-if="$route.params.id !== 'new'">
-      <b-row>
+      <b-row class="mt-4">
         <b-col>
-          <h3>
-            <router-link :to="`/artist/${artist.id}/albums`">Albums</router-link>
-          </h3>
+          <router-link :to="`/artist/${artist.id}/albums`">
+            <b-button block variant="outline-success">Albums</b-button>
+          </router-link>
         </b-col>
       </b-row>
-      <b-row>
+      <b-row class="mt-4">
         <b-col>
-
-      
-          <h3>
-            <router-link :to="`/artist/${artist.id}/singles`"
-              >Singles</router-link
-            >
-          </h3>
+          <router-link :to="`/artist/${artist.id}/featured`">
+            <b-button block variant="outline-success">Featured Tracks</b-button>
+          </router-link>
         </b-col>
       </b-row>
-      <b-row>
+      <b-row class="mt-4">
         <b-col>
-
-        
-          <h3>
-            <router-link :to="`/artist/${artist.id}/featured`"
-              >Featured Tracks</router-link
-            >
-          </h3>
+          <router-link :to="`/artist/${artist.id}/singles`">
+            <b-button block variant="outline-success">Singles</b-button>
+          </router-link>
         </b-col>
       </b-row>
       <b-row>
