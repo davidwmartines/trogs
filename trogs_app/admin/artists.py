@@ -187,8 +187,25 @@ def delete(artist):
         )
     else:
         # delete artist plus all content in transaction(s)
-        raise Exception(
-            'deleting artist plus existing content not implemented')
+
+        # content = artist, albums, singles
+        items_to_delete = content['Items']
+
+        # album tracks
+        for item in list(filter(lambda i: (i['AC_SK'].startswith('2')), content['Items'])):
+            album_content = table.query(
+                IndexName="IX_ARTISTS_ALBUMS",
+                ScanIndexForward=True,
+                KeyConditionExpression=Key('AA_PK').eq(item['AA_PK'])
+            )
+            #album content = album item plus track items
+            if len(album_content['Items']) > 1:
+                tracks = album_content['Items'][1:]
+                # get tracks from album not already in list to delete (if they were from the featured artist content)
+                non_featured_tracks = list(filter(lambda t: (not any(t['PK'] == d['PK'] for d in items_to_delete)), tracks))
+                items_to_delete.extend(non_featured_tracks)
+
+        db.transactionally_delete(items_to_delete)
 
 
 def name_is_taken(test_name, exclude_id=None):

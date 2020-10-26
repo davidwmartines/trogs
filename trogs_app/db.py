@@ -3,23 +3,51 @@ import os
 import boto3
 from botocore.exceptions import ClientError
 
+TABLE_NAME = 'art2'
 
-def init_table():
+
+def _init():
     if "AWS_ENDPOINT_URL" in os.environ:
-        dynamodb = boto3.resource(
+        res = boto3.resource(
+            'dynamodb', endpoint_url=os.environ["AWS_ENDPOINT_URL"])
+        client = boto3.client(
             'dynamodb', endpoint_url=os.environ["AWS_ENDPOINT_URL"])
     else:
-        dynamodb = boto3.resource("dynamodb")
-    table = dynamodb.Table("art2")
-    print('dynamodb table resource initialized')
-    return table
+        res = boto3.resource("dynamodb")
+        client = boto3.client("dynamodb")
+    table = res.Table(TABLE_NAME)
+    print('dynamodb table and client initialized')
+    return table, client
 
 
-_table = init_table()
+_table, _client = _init()
 
 
 def get_table():
     return _table
+
+
+def get_client():
+    return _client
+
+
+def transactionally_delete(items):
+    transact_items = []
+    for item in items:
+        transact_items.append({
+            'Delete': {
+                'Key': {
+                    'PK': {'S': item['PK']},
+                    'SK': {'S': item['SK']}
+                },
+                'TableName': TABLE_NAME
+            }
+        })
+    # TODO: loop to handle > 25 items
+    print('deleting {0} items'.format(len(transact_items)))
+    client = get_client()
+    res = client.transact_write_items(TransactItems=transact_items)
+    print(res)
 
 
 def handle_db_error(wrapped_function):
