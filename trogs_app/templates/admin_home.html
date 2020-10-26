@@ -328,11 +328,7 @@
             this.uploadPercentage = 0;
             this.$refs.file.reset();
             this.showError = true;
-            if (e.response && e.response.data && e.response.data.errors) {
-              this.errorMessage = e.response.data.errors[0].detail;
-            } else {
-              this.errorMessage = e;
-            }
+            this.errorMessage = parseAxiosError(e);
           });
       },
       create() {
@@ -362,11 +358,7 @@
           .catch((e) => {
             this.saving = false;
             this.showError = true;
-            if (e.response && e.response.data && e.response.data.errors) {
-              this.errorMessage = e.response.data.errors[0].detail;
-            } else {
-              this.errorMessage = e;
-            }
+            this.errorMessage = parseAxiosError(e);
           });
       },
       update() {
@@ -392,11 +384,7 @@
           .catch((e) => {
             this.saving = false;
             this.showError = true;
-            if (e.response && e.response.data && e.response.data.errors) {
-              this.errorMessage = e.response.data.errors[0].detail;
-            } else {
-              this.errorMessage = e;
-            }
+            this.errorMessage = parseAxiosError(e);
           });
       },
       deleteArtist(){
@@ -407,15 +395,19 @@
           .catch((e) => {
             this.deleting = false
             this.showError = true;
-            if (e.response && e.response.data && e.response.data.errors) {
-              this.errorMessage = e.response.data.errors[0].detail;
-            } else {
-              this.errorMessage = e;
-            }
+            this.errorMessage = parseAxiosError(e);
           });
       }
     },
     template: "#ArtistDetail",
+  };
+
+  const parseAxiosError = (e) => {
+    if (e.response && e.response.data && e.response.data.errors) {
+      return e.response.data.errors[0].detail;
+    } else {
+      return e;
+    }
   };
 
   const AlbumList = { template: "<div>albums</div>" };
