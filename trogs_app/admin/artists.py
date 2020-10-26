@@ -3,6 +3,7 @@ import ids
 from boto3.dynamodb.conditions import Key
 
 from . import names
+import datetime
 
 
 class Model:
@@ -44,7 +45,8 @@ def artist_to_item(artist):
         'AC_SK': '000',
         'Bio': artist.bio,
         'ImageURL': artist.image_url,
-        'NormalizedName': artist.normalized_name
+        'NormalizedName': artist.normalized_name,
+        'CreatedDate': datetime.datetime.utcnow().isoformat(timespec='seconds')
     }
 
 
