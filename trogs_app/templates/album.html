@@ -1,7 +1,13 @@
 {% extends "layout.html" %}
 
 {% block title %}
-{{album.artistName}} - {{album.title}}
+{{album.artist_name}} - {{album.title}}
+{% endblock %}
+
+{% block head %}
+<meta name="decription" content="{{album.title}} by {{album.artist_name}}" />
+<meta property="og:audio:artist" content="{{album.artist_name}}" />
+<meta property="og:audio:album" content="{{album.title}}" />
 {% endblock %}
 
 {% block content %}
@@ -34,7 +40,7 @@
           <a class="share" data-clipboard-text="{{ url_for('track', id=track.id) }}" href="{{ url_for('track', id=track.id) }}" title="share"></a>
         </h4>
         <div>
-          <audio id="track_{{loop.index0}}" controls><source src="{{track.audio_url}}"></audio>
+          <audio id="track_{{loop.index0}}" controls data-title="{{track.title}}"><source src="{{track.audio_url}}"></audio>
         </div>
       </div>
     {% endfor %}

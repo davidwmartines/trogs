@@ -4,6 +4,12 @@
 {{track.track_title}}
 {% endblock%}
 
+{% block head %}
+<meta name="decription" content="{{track.track_title}} by {{track.artist_name}}" />
+<meta property="og:audio:artist" content="{{track.artist_name}}" />
+<meta property="og:audio:title" content="{{track.track_title}}" />
+{% endblock %}
+
 {% block content %}
 
 <h1>{{track.track_title}}
@@ -22,13 +28,7 @@
   {% endif %}
 </p>
 
-{% if track.license|length %}
-<p class="license">
-  <a rel="license" href="http://creativecommons.org/licenses/{{track.license}}/4.0/" target="_blank">
-    <img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/{{track.license}}/4.0/80x15.png" /></a>
-    This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/{{track.license}}/4.0/" target="_blank">{{track.license_name}}</a>.
-  </p>
-{% endif %}
+
 <div class="playpause">
   <input type="checkbox" value="None" id="playpause" name="check" checked />
   <label for="playpause" tabindex="1"></label>
@@ -38,6 +38,13 @@
     <audio id="track_0" controls><source src="{{track.audio_url}}" /></audio>
   </div>  
 </div>
+{% if track.license|length %}
+<p class="license">
+  <a rel="license" href="http://creativecommons.org/licenses/{{track.license}}/4.0/" target="_blank">
+    <img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/{{track.license}}/4.0/80x15.png" /></a>
+    This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/{{track.license}}/4.0/" target="_blank">{{track.license_name}}</a>.
+  </p>
+{% endif %}
 {% endblock %}
 
 {% block scripts %}

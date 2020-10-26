@@ -7,7 +7,6 @@ a {
 a:link,
 a:visited {
   text-decoration: none;
-  color: blue;
 }
 nav {
   display: table;
