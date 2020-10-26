@@ -34,7 +34,7 @@
           <a class="share" data-clipboard-text="{{ url_for('track', id=track.id) }}" href="{{ url_for('track', id=track.id) }}" title="share"></a>
         </h4>
         <div>
-          <audio id="track_{{loop.index0}}" controls><source src="{{track.audio_url}}"></audio>
+          <audio id="track_{{loop.index0}}" controls data-title="{{track.title}}"><source src="{{track.audio_url}}"></audio>
         </div>
       </div>
     {% endfor %}

@@ -23,17 +23,10 @@
     <div class="trackbox">
         <p>
             <b>{{track.title}}</b>
-            <!-- {%if track.album_id is defined and track.album_id is not none %}
-            <span>from the album <a href="{{url_for('album', id=track.album_id)}}">{{track.album_title}}</a></span>
-            {% endif %}
-            {% if track.year is not none and track.year|length %}
-            •
-            {{track.year}}
-            {% endif %} -->
           <a class="share" data-clipboard-text="{{ url_for('track', id=track.id) }}" href="{{ url_for('track', id=track.id) }}"></a>
         </p>
         <div>
-            <audio id="track_{{loop.index0}}" controls><source src="{{track.audio_url}}"></audio>
+            <audio id="track_{{loop.index0}}" controls data-title="{{track.title}}"><source src="{{track.audio_url}}"></audio>
         </div>
         {% if track.license|length %}
         <p class="license">

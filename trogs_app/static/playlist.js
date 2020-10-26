@@ -5,13 +5,11 @@ $(() => {
   let currentTrackId = firstTrackId;
 
   const buttonPlaying = () => {
-    $("#playpause").prop("checked", false)
-      .next().attr('title', 'Stop');
+    $("#playpause").prop("checked", false).next().attr("title", "Stop");
   };
 
   const buttonPaused = () => {
-    $("#playpause").prop("checked", true)
-      .next().attr('title', 'Play');
+    $("#playpause").prop("checked", true).next().attr("title", "Play");
   };
 
   const getNextTrackId = (current) => {
@@ -31,6 +29,11 @@ $(() => {
 
     $(e.target).focus();
     $(e.target).parent().parent().addClass("currenttrack");
+
+    const title = $(e.target).attr("data-title");
+    if (title) {
+      document.title = title;
+    }
 
     // turn of all other tracks
     // note: need to use "function" syntax for proper "this" handling.
