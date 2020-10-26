@@ -23,6 +23,9 @@
           },
           "ReleaseDate": {
             "S": "1998-12-31"
+          },
+          "AudioURL":{
+            "S": "https://..."
           }
         }
       }
@@ -119,6 +122,9 @@
           },
           "AC_PK": {
             "S": "artist1"
+          },
+          "AudioURL":{
+            "S": "https://..."
           }
         }
       }
@@ -209,6 +215,9 @@
           },
           "AlbumTitle": {
             "S": "Revolver"
+          },
+          "AudioURL":{
+            "S": "https://..."
           }
         }
       }
