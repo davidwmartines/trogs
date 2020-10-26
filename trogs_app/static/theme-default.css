@@ -12,6 +12,9 @@ a:visited {
   color: #a7a6a6;
 }
 
+.inline_license_name:link, .inline_license_name:visited {
+  color: #a7a6a6;
+}
 .playpause label {
   border-color: transparent transparent transparent #242525;
 }
