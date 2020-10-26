@@ -42,6 +42,9 @@
           <h1>My Artists</h1>
         </b-col>
       </b-row>
+      <b-row v-if="loading">
+        <b-col><b-spinner variant="primary"></b-spinner></b-col>
+      </b-row>
       <b-row v-for="artist in artists" :key="artist.id" class="mb-2" align-v="center">
         <b-col col lg="1" class="pr-0">
           <router-link :to="`/artist/${artist.id}`">
@@ -198,14 +201,17 @@
   const ArtistList = {
     data: function () {
       return {
+        loading: true,
         artists: [],
       };
     },
     mounted() {
-      console.log("artist list mounted");
       axios
         .get("/api/v1/me/artists")
-        .then((response) => (this.artists = response.data.data))
+        .then((response) => {
+          this.artists = response.data.data;
+          this.loading = false;
+        })
         .catch((e) => console.error(e));
     },
     template: "#ArtistList",
@@ -234,7 +240,6 @@
       };
     },
     mounted() {
-      console.log("artist detail mounted", this.$route.params.id);
       if (this.$route.params.id === "new") {
         this.editing = true;
       } else {
@@ -264,7 +269,6 @@
       },
       handleFileUpload() {
         if (!this.fileToUpload) {
-          console.log("no file selected");
           return;
         }
         this.uploading = true;
@@ -304,7 +308,6 @@
           });
       },
       create() {
-        console.log("creating");
         this.saving = true;
         const postData = {
           data: {
@@ -339,7 +342,6 @@
           });
       },
       update() {
-        console.log("updating");
         this.saving = true;
         const patchData = {
           data: {
