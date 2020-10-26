@@ -145,8 +145,8 @@ def add_image(artist_id):
 
     # persist image
     file_data = request.files['image_file']
-    object_name = 'art/{0}/{1}.jpg'.format(
-        artist.id, ids.new_id())
+    object_name = 'art/{0}-{1}/{0}.jpg'.format(
+        artist.normalized_name, artist.id)
     admin.files.save(file_data, object_name, content_type='image/jpeg')
     if artist.image_url:
         admin.files.delete(artist.image_url)
