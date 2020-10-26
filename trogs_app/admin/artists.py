@@ -111,7 +111,6 @@ def create(data):
     return artist
 
 
-
 def update(artist, data):
     """
     Updates attributes of the artist from the supplied data.
@@ -133,7 +132,6 @@ def update(artist, data):
     if data['name'] == artist.name and data["bio"] == artist.bio:
         return artist
 
-   
     if data['name'] == artist.name:
         # just update bio
         table = db.get_table()
@@ -168,6 +166,29 @@ def update_image_url(artist_id, image_url):
         }
     )
     print('done')
+
+
+def delete(artist):
+    print('deleting artist', artist.id)
+
+    # get list of existing content
+    table = db.get_table()
+    content = table.query(
+        IndexName='IX_ARTIST_CONTENT',
+        ScanIndexForward=True,
+        KeyConditionExpression=Key('AC_PK').eq(artist.id)
+    )
+
+    # content response items includes one row for artist.
+    if len(content['Items']) == 1:
+        # no albums or singles... ok to just delete artist record.
+        table.delete_item(
+            Key={'PK': artist.id, 'SK': artist.id}
+        )
+    else:
+        # delete artist plus all content in transaction(s)
+        raise Exception(
+            'deleting artist plus existing content not implemented')
 
 
 def name_is_taken(test_name, exclude_id=None):

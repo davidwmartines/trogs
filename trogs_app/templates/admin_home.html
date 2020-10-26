@@ -52,7 +52,7 @@
             <div v-if="!artist.attributes.thumbnail_image_url" class="placeholder box50"></div>
           </router-link>
           </b-col>
-          <b-col cols="10" md="auto" class="pl-0">
+          <b-col cols="9" md="auto" class="pl-0">
             <router-link :to="`/artist/${artist.id}`">
               <p>{{artist.attributes.name}}</p>
             </router-link>
@@ -164,22 +164,48 @@
           <h3>
             <router-link :to="`/artist/${artist.id}/albums`">Albums</router-link>
           </h3>
+        </b-col>
+      </b-row>
+      <b-row>
+        <b-col>
+
+      
           <h3>
             <router-link :to="`/artist/${artist.id}/singles`"
               >Singles</router-link
             >
           </h3>
+        </b-col>
+      </b-row>
+      <b-row>
+        <b-col>
+
+        
           <h3>
             <router-link :to="`/artist/${artist.id}/featured`"
               >Featured Tracks</router-link
             >
           </h3>
-
-          <div class="mt-4">
- 
-             <b-button variant="danger" size="sm">Delete</b-button>
-
-            
+        </b-col>
+      </b-row>
+      <b-row>
+        <b-col>
+          <div class="mt-4 mb-4">
+            <b-button variant="outline-danger" size="sm" v-if="!confirmingDelete" @click="confirmingDelete = true">Delete</b-button>
+         
+            <b-alert variant="warning" :show="confirmingDelete">
+              <h5>Warning</h5>
+              <p>
+                Deleting will PERMANENTLY REMOVE the artist <b>{{artist.attributes.name}}</b> including ALL ALUBUMS, SINGLES and TRACKS.
+              </p>
+              <p>Are you sure?</p>
+              
+              <b-button variant="danger" @click="deleteArtist()" :disabled="deleting">
+                <b-spinner small v-if="deleting"></b-spinner>
+                {{ deleting ? "Deleting..." : "Yes, Delete"}}
+              </b-button>
+              <b-button @click="confirmingDelete = false" :disabled="deleting">Cancel</b-button>
+            </b-alert>
           </div>
         </b-col>
       </b-row>
@@ -230,6 +256,8 @@
         uploading: false,
         saving: false,
         saveFunction: this.create,
+        confirmingDelete: false,
+        deleting: false,
         origName: '',
         origBio: '',
         artist: {
@@ -371,6 +399,21 @@
             }
           });
       },
+      deleteArtist(){
+        this.deleting = true;
+        axios
+          .delete(`/api/v1/me/artists/${this.$route.params.id}`)
+          .then(() => router.push("/"))
+          .catch((e) => {
+            this.deleting = false
+            this.showError = true;
+            if (e.response && e.response.data && e.response.data.errors) {
+              this.errorMessage = e.response.data.errors[0].detail;
+            } else {
+              this.errorMessage = e;
+            }
+          });
+      }
     },
     template: "#ArtistDetail",
   };

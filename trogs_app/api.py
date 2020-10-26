@@ -160,6 +160,19 @@ def add_image(artist_id):
     data = ArtistSchema().dump(artist)
     return J(data)
 
+@current_app.route('/api/v1/me/artists/<artist_id>', methods=['DELETE'])
+@auth.requires_auth
+def delete_my_artist(artist_id):
+
+    # get artist
+    artist = admin.artists.by_id_for_owner(artist_id, current_user_email())
+    if not artist:
+        raise Forbidden
+
+    admin.artists.delete(artist)
+
+    return '', 204
+
 
 def to_error_object(message):
     """ make a JSONAPI error object from a single message string """
