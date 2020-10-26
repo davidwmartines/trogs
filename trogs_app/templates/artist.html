@@ -2,6 +2,10 @@
 {% block title %}
 {{artist.name}}
 {% endblock %}
+{% block head %}
+<meta property="og:audio:artist" content="{{artist.name}}" />
+<meta name="decription" content="{{artist.name}}" />
+{% endblock %}
 {% block content %}
 <h1>{{artist.name}}
     <a class="share" data-clipboard-text="{{ url_for('artist', id=artist.artistId) }}" href="#" title="share"></a>

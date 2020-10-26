@@ -1,7 +1,13 @@
 {% extends "layout.html" %}
 
 {% block title %}
-{{album.artistName}} - {{album.title}}
+{{album.artist_name}} - {{album.title}}
+{% endblock %}
+
+{% block head %}
+<meta name="decription" content="{{album.title}} by {{album.artist_name}}" />
+<meta property="og:audio:artist" content="{{album.artist_name}}" />
+<meta property="og:audio:album" content="{{album.title}}" />
 {% endblock %}
 
 {% block content %}

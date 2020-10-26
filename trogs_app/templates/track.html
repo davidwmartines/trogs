@@ -4,6 +4,12 @@
 {{track.track_title}}
 {% endblock%}
 
+{% block head %}
+<meta name="decription" content="{{track.track_title}} by {{track.artist_name}}" />
+<meta property="og:audio:artist" content="{{track.artist_name}}" />
+<meta property="og:audio:title" content="{{track.track_title}}" />
+{% endblock %}
+
 {% block content %}
 
 <h1>{{track.track_title}}
