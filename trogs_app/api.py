@@ -51,8 +51,11 @@ def my_artists():
     owner = current_user_email()
     artists = admin.artists.list_for_owner(owner)
     for artist in artists:
-        artist.thumbnail_image_url = get_resized_image_url(
-            artist.image_url, '50x50')
+        try:
+            artist.thumbnail_image_url = get_resized_image_url(
+                artist.image_url, '50x50')
+        except Exception as e:
+            print(e)
     data = ArtistSchema(many=True).dump(artists)
     return data
 
@@ -145,8 +148,8 @@ def add_image(artist_id):
 
     # persist image
     file_data = request.files['image_file']
-    object_name = 'art/{0}-{1}/{0}.jpg'.format(
-        artist.normalized_name, artist.id)
+    object_name = 'art/{0}-{1}/{0}-{2}.jpg'.format(
+        artist.normalized_name, artist.id, ids.new_id()[:8])
     admin.files.save(file_data, object_name, content_type='image/jpeg')
     if artist.image_url:
         admin.files.delete(artist.image_url)
