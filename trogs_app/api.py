@@ -7,6 +7,7 @@ from marshmallow_jsonapi import fields
 from marshmallow_jsonapi.flask import Relationship, Schema
 from werkzeug.exceptions import Forbidden, NotFound, UnprocessableEntity
 
+import admin.albums
 import admin.artists
 import admin.files
 import admin.names
@@ -24,6 +25,18 @@ class ArtistSchema(Schema):
     class Meta:
         type_ = "artist"
 
+
+class AlbumSchema(Schema):
+    id = fields.Str(dump_only=True)
+    title = fields.Str(required=True)
+    release_date = fields.Str(required=True)
+    sort = fields.Int(dump_only=True)
+    profile_image_url = fields.Str(dump_only=True)
+    thumbnail_image_url = fields.Str(dump_only=True)
+
+    class Meta:
+        type_ = "album"
+        
 
 def J(*args, **kwargs):
     """Wrapper around jsonify that sets the Content-Type of the response to
@@ -163,6 +176,7 @@ def add_image(artist_id):
     data = ArtistSchema().dump(artist)
     return J(data)
 
+
 @current_app.route('/api/v1/me/artists/<artist_id>', methods=['DELETE'])
 @auth.requires_auth
 def delete_my_artist(artist_id):
@@ -175,6 +189,26 @@ def delete_my_artist(artist_id):
     admin.artists.delete(artist)
 
     return '', 204
+
+
+@current_app.route('/api/v1/me/artists/<artist_id>/albums')
+@auth.requires_auth
+def list_my_artist_albums(artist_id):
+
+    # get artist
+    artist = admin.artists.by_id_for_owner(artist_id, current_user_email())
+    if not artist:
+        raise Forbidden
+
+    albums = admin.albums.list_for_artist(artist_id)
+    for album in albums:
+        try:
+            album.thumbnail_image_url = get_resized_image_url(
+                album.image_url, '80x80')
+        except Exception as e:
+            print(e)
+    data = AlbumSchema(many=True).dump(albums)
+    return data
 
 
 def to_error_object(message):

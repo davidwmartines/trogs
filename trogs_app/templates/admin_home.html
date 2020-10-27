@@ -199,6 +199,44 @@
   </div>
 </component>
 
+<component id="AlbumList" style="display: none">
+  <div>
+    <b-container>
+      <b-row>
+        <b-col>
+          <h2>Albums</h2>
+        </b-col>
+      </b-row>
+      <b-row v-if="loading">
+        <b-col><b-spinner variant="primary"></b-spinner></b-col>
+      </b-row>
+      <b-row v-for="album in albums" :key="album.id" class="mb-2" align-v="center">
+        <b-col col lg="1" class="pr-0">
+          <router-link :to="`/artist/${$route.params.artist_id}/albums/${album.id}`">
+            <img v-if="album.attributes.thumbnail_image_url" :src="album.attributes.thumbnail_image_url" width="50" height="50"/>
+            <div v-if="!album.attributes.thumbnail_image_url" class="placeholder box50"></div>
+          </router-link>
+          </b-col>
+          <b-col cols="9" md="auto" class="pl-0">
+            <router-link :to="`/artist/${$route.params.artist_id}/albums/${album.id}`">
+              <p>{{album.attributes.title}}</p>
+            </router-link>
+          </b-col>
+        </b-row>
+      </b-row>
+    </b-container>
+    <b-container>
+      <b-row>
+        <b-col>
+          <router-link :to="`/artist/${$route.params.artist_id}/albums/new`">
+            <b-button variant="primary">+ Add Album</b-button>
+          </router-link>
+        </b-col>
+      </b-row>
+    </b-container>
+  </div>
+</component>
+
 {% endraw %} {% endblock %} {% block scripts %} {% if env == 'development' %}
 <script src="https://cdn.jsdelivr.net/npm/vue@2.6.12/dist/vue.js"></script>
 <script src="https://unpkg.com/vue-router/dist/vue-router.js"></script>
@@ -377,6 +415,55 @@
     template: "#ArtistDetail",
   };
 
+  const AlbumList = {
+    data: function () {
+      return {
+        loading: true,
+        albums: []
+        
+    //     [{
+    //   "attributes": {
+    //     "release_date": "1966-05-01", 
+    //     "title": "Revolver", 
+    //     "profile_image_url": "",
+    //     "sort": "001",
+    //     "thumbnail_image_url": "https://s3.us-east-2.amazonaws.com/dxffd4gk9zzvk2/resized-images/cccbdf13761e8c198ff4ecf45de2563129e3852e.jpg"
+    //   }, 
+    //   "id": "1234", 
+    //   "type": "album"
+    // }, 
+    // {
+    //   "attributes": {
+    //     "release_date": "1965-11-20", 
+    //     "title": "Rubber Soul", 
+    //     "profile_image_url": "", 
+    //     "sort": "002",
+    //     "thumbnail_image_url": ""
+    //   }, 
+    //   "id": "5678", 
+    //   "type": "album"
+    // }]
+    // ,
+      };
+    },
+    mounted() {
+      this.loading =false;
+      console.log(`get albums for artist ${this.$route.params.artist_id}`);
+      // axios
+      //   .get(`/api/v1/me/artists/${this.$route.params.artist_id}/albums`)
+      //   .then((response) => {
+      //     this.albums = response.data.data;
+      //     this.loading = false;
+      //   })
+      //   .catch((e) => console.error(e));
+
+    },
+    template: "#AlbumList" };
+
+  const SingleList = { template: "<div>singles</div>" };
+
+  const Featured = { template: "<div>featured</div>" };
+
   const parseAxiosError = (e) => {
     if (e.response && e.response.data && e.response.data.errors) {
       return e.response.data.errors[0].detail;
@@ -385,23 +472,18 @@
     }
   };
 
-  const AlbumList = { template: "<div>albums</div>" };
-
-  const SingleList = { template: "<div>singles</div>" };
-
-  const Featured = { template: "<div>featured</div>" };
-
   const routes = [
     { path: "/", component: ArtistList },
     { path: "/artist/:id", component: ArtistDetail },
-    { path: "/artist/:id/albums", component: AlbumList },
-    { path: "/artist/:id/singles", component: SingleList },
-    { path: "/artist/:id/featured", component: Featured },
+    { path: "/artist/:artist_id/albums", component: AlbumList },
+    { path: "/artist/:artist_id/singles", component: SingleList },
+    { path: "/artist/:artist_id/featured", component: Featured },
   ];
   const router = new VueRouter({
     routes,
   });
 
+  // Root Component
   new Vue({
     router,
     el: "#app",

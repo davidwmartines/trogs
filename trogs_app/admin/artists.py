@@ -1,19 +1,11 @@
+import datetime
+
 import db
 import ids
 from boto3.dynamodb.conditions import Key
 
 from . import names
-import datetime
-
-
-class Model:
-    def __init__(self, **kwargs):
-        for key, val in kwargs.items():
-            setattr(self, key, val)
-
-
-class Artist(Model):
-    pass
+from .models import Artist
 
 
 def item_to_artist(item):
