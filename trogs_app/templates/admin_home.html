@@ -28,6 +28,12 @@
     </b-row>
     <b-row>
       <b-col>
+        <b-alert :show="showSuccess" dismissible fade variant="success" @dismissed="showSuccess=0" >{{successMessage}}</b-alert>
+        <b-alert :show="showError" dismissible variant="danger" @dismissed="showError=false">{{errorMessage}}</b-alert>
+      </b-col>
+    </b-row>
+    <b-row>
+      <b-col>
         <router-view></router-view>
       </b-col>
     </b-row>
@@ -74,8 +80,7 @@
 
 <component id="ArtistDetail" style="display: none">
   <div>
-    <b-alert :show="showSuccess" dismissible fade variant="success" @dismissed="showSuccess=0" >{{successMessage}}</b-alert>
-    <b-alert :show="showError" dismissible variant="danger" @dismissed="showError=false">{{errorMessage}}</b-alert>
+   
     <b-container v-if="editing">
       <b-row>
           <b-col>
@@ -227,10 +232,6 @@
   const ArtistDetail = {
     data: function () {
       return {
-        showSuccess: 0,
-        successMessage: "",
-        errorMessage: "",
-        showError: false,
         editing: false,
         fileToUpload: null,
         uploadPercentage: 0,
@@ -295,21 +296,19 @@
             }.bind(this),
           })
           .then((response) => {
+            this.$root.alertSuccess('New picture saved');
             this.uploading = false;
             this.uploadPercentage = 0;
             this.$refs.file.reset();
             this.uploadPercentage = 0;
             this.artist.attributes.profile_image_url =
               response.data.data.attributes.profile_image_url;
-            this.showSuccess = 5;
-            this.successMessage = "New picture saved.";
           })
           .catch((e) => {
+            this.$root.alertError(parseAxiosError(e));
             this.uploading = false;
             this.uploadPercentage = 0;
             this.$refs.file.reset();
-            this.showError = true;
-            this.errorMessage = parseAxiosError(e);
           });
       },
       create() {
@@ -326,20 +325,18 @@
         axios
           .post("/api/v1/me/artists", postData)
           .then((response) => {
+            this.$root.alertSuccess('Artist created');
             this.artist = response.data.data;
             this.origBio = this.artist.attributes.bio;
             this.origName = this.artist.attributes.name
             this.editing = false;
-            router.push(`/artist/${response.data.data.id}`);
-            this.showSuccess = 5;
-            this.successMessage = "Artist created.";
             this.saving = false;
             this.saveFunction = this.update;
+            router.push(`/artist/${response.data.data.id}`);
           })
           .catch((e) => {
             this.saving = false;
-            this.showError = true;
-            this.errorMessage = parseAxiosError(e);
+            this.$root.alertError(parseAxiosError(e));
           });
       },
       update() {
@@ -356,16 +353,14 @@
         axios
           .patch(`/api/v1/me/artists/${this.$route.params.id}`, patchData)
           .then((response) => {
+            this.$root.alertSuccess('Artist updated');
             this.artist = response.data.data;
             this.editing = false;
-            this.showSuccess = 5;
-            this.successMessage = "Artist updated.";
             this.saving = false;
           })
           .catch((e) => {
+            this.$root.alertError(parseAxiosError(e));
             this.saving = false;
-            this.showError = true;
-            this.errorMessage = parseAxiosError(e);
           });
       },
       deleteArtist(){
@@ -374,9 +369,8 @@
           .delete(`/api/v1/me/artists/${this.$route.params.id}`)
           .then(() => router.push("/"))
           .catch((e) => {
+            this.$root.alertError(parseAxiosError(e));
             this.deleting = false
-            this.showError = true;
-            this.errorMessage = parseAxiosError(e);
           });
       }
     },
@@ -412,8 +406,26 @@
     router,
     el: "#app",
     data: {
-     
+     showSuccess: 0,
+     showError: false,
+     successMessage: '',
+     errorMessage: ''
+    },
+    methods: {
+      alertSuccess(message){
+        this.showSuccess = 3;
+        this.successMessage = message;
+      },
+      alertError(message){
+        this.showError = true;
+        this.errorMessage = message;
+      }
+    },
+    watch: {
+    '$route' (to, from) {
+      this.showError = false;
     }
+  }
   });
 </script>
 
