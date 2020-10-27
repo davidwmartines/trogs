@@ -420,49 +420,26 @@
       return {
         loading: true,
         albums: []
-        
-    //     [{
-    //   "attributes": {
-    //     "release_date": "1966-05-01", 
-    //     "title": "Revolver", 
-    //     "profile_image_url": "",
-    //     "sort": "001",
-    //     "thumbnail_image_url": "https://s3.us-east-2.amazonaws.com/dxffd4gk9zzvk2/resized-images/cccbdf13761e8c198ff4ecf45de2563129e3852e.jpg"
-    //   }, 
-    //   "id": "1234", 
-    //   "type": "album"
-    // }, 
-    // {
-    //   "attributes": {
-    //     "release_date": "1965-11-20", 
-    //     "title": "Rubber Soul", 
-    //     "profile_image_url": "", 
-    //     "sort": "002",
-    //     "thumbnail_image_url": ""
-    //   }, 
-    //   "id": "5678", 
-    //   "type": "album"
-    // }]
-    // ,
       };
     },
     mounted() {
-      this.loading =false;
-      console.log(`get albums for artist ${this.$route.params.artist_id}`);
-      // axios
-      //   .get(`/api/v1/me/artists/${this.$route.params.artist_id}/albums`)
-      //   .then((response) => {
-      //     this.albums = response.data.data;
-      //     this.loading = false;
-      //   })
-      //   .catch((e) => console.error(e));
+      this.loading = true;
+      axios
+        .get(`/api/v1/me/artists/${this.$route.params.artist_id}/albums`)
+        .then((response) => {
+          this.albums = response.data.data;
+          this.loading = false;
+        })
+        .catch((e) => console.error(e));
 
     },
-    template: "#AlbumList" };
+    template: "#AlbumList" 
+  };
 
-  const SingleList = { template: "<div>singles</div>" };
-
+  
   const Featured = { template: "<div>featured</div>" };
+  const SingleList = { template: "<div>singles</div>" };
+  const AlbumDetail = { template: "<div>album detail</div>" };
 
   const parseAxiosError = (e) => {
     if (e.response && e.response.data && e.response.data.errors) {
@@ -473,11 +450,12 @@
   };
 
   const routes = [
-    { path: "/", component: ArtistList },
-    { path: "/artist/:id", component: ArtistDetail },
-    { path: "/artist/:artist_id/albums", component: AlbumList },
-    { path: "/artist/:artist_id/singles", component: SingleList },
-    { path: "/artist/:artist_id/featured", component: Featured },
+    { name: "My Artists", path: "/", component: ArtistList },
+    { name: "Artist", path: "/artist/:id", component: ArtistDetail },
+    { name: "Albums", path: "/artist/:artist_id/albums", component: AlbumList },
+    { name: "Album", path: "/artist/:artist_id/albums/:album_id", component: AlbumDetail },
+    { name: "Singles", path: "/artist/:artist_id/singles", component: SingleList },
+    { name: "Featured Tracks", path: "/artist/:artist_id/featured", component: Featured },
   ];
   const router = new VueRouter({
     routes,
@@ -505,6 +483,11 @@
     },
     watch: {
     '$route' (to, from) {
+      //console.log('to', to);
+      //console.log('from', from);
+      // TODO: build breadcrumbs based on current route.
+      
+      // clear eror message from previous view
       this.showError = false;
     }
   }
