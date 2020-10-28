@@ -66,6 +66,10 @@ def add(artist, data):
     """
 
     album = Album(id=ids.new_id(), artist=artist, image_url='', **data)
+    if not hasattr(album, 'license'):
+        setattr(album, 'license', '')
+    if not hasattr(album, 'description'):
+        setattr(album, 'description', '') 
 
     table = db.get_table()
     # get next sort order
