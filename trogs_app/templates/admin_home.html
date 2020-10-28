@@ -260,10 +260,40 @@
   </div>
 
   <div class="container" v-if="!editing">
-
+ 
+    <h2>{{album.attributes.title}}</h3>
+    <p>{{album.attributes.description}}</p>
+    <p>{{album.attributes.release_date}}</p>
+    <p>{{album.attributes.license}}</p>
+    <div class="mb-2">
+      <b-button variant="primary" v-on:click="edit()">Edit</b-button>
+    </div>
+    <img v-if="album.attributes.profile_image_url" :src="album.attributes.profile_image_url" width="300" height="300" />
+    <div
+      v-if="!album.attributes.profile_image_url"
+      class="placeholder box300"
+    ></div>
+    <div>
+      <div>
+        <b-form-file
+          v-model="fileToUpload"
+          size="sm"
+          placeholder=""
+          browse-text="Change Picture"
+          style="width: 300px"
+          id="file"
+          ref="file"
+          accept=".jpg"
+          v-on:input="handleFileUpload()"
+        ></b-form-file>
+        <div v-show="uploading">
+          <b-spinner small></b-spinner>
+          Saving picture...
+          <progress max="100" :value.prop="uploadPercentage"></progress>
+        </div>
+      </div>
+    </div>
   </div>
-
-
 
 </div>
 </component>
@@ -494,6 +524,14 @@
     mounted(){
       if (this.$route.params.album_id === "new") {
         this.editing = true;
+      } else{
+        axios.get(`/api/v1/me/artists/${this.$route.params.artist_id}/albums/${this.$route.params.album_id}`)
+          .then((response) => {
+            this.album = response.data.data;
+            this.origAttributes = Object.assign({}, this.album.attributes)
+          })
+          .catch((e) => console.error(e));
+          this.saveFunction = this.update;
       }
     },
     methods :{
@@ -505,7 +543,7 @@
         if (this.$route.params.album_id === "new") {
           router.go(-1);
         } else {
-          this.artist.attributes = this.origAttributes;
+          this.album.attributes = Object.assign({}, this.origAttributes);
         }
       },
       create(){
@@ -521,7 +559,7 @@
           .then((response) => {
             this.$root.alertSuccess('Album created');
             this.album = response.data.data;
-            this.origAttributes = this.album.attributes;
+            this.origAttributes = Object.assign({}, this.album.attributes);
             this.editing = false;
             this.saving = false;
             this.saveFunction = this.update;

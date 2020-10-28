@@ -229,6 +229,24 @@ def add_my_album(artist_id):
     newAlbum = admin.albums.add(artist, data)
 
     return J(schema.dump(newAlbum))
+
+
+@current_app.route('/api/v1/me/artists/<artist_id>/albums/<album_id>')
+@auth.requires_auth
+def my_album_by_id(artist_id, album_id):
+    # get artist
+    artist = admin.artists.by_id_for_owner(artist_id, current_user_email())
+    if not artist:
+        raise Forbidden
+    
+    album = admin.albums.get_by_id(album_id)
+    if album.artist.id != artist_id:
+        raise Forbidden
+
+    album.profile_image_url = get_resized_image_url(
+        album.image_url, '300')
+    data = AlbumSchema().dump(album)
+    return data
     
 
 def to_error_object(message):

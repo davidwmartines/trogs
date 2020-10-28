@@ -5,7 +5,7 @@ import ids
 from boto3.dynamodb.conditions import Key
 
 from . import names
-from .models import Album
+from .models import Album, Artist
 
 def item_to_album(item):
     """
@@ -16,8 +16,10 @@ def item_to_album(item):
         title=item['AlbumTitle'],
         description=item.get('Description', ''),
         license = item.get('License', ''),
+        release_date = item['ReleaseDate'],
         image_url=item.get('ImageURL'),
         sort = item['AC_SK'],
+        artist = Artist(id = item['PK'], name=item['ArtistName']),
         profile_image_url='',
         thumbnail_image_url=''
     )
@@ -86,3 +88,17 @@ def add(artist, data):
     table.put_item(Item=album_to_item(album))
     return album
 
+
+def get_by_id(album_id):
+    table = db.get_table()
+
+    res = table.query(
+        IndexName='IX_ARTISTS_ALBUMS',
+        ScanIndexForward=True,
+        KeyConditionExpression=Key('AA_PK').eq(album_id)
+    )
+
+    if not res['Items']:
+        return None
+    
+    return item_to_album(res['Items'][0])
