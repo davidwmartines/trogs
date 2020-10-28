@@ -22,7 +22,7 @@
     <b-row>
       <b-col>
         <b-breadcrumb>
-           <b-breadcrumb-item to="/">My Artists</b-breadcrumb-item> 
+           <b-breadcrumb-item v-for="item in breadcrumbs" v-bind:key="item.text" :to="item.to">{{item.text}}</b-breadcrumb-item>
         </b-breadcrumb>
       </b-col>
     </b-row>
@@ -76,18 +76,18 @@
       </b-row>
     </b-container>
   </div>
+  
 </component>
 
 <component id="ArtistDetail" style="display: none">
   <div>
-   
     <b-container v-if="editing">
       <b-row>
           <b-col>
-            <h1 v-if="$route.params.id === 'new'">Add a new artist</h1>
+            <h1 v-if="$route.params.artist_id === 'new'">Add a new artist</h1>
             <div>
               <div><label for="artist-name">Artist Name</label></div>
-              <input v-model="artist.attributes.name" id="artist-name" :disabled="$route.params.id !== 'new'" />
+              <input v-model="artist.attributes.name" id="artist-name" :disabled="$route.params.artist_id !== 'new'" />
             </div>
             <div>
               <div><label for="artist-bio">Bio</label></div>
@@ -151,7 +151,7 @@
       </b-row>
     </b-container>
 
-    <b-container v-if="$route.params.id !== 'new'">
+    <b-container v-if="$route.params.artist_id !== 'new'">
       <b-row class="mt-4">
         <b-col>
           <router-link :to="`/artists/${artist.id}/albums`">
@@ -351,19 +351,20 @@
       };
     },
     mounted() {
-      if (this.$route.params.id === "new") {
+      if (this.$route.params.artist_id === "new") {
         this.editing = true;
       } else {
         axios
-          .get(`/api/v1/me/artists/${this.$route.params.id}`)
+          .get(`/api/v1/me/artists/${this.$route.params.artist_id}`)
           .then((response) => {
             this.artist = response.data.data;
             this.origBio = this.artist.attributes.bio;
-            this.origName = this.artist.attributes.name
+            this.origName = this.artist.attributes.name;
+            this.setBreadcrumbs();
           })
           .catch((e) => console.error(e));
           this.saveFunction = this.update;
-      }
+        }
     },
     methods: {
       edit() {
@@ -371,7 +372,7 @@
       },
       cancel() {
         this.editing = false;
-        if (this.$route.params.id === "new") {
+        if (this.$route.params.artist_id === "new") {
           router.push("/");
         } else {
           this.artist.attributes.name = this.origName;
@@ -434,6 +435,7 @@
             this.saving = false;
             this.saveFunction = this.update;
             router.push(`/artists/${response.data.data.id}`);
+            this.setBreadcrumbs();
           })
           .catch((e) => {
             this.saving = false;
@@ -452,7 +454,7 @@
           },
         };
         axios
-          .patch(`/api/v1/me/artists/${this.$route.params.id}`, patchData)
+          .patch(`/api/v1/me/artists/${this.$route.params.artist_id}`, patchData)
           .then((response) => {
             this.$root.alertSuccess('Artist updated');
             this.artist = response.data.data;
@@ -467,12 +469,16 @@
       deleteArtist(){
         this.deleting = true;
         axios
-          .delete(`/api/v1/me/artists/${this.$route.params.id}`)
+          .delete(`/api/v1/me/artists/${this.$route.params.artist_id}`)
           .then(() => router.push("/"))
           .catch((e) => {
             this.$root.alertError(parseAxiosError(e));
             this.deleting = false
           });
+      },
+      setBreadcrumbs(){
+        this.$root.currentArtist = this.artist.attributes.name;
+        this.$root.setBreadcrumbs([{text: this.artist.attributes.name, to: this.$route.fullPath}])
       }
     },
     template: "#ArtistDetail",
@@ -492,9 +498,12 @@
         .then((response) => {
           this.albums = response.data.data;
           this.loading = false;
+          this.$root.setBreadcrumbs([
+            {text: this.$root.currentArtist, to: `/artists/${this.$route.params.artist_id}`},
+            {text:'Albums', to: this.$route.fullPath}
+          ]);
         })
         .catch((e) => console.error(e));
-
     },
     template: "#AlbumList" 
   };
@@ -528,7 +537,8 @@
         axios.get(`/api/v1/me/artists/${this.$route.params.artist_id}/albums/${this.$route.params.album_id}`)
           .then((response) => {
             this.album = response.data.data;
-            this.origAttributes = Object.assign({}, this.album.attributes)
+            this.origAttributes = Object.assign({}, this.album.attributes);
+            this.setBreadcrumbs();
           })
           .catch((e) => console.error(e));
           this.saveFunction = this.update;
@@ -564,6 +574,7 @@
             this.saving = false;
             this.saveFunction = this.update;
             router.push(`/artists/${this.$route.params.artist_id}/albums/${response.data.data.id}`);
+            this.setBreadcrumbs();
           })
           .catch((e) => {
             this.saving = false;
@@ -572,6 +583,13 @@
       },
       update(){
 
+      },
+      setBreadcrumbs(){
+        this.$root.setBreadcrumbs([
+              {text: this.$root.currentArtist, to: `/artists/${this.$route.params.artist_id}`},
+              {text: 'Albums', to: `/artists/${this.$route.params.artist_id}/albums`},
+              {text: this.album.attributes.title, to: this.$route.fullPath}
+            ]);
       }
     },
     template: "#AlbumDetail"
@@ -589,47 +607,17 @@
   };
 
   const routes = [
-    {
-      name: "My Artists",
-      path: "/",
-      component: ArtistList,
-      children: [
-        {
-          name: "Artist",
-          path: "artists/:id",
-          component: ArtistDetail,
-          children : [
-            {
-              name: "Albums",
-              path: "albums",
-              component: AlbumList,
-              children : [
-                {
-                  name: "Album",
-                  path: ":album_id",
-                  component: AlbumDetail
-                }
-              ]
-            },
-            {
-              name: "Singles",
-              path: "singles",
-              component: SingleList
-            },
-            {
-              name: "Featured Tracks",
-              path: "/artists/:artist_id/featured",
-              component: Featured
-            }
-          ]
-        }
-      ]
-     }
+    { path: "/", component: ArtistList },
+    { path: "/artists/:artist_id", component: ArtistDetail },
+    { path: "/artists/:artist_id/albums", component: AlbumList },
+    { path: "/artists/:artist_id/albums/:album_id", component: AlbumDetail },
+    { path: "/artists/:artist_id/singles", component: SingleList },
+    { path: "/artists/:artist_id/featured", component: Featured },
   ];
   const router = new VueRouter({
     routes,
   });
-
+ 
   // Root Component
   new Vue({
     router,
@@ -638,7 +626,13 @@
      showSuccess: 0,
      showError: false,
      successMessage: '',
-     errorMessage: ''
+     errorMessage: '',
+     breadcrumbs: [],
+     currentArtist: null
+    },
+    mounted(){
+      console.log('root mounted');
+      this.setBreadcrumbs([]);
     },
     methods: {
       alertSuccess(message){
@@ -648,18 +642,25 @@
       alertError(message){
         this.showError = true;
         this.errorMessage = message;
+      },
+      setBreadcrumbs(childItems){
+        this.breadcrumbs = [
+          {text: 'My Artists', to: '/'}
+        ].concat(childItems);
+        console.log('breadcrumbs set');
       }
     },
     watch: {
-    '$route' (to, from) {
-      //console.log('to', to);
-      //console.log('from', from);
-      // TODO: build breadcrumbs based on current route.
-      
-      // clear eror message from previous view
-      this.showError = false;
+      '$route' (to, from) {
+        console.log('route change to', to);
+        if(to.path === '/'){
+          this.currentArtist = null;
+          this.setBreadcrumbs([]);
+        }
+        // clear eror message from previous view
+        this.showError = false;
+      }
     }
-  }
   });
 </script>
 
