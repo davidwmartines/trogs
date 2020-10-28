@@ -13,31 +13,19 @@
 {% endblock %} {% block content %}
 
 <section id="app">
-  <b-container>
-    <b-row>
-      <b-col>
-        {{ session['profile']['email']}}{% raw %}
-      </b-col>
-    </b-row>
-    <b-row>
-      <b-col>
-        <b-breadcrumb>
-           <b-breadcrumb-item v-for="item in breadcrumbs" v-bind:key="item.text" :to="item.to">{{item.text}}</b-breadcrumb-item>
-        </b-breadcrumb>
-      </b-col>
-    </b-row>
-    <b-row>
-      <b-col>
-        <b-alert :show="showSuccess" dismissible fade variant="success" @dismissed="showSuccess=0" >{{successMessage}}</b-alert>
-        <b-alert :show="showError" dismissible variant="danger" @dismissed="showError=false">{{errorMessage}}</b-alert>
-      </b-col>
-    </b-row>
-    <b-row>
-      <b-col>
-        <router-view></router-view>
-      </b-col>
-    </b-row>
-  </b-container>
+  <div class="container">
+    {{ session['profile']['email']}}{% raw %}
+  </div>
+  <div class="container">
+    <b-breadcrumb>
+      <b-breadcrumb-item v-for="item in breadcrumbs" v-bind:key="item.text" :to="item.to">{{item.text}}</b-breadcrumb-item>
+   </b-breadcrumb>
+  </div>
+  <div class="container">
+    <b-alert :show="showSuccess" dismissible fade variant="success" @dismissed="showSuccess=0" >{{successMessage}}</b-alert>
+    <b-alert :show="showError" dismissible variant="danger" @dismissed="showError=false">{{errorMessage}}</b-alert>
+  </div>
+  <router-view></router-view>
 </section>
 
 <component id="ArtistList" style="display: none">
@@ -66,135 +54,99 @@
         </b-row>
       </b-row>
     </b-container>
-    <b-container>
-      <b-row>
-        <b-col>
-          <router-link to="/artists/new">
-            <b-button variant="primary">+ Add New Artist</b-button>
-          </router-link>
-        </b-col>
-      </b-row>
-    </b-container>
+    <div class="container">
+      <router-link to="/artists/new">
+        <b-button variant="primary">+ Add New Artist</b-button>
+      </router-link>
+    </div>
   </div>
-  
 </component>
 
 <component id="ArtistDetail" style="display: none">
   <div>
-    <b-container v-if="editing">
-      <b-row>
-          <b-col>
-            <h1 v-if="$route.params.artist_id === 'new'">Add a new artist</h1>
-            <div>
-              <div><label for="artist-name">Artist Name</label></div>
-              <input v-model="artist.attributes.name" id="artist-name" :disabled="$route.params.artist_id !== 'new'" />
-            </div>
-            <div>
-              <div><label for="artist-bio">Bio</label></div>
-              <textarea v-model="artist.attributes.bio" id="artist-bio"></textarea>
-            </div>
-            <div>
-              <b-button variant="primary" v-on:click="saveFunction" :disabled="saving">
-                <b-spinner small v-if="saving"></b-spinner>
-              {{ saving ? "Saving..." : "Save"}}
-              </b-button>
-
-              <b-button v-on:click="cancel()">Cancel</b-button>
-            </div>
-        </b-col>
-      </b-row>
-    </b-container>
-
-    <b-container v-if="!editing">
-      <b-row class="mb-2">
-        <b-col>
-          <h1>{{artist.attributes.name}}</h1>
-          <p>{{artist.attributes.bio}}</p>
-          <div>
-            <b-button variant="primary" v-on:click="edit()">Edit</b-button>
+    
+    <div class="container" v-if="!editing">
+      <b-spinner variant="primary" v-if="loading"></b-spinner>
+      <div class="mb-2">
+        <h1>{{artist.attributes.name}}</h1>
+        <p>{{artist.attributes.bio}}</p>
+        <div>
+          <b-button variant="primary" v-on:click="edit()">Edit</b-button>
+        </div>
+      </div >
+     <div>
+        <img v-if="artist.attributes.profile_image_url" :src="artist.attributes.profile_image_url" width="300" />
+        <div v-if="!artist.attributes.profile_image_url" class="placeholder box300"></div>
+        <div>
+          <b-form-file
+            v-model="fileToUpload"
+            size="sm"
+            placeholder=""
+            browse-text="Change Picture"
+            style="width: 300px"
+            id="file"
+            ref="file"
+            accept=".jpg"
+            v-on:input="handleFileUpload()"
+          ></b-form-file>
+          <div v-show="uploading">
+            <b-spinner small></b-spinner>
+            Saving picture...
+            <progress max="100" :value.prop="uploadPercentage"></progress>
           </div>
-        </b-col>
-      </b-row >
-      <b-row>
-        <b-col> 
-            <img
-              v-if="artist.attributes.profile_image_url"
-              :src="artist.attributes.profile_image_url"
-              width="300"
-            />
-            <div
-              v-if="!artist.attributes.profile_image_url"
-              class="placeholder box300"
-            ></div>
-            <div>
-              <div>
-                <b-form-file
-                  v-model="fileToUpload"
-                  size="sm"
-                  placeholder=""
-                  browse-text="Change Picture"
-                  style="width: 300px"
-                  id="file"
-                  ref="file"
-                  accept=".jpg"
-                  v-on:input="handleFileUpload()"
-                ></b-form-file>
-                <div v-show="uploading">
-                  <b-spinner small></b-spinner>
-                  Saving picture...
-                  <progress max="100" :value.prop="uploadPercentage"></progress>
-                </div>
-              </div>
-            </div>
-         
-        </b-col>
-      </b-row>
-    </b-container>
+        </div>
+      </div>
+    </div>
 
-    <b-container v-if="$route.params.artist_id !== 'new'">
-      <b-row class="mt-4">
-        <b-col>
-          <router-link :to="`/artists/${artist.id}/albums`">
-            <b-button block variant="outline-success">Albums</b-button>
-          </router-link>
-        </b-col>
-      </b-row>
-      <b-row class="mt-4">
-        <b-col>
-          <router-link :to="`/artists/${artist.id}/featured`">
-            <b-button block variant="outline-success">Featured Tracks</b-button>
-          </router-link>
-        </b-col>
-      </b-row>
-      <b-row class="mt-4">
-        <b-col>
-          <router-link :to="`/artists/${artist.id}/singles`">
-            <b-button block variant="outline-success">Singles</b-button>
-          </router-link>
-        </b-col>
-      </b-row>
-      <b-row>
-        <b-col>
-          <div class="mt-4 mb-4">
-            <b-button variant="outline-danger" size="sm" v-if="!confirmingDelete" @click="confirmingDelete = true">Delete</b-button>
-         
-            <b-alert variant="warning" :show="confirmingDelete">
-              <h5>Warning</h5>
-              <p>
-                Deleting will PERMANENTLY REMOVE the artist <b>{{artist.attributes.name}}</b> including ALL ALUBUMS, SINGLES and TRACKS.
-              </p>
-              <p>Are you sure?</p>
-              
-              <b-button variant="danger" @click="deleteArtist()" :disabled="deleting">
-                <b-spinner small v-if="deleting"></b-spinner>
-                {{ deleting ? "Deleting..." : "Yes, Delete"}}
-              </b-button>
-              <b-button @click="confirmingDelete = false" :disabled="deleting">Cancel</b-button>
-            </b-alert>
-          </div>
-        </b-col>
-      </b-row>
-    </b-container>
+    <div class="container" v-if="editing">
+      <h1 v-if="$route.params.artist_id === 'new'">Add a new artist</h1>
+      <b-form-group label="Artist Name" id="input-group-1" label-for="input-name">
+        <b-form-input id="input-name" v-model="artist.attributes.name" :disabled="$route.params.artist_id !== 'new'" required placeholder="Enter a name for the artist"></b-form-input>
+      </b-form-group>
+      <b-form-group label="Bio" id="input-group-2" label-for="text-bio">
+        <b-form-textarea id="text-bio" v-model="artist.attributes.bio" placeholder="Enter a brief bio about the artist" rows="2" max-rows="2"></b-form-textarea>
+      </b-form-group>
+      <b-button variant="primary" v-on:click="saveFunction" :disabled="saving">
+        <b-spinner small v-if="saving"></b-spinner>
+      {{ saving ? "Saving..." : "Save"}}
+      </b-button>
+      <b-button v-on:click="cancel()">Cancel</b-button>
+    </div>
+
+    <div class="container" v-if="$route.params.artist_id !== 'new'">
+      <div class="mt-4">
+        <router-link :to="`/artists/${artist.id}/albums`">
+          <b-button block variant="outline-success">Albums</b-button>
+        </router-link>
+      </div>
+      <div class="mt-4">
+        <router-link :to="`/artists/${artist.id}/featured`">
+          <b-button block variant="outline-success">Featured Tracks</b-button>
+        </router-link>
+      </div>
+      <div class="mt-4">
+        <router-link :to="`/artists/${artist.id}/singles`">
+          <b-button block variant="outline-success">Singles</b-button>
+        </router-link>
+      </div>
+      <div>
+        <div class="mt-4 mb-4">
+          <b-button variant="outline-danger" size="sm" v-if="!confirmingDelete" @click="confirmingDelete = true">Delete</b-button>
+          <b-alert variant="warning" :show="confirmingDelete">
+            <h5>Warning</h5>
+            <p>
+              Deleting will PERMANENTLY REMOVE the artist <b>{{artist.attributes.name}}</b> including ALL ALUBUMS, SINGLES and TRACKS.
+            </p>
+            <p>Are you sure?</p>
+            <b-button variant="danger" @click="deleteArtist()" :disabled="deleting">
+              <b-spinner small v-if="deleting"></b-spinner>
+              {{ deleting ? "Deleting..." : "Yes, Delete"}}
+            </b-button>
+            <b-button @click="confirmingDelete = false" :disabled="deleting">Cancel</b-button>
+          </b-alert>
+        </div>
+      </div>
+    </div>
   </div>
 </component>
 
@@ -333,6 +285,7 @@
   const ArtistDetail = {
     data: function () {
       return {
+        loading: false,
         editing: false,
         fileToUpload: null,
         uploadPercentage: 0,
@@ -354,15 +307,20 @@
       if (this.$route.params.artist_id === "new") {
         this.editing = true;
       } else {
+        this.loading = true;
         axios
           .get(`/api/v1/me/artists/${this.$route.params.artist_id}`)
           .then((response) => {
+            this.loading = false;
             this.artist = response.data.data;
             this.origBio = this.artist.attributes.bio;
             this.origName = this.artist.attributes.name;
             this.setBreadcrumbs();
           })
-          .catch((e) => console.error(e));
+          .catch((e) => {
+            this.loading = false;
+            console.error(e);
+          });
           this.saveFunction = this.update;
         }
     },
@@ -631,7 +589,6 @@
      currentArtist: null
     },
     mounted(){
-      console.log('root mounted');
       this.setBreadcrumbs([]);
     },
     methods: {
@@ -647,12 +604,10 @@
         this.breadcrumbs = [
           {text: 'My Artists', to: '/'}
         ].concat(childItems);
-        console.log('breadcrumbs set');
       }
     },
     watch: {
       '$route' (to, from) {
-        console.log('route change to', to);
         if(to.path === '/'){
           this.currentArtist = null;
           this.setBreadcrumbs([]);
