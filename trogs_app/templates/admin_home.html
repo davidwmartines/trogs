@@ -589,12 +589,42 @@
   };
 
   const routes = [
-    { name: "My Artists", path: "/", component: ArtistList },
-    { name: "Artist", path: "/artists/:id", component: ArtistDetail },
-    { name: "Albums", path: "/artists/:artist_id/albums", component: AlbumList },
-    { name: "Album", path: "/artists/:artist_id/albums/:album_id", component: AlbumDetail },
-    { name: "Singles", path: "/artists/:artist_id/singles", component: SingleList },
-    { name: "Featured Tracks", path: "/artists/:artist_id/featured", component: Featured },
+    {
+      name: "My Artists",
+      path: "/",
+      component: ArtistList,
+      children: [
+        {
+          name: "Artist",
+          path: "artists/:id",
+          component: ArtistDetail,
+          children : [
+            {
+              name: "Albums",
+              path: "albums",
+              component: AlbumList,
+              children : [
+                {
+                  name: "Album",
+                  path: ":album_id",
+                  component: AlbumDetail
+                }
+              ]
+            },
+            {
+              name: "Singles",
+              path: "singles",
+              component: SingleList
+            },
+            {
+              name: "Featured Tracks",
+              path: "/artists/:artist_id/featured",
+              component: Featured
+            }
+          ]
+        }
+      ]
+     }
   ];
   const router = new VueRouter({
     routes,
