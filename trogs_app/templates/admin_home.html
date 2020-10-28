@@ -294,8 +294,7 @@
         saveFunction: this.create,
         confirmingDelete: false,
         deleting: false,
-        origName: '',
-        origBio: '',
+        origAttributes: {},
         artist: {
           id: "",
           type: "artist",
@@ -313,8 +312,7 @@
           .then((response) => {
             this.loading = false;
             this.artist = response.data.data;
-            this.origBio = this.artist.attributes.bio;
-            this.origName = this.artist.attributes.name;
+            this.origAttributes = Object.assign({}, this.artist.attributes);
             this.setBreadcrumbs();
           })
           .catch((e) => {
@@ -333,8 +331,7 @@
         if (this.$route.params.artist_id === "new") {
           router.push("/");
         } else {
-          this.artist.attributes.name = this.origName;
-          this.artist.attributes.bio = this.origBio;
+          this.artist.attributes = Object.assign({}, this.origAttributes);
         }
       },
       handleFileUpload() {
