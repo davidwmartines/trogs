@@ -17,7 +17,7 @@ import ids
 
 class ArtistSchema(Schema):
     id = fields.Str(dump_only=True)
-    name = fields.Str(required=True)
+    name = fields.Str(required=True, validate=validate.Length(min=1, error='Name cannot be blank'))
     bio = fields.Str()
     profile_image_url = fields.Str(dump_only=True)
     thumbnail_image_url = fields.Str(dump_only=True)
@@ -28,7 +28,7 @@ class ArtistSchema(Schema):
 
 class AlbumSchema(Schema):
     id = fields.Str(dump_only=True)
-    title = fields.Str(required=True)
+    title = fields.Str(required=True, validate=validate.Length(min=1, error='Title cannot be blank'))
     release_date = fields.Str(required=True)
     license = fields.Str(default='')
     description = fields.Str(default='')
@@ -226,7 +226,10 @@ def add_my_album(artist_id):
     except ValidationError as err:
         return J(err.messages), 422
 
-    newAlbum = admin.albums.add(artist, data)
+    try:
+        newAlbum = admin.albums.add(artist, data)
+    except admin.albums.TitleExists as err:
+        return J(to_error_object(err.message)), 422
 
     return J(schema.dump(newAlbum))
 

@@ -72,7 +72,7 @@ def add(artist, data):
         setattr(album, 'description', '') 
 
     table = db.get_table()
-    # get next sort order
+    # get existing albums to check name and get next sort
     res = table.query(
         IndexName='IX_ARTIST_CONTENT',
         ScanIndexForward=True,
@@ -80,6 +80,9 @@ def add(artist, data):
             artist.id) & Key('AC_SK').begins_with('2')
     )
     existing_albums = list(map(item_to_album, res['Items']))
+    if any(album.title == existing.title for existing in existing_albums):
+        raise TitleExists
+
     if len(existing_albums) > 0:
         last_album = existing_albums[-1]
         last_sort = int(last_album.sort)
@@ -122,3 +125,7 @@ def update_image_url(artist_id, album_id, image_url):
         }
     )
     print('done')
+
+
+class TitleExists(Exception):
+    message = 'Artist already has an album with that title.'
