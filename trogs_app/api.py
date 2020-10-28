@@ -149,19 +149,17 @@ def edit_my_artist(artist_id):
 @auth.requires_auth
 def add_artist_image(artist_id):
 
-    # validate posted data
-    if 'image_file' not in request.files:
-        return J(to_error_object('no image_file posted')), 400
-
-    # todo VERIFY jpeg
-
+    try:
+        file_data = get_posted_image(request)
+    except InvalidImage as err:
+        return J(to_error_object(err.message)), 400
+   
     # get artist
     artist = admin.artists.by_id_for_owner(artist_id, current_user_email())
     if not artist:
         raise Forbidden
 
     # persist image
-    file_data = request.files['image_file']
     object_name = 'art/{0}-{1}/{0}-{2}.jpg'.format(
         artist.normalized_name, artist.id, ids.new_id()[:8])
     admin.files.save(file_data, object_name, content_type='image/jpeg')
@@ -256,11 +254,10 @@ def my_album_by_id(artist_id, album_id):
 @auth.requires_auth
 def add_album_image(artist_id, album_id):
 
-    # validate posted data
-    if 'image_file' not in request.files:
-        return J(to_error_object('no image_file posted')), 400
-
-    # todo VERIFY jpeg
+    try:
+        file_data = get_posted_image(request)
+    except InvalidImage as err:
+        return J(to_error_object(err.message)), 400
 
     # get artist
     artist = admin.artists.by_id_for_owner(artist_id, current_user_email())
@@ -273,7 +270,6 @@ def add_album_image(artist_id, album_id):
         raise Forbidden
 
     # persist image
-    file_data = request.files['image_file']
     object_name = 'art/{0}-{1}/{2}-{3}/{2}-{4}.jpg'.format(
         artist.normalized_name, 
         artist.id,
@@ -298,6 +294,22 @@ def add_album_image(artist_id, album_id):
 def to_error_object(message):
     """ make a JSONAPI error object from a single message string """
     return {'errors': [{'detail': message}]}
+
+
+class InvalidImage(Exception):
+    def __init__(self, message):
+        self.message = message
+
+
+def get_posted_image(request, key='image_file'):
+    if key not in request.files:
+        raise InvalidImage(message='no image file posted')
+
+    file_data = request.files[key]
+    if not file_data.filename.endswith('.jpg') and not file_data.filename.endswith(".jpeg"):
+        raise InvalidImage(message='Only JPEG files can be used for images')
+
+    return file_data
 
 
 
