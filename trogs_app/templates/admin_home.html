@@ -53,13 +53,13 @@
       </b-row>
       <b-row v-for="artist in artists" :key="artist.id" class="mb-2" align-v="center">
         <b-col col lg="1" class="pr-0">
-          <router-link :to="`/artist/${artist.id}`">
+          <router-link :to="`/artists/${artist.id}`">
             <img v-if="artist.attributes.thumbnail_image_url" :src="artist.attributes.thumbnail_image_url" width="50" height="50"/>
             <div v-if="!artist.attributes.thumbnail_image_url" class="placeholder box50"></div>
           </router-link>
           </b-col>
           <b-col cols="9" md="auto" class="pl-0">
-            <router-link :to="`/artist/${artist.id}`">
+            <router-link :to="`/artists/${artist.id}`">
               <p>{{artist.attributes.name}}</p>
             </router-link>
           </b-col>
@@ -69,7 +69,7 @@
     <b-container>
       <b-row>
         <b-col>
-          <router-link to="/artist/new">
+          <router-link to="/artists/new">
             <b-button variant="primary">+ Add New Artist</b-button>
           </router-link>
         </b-col>
@@ -116,8 +116,7 @@
         </b-col>
       </b-row >
       <b-row>
-        <b-col>
-          
+        <b-col> 
             <img
               v-if="artist.attributes.profile_image_url"
               :src="artist.attributes.profile_image_url"
@@ -155,21 +154,21 @@
     <b-container v-if="$route.params.id !== 'new'">
       <b-row class="mt-4">
         <b-col>
-          <router-link :to="`/artist/${artist.id}/albums`">
+          <router-link :to="`/artists/${artist.id}/albums`">
             <b-button block variant="outline-success">Albums</b-button>
           </router-link>
         </b-col>
       </b-row>
       <b-row class="mt-4">
         <b-col>
-          <router-link :to="`/artist/${artist.id}/featured`">
+          <router-link :to="`/artists/${artist.id}/featured`">
             <b-button block variant="outline-success">Featured Tracks</b-button>
           </router-link>
         </b-col>
       </b-row>
       <b-row class="mt-4">
         <b-col>
-          <router-link :to="`/artist/${artist.id}/singles`">
+          <router-link :to="`/artists/${artist.id}/singles`">
             <b-button block variant="outline-success">Singles</b-button>
           </router-link>
         </b-col>
@@ -201,41 +200,75 @@
 
 <component id="AlbumList" style="display: none">
   <div>
+    <div class="container">
+      <h2>Albums</h2>
+    </div>
     <b-container>
-      <b-row>
-        <b-col>
-          <h2>Albums</h2>
-        </b-col>
-      </b-row>
       <b-row v-if="loading">
         <b-col><b-spinner variant="primary"></b-spinner></b-col>
       </b-row>
       <b-row v-for="album in albums" :key="album.id" class="mb-2" align-v="center">
         <b-col col lg="1" class="pr-0">
-          <router-link :to="`/artist/${$route.params.artist_id}/albums/${album.id}`">
+          <router-link :to="`/artists/${$route.params.artist_id}/albums/${album.id}`">
             <img v-if="album.attributes.thumbnail_image_url" :src="album.attributes.thumbnail_image_url" width="50" height="50"/>
             <div v-if="!album.attributes.thumbnail_image_url" class="placeholder box50"></div>
           </router-link>
           </b-col>
           <b-col cols="9" md="auto" class="pl-0">
-            <router-link :to="`/artist/${$route.params.artist_id}/albums/${album.id}`">
+            <router-link :to="`/artists/${$route.params.artist_id}/albums/${album.id}`">
               <p>{{album.attributes.title}}</p>
             </router-link>
           </b-col>
         </b-row>
       </b-row>
     </b-container>
-    <b-container>
-      <b-row>
-        <b-col>
-          <router-link :to="`/artist/${$route.params.artist_id}/albums/new`">
-            <b-button variant="primary">+ Add Album</b-button>
-          </router-link>
-        </b-col>
-      </b-row>
-    </b-container>
+    <div class="container">
+      <router-link :to="`/artists/${$route.params.artist_id}/albums/new`">
+        <b-button variant="primary">+ Add Album</b-button>
+      </router-link>
+    </div>
   </div>
 </component>
+
+<component id="AlbumDetail" style="display: none">
+<div>
+  
+  <div class="container" v-if="editing">
+    <h2 v-if="$route.params.album_id === 'new'">New Album</h2>
+    <b-form-group label="Title" id="input-group-1" label-for="input-title">
+      <b-form-input id="input-title" v-model="album.attributes.title" required placeholder="Enter the album title"></b-form-input>
+    </b-form-group>
+    <b-form-group label="Release Date" id="input-group-2" label-for="input-release-date">
+      <b-form-datepicker required id="input-release-date" v-model="album.attributes.release_date"></b-form-datepicker>
+    </b-form-group>
+    <b-form-group label="License" id="input-group-3" label-for="select-license">
+      <b-form-select id="select-license" v-model="album.attributes.license" :options="licenses">
+        <template #first>
+          <b-form-select-option value=""></b-form-select-option>
+        </template>
+      </b-form-select>
+      <a href="https://creativecommons.org/licenses/" class="license" target="_blank">License Descriptions</a>
+    </b-form-group>
+    <b-form-group label="Description" id="input-group-4" label-for="text-description">
+      <b-form-textarea id="text-description" v-model="album.attributes.description" placeholder="Enter a brief description" rows="3" max-rows="3"></b-form-textarea>
+    </b-form-group>
+    <b-button variant="primary" v-on:click="saveFunction" :disabled="saving">
+      <b-spinner small v-if="saving"></b-spinner>
+    {{ saving ? "Saving..." : "Save"}}
+    </b-button>
+    <b-button v-on:click="cancel()">Cancel</b-button>
+  </div>
+
+  <div class="container" v-if="!editing">
+
+  </div>
+
+
+
+</div>
+</component>
+
+
 
 {% endraw %} {% endblock %} {% block scripts %} {% if env == 'development' %}
 <script src="https://cdn.jsdelivr.net/npm/vue@2.6.12/dist/vue.js"></script>
@@ -370,7 +403,7 @@
             this.editing = false;
             this.saving = false;
             this.saveFunction = this.update;
-            router.push(`/artist/${response.data.data.id}`);
+            router.push(`/artists/${response.data.data.id}`);
           })
           .catch((e) => {
             this.saving = false;
@@ -436,11 +469,79 @@
     template: "#AlbumList" 
   };
 
-  
+  const AlbumDetail = {
+    data: function(){
+      return {
+        editing: false,
+        saving: false,
+        saveFunction: this.create,
+        album: {
+          id: '',
+          type: 'album',
+          attributes: { title: '', release_date: new Date().toISOString(), description: ''},
+        },
+        origAttributes: {},
+        licenses : [
+            {value : 'by', text: 'CC-BY (Creative Commons Attribution 4.0 International License)'},
+            {value : 'by-sa', text: 'CC BY-SA (Creative Commons Attribution-ShareAlike 4.0 International License)'},
+            {value : 'by-nd', text: 'CC BY-ND (Creative Commons Attribution-NoDerivatives 4.0 International License)'},
+            {value : 'by-nc', text: 'CC BY-NC (Creative Commons Attribution-NonCommercial 4.0 International License)'},
+            {value : 'by-nc-sa', text: 'CC BY-NC-SA (Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License)'},
+            {value : 'by-nc-nd', text: 'CC BY-NC-ND (Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International License)'},
+          ]
+      };
+    },
+    mounted(){
+      if (this.$route.params.album_id === "new") {
+        this.editing = true;
+      }
+    },
+    methods :{
+      edit() {
+        this.editing = true;
+      },
+      cancel() {
+        this.editing = false;
+        if (this.$route.params.album_id === "new") {
+          router.go(-1);
+        } else {
+          this.artist.attributes = this.origAttributes;
+        }
+      },
+      create(){
+        this.saving = true;
+        const postData = {
+          data: {
+            attributes : this.album.attributes,
+            type: 'album'
+          }
+        };
+        axios
+          .post(`/api/v1/me/artists/${this.$route.params.artist_id}/albums`, postData)
+          .then((response) => {
+            this.$root.alertSuccess('Album created');
+            this.album = response.data.data;
+            this.origAttributes = this.album.attributes;
+            this.editing = false;
+            this.saving = false;
+            this.saveFunction = this.update;
+            router.push(`/artists/${this.$route.params.artist_id}/albums/${response.data.data.id}`);
+          })
+          .catch((e) => {
+            this.saving = false;
+            this.$root.alertError(parseAxiosError(e));
+          });
+      },
+      update(){
+
+      }
+    },
+    template: "#AlbumDetail"
+  };
+
   const Featured = { template: "<div>featured</div>" };
   const SingleList = { template: "<div>singles</div>" };
-  const AlbumDetail = { template: "<div>album detail</div>" };
-
+  
   const parseAxiosError = (e) => {
     if (e.response && e.response.data && e.response.data.errors) {
       return e.response.data.errors[0].detail;
@@ -451,11 +552,11 @@
 
   const routes = [
     { name: "My Artists", path: "/", component: ArtistList },
-    { name: "Artist", path: "/artist/:id", component: ArtistDetail },
-    { name: "Albums", path: "/artist/:artist_id/albums", component: AlbumList },
-    { name: "Album", path: "/artist/:artist_id/albums/:album_id", component: AlbumDetail },
-    { name: "Singles", path: "/artist/:artist_id/singles", component: SingleList },
-    { name: "Featured Tracks", path: "/artist/:artist_id/featured", component: Featured },
+    { name: "Artist", path: "/artists/:id", component: ArtistDetail },
+    { name: "Albums", path: "/artists/:artist_id/albums", component: AlbumList },
+    { name: "Album", path: "/artists/:artist_id/albums/:album_id", component: AlbumDetail },
+    { name: "Singles", path: "/artists/:artist_id/singles", component: SingleList },
+    { name: "Featured Tracks", path: "/artists/:artist_id/featured", component: Featured },
   ];
   const router = new VueRouter({
     routes,

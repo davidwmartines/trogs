@@ -30,13 +30,15 @@ class AlbumSchema(Schema):
     id = fields.Str(dump_only=True)
     title = fields.Str(required=True)
     release_date = fields.Str(required=True)
+    license = fields.Str()
+    description = fields.Str()
     sort = fields.Int(dump_only=True)
     profile_image_url = fields.Str(dump_only=True)
     thumbnail_image_url = fields.Str(dump_only=True)
 
     class Meta:
         type_ = "album"
-        
+
 
 def J(*args, **kwargs):
     """Wrapper around jsonify that sets the Content-Type of the response to
@@ -143,7 +145,6 @@ def edit_my_artist(artist_id):
     return J(data)
 
 
-
 @current_app.route('/api/v1/me/artists/<artist_id>/image', methods=['POST'])
 @auth.requires_auth
 def add_image(artist_id):
@@ -211,6 +212,28 @@ def list_my_artist_albums(artist_id):
     return data
 
 
+@current_app.route('/api/v1/me/artists/<artist_id>/albums', methods=['POST'])
+@auth.requires_auth
+def add_my_album(artist_id):
+    # get artist
+    artist = admin.artists.by_id_for_owner(artist_id, current_user_email())
+    if not artist:
+        raise Forbidden
+
+    schema = AlbumSchema()
+    try:
+        data = schema.load(request.get_json() or {})
+    except ValidationError as err:
+        return J(err.messages), 422
+
+    newAlbum = admin.albums.add(artist, data)
+
+    return J(schema.dump(newAlbum))
+    
+
 def to_error_object(message):
     """ make a JSONAPI error object from a single message string """
     return {'errors': [{'detail': message}]}
+
+
+
