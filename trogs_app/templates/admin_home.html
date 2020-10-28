@@ -468,6 +468,9 @@
       return {
         editing: false,
         saving: false,
+        fileToUpload: null,
+        uploadPercentage: 0,
+        uploading: false,
         saveFunction: this.create,
         album: {
           id: '',
@@ -538,6 +541,40 @@
       },
       update(){
 
+      },
+      handleFileUpload() {
+        if (!this.fileToUpload) {
+          return;
+        }
+        this.uploading = true;
+        const formData = new FormData();
+        formData.append("image_file", this.fileToUpload);
+        axios
+          .post(`/api/v1/me/artists/${this.$route.params.artist_id}/albums/${this.$route.params.album_id}/image`, formData, {
+            headers: {
+              "Content-Type": "multipart/form-data",
+            },
+            onUploadProgress: function (progressEvent) {
+              this.uploadPercentage = parseInt(
+                Math.round((progressEvent.loaded / progressEvent.total) * 80)
+              );
+            }.bind(this),
+          })
+          .then((response) => {
+            this.$root.alertSuccess('New picture saved');
+            this.uploading = false;
+            this.uploadPercentage = 0;
+            this.$refs.file.reset();
+            this.uploadPercentage = 0;
+            this.album.attributes.profile_image_url =
+              response.data.data.attributes.profile_image_url;
+          })
+          .catch((e) => {
+            this.$root.alertError(parseAxiosError(e));
+            this.uploading = false;
+            this.uploadPercentage = 0;
+            this.$refs.file.reset();
+          });
       },
       setBreadcrumbs(){
         this.$root.setBreadcrumbs([

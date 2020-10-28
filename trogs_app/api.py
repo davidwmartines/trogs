@@ -147,7 +147,7 @@ def edit_my_artist(artist_id):
 
 @current_app.route('/api/v1/me/artists/<artist_id>/image', methods=['POST'])
 @auth.requires_auth
-def add_image(artist_id):
+def add_artist_image(artist_id):
 
     # validate posted data
     if 'image_file' not in request.files:
@@ -247,7 +247,50 @@ def my_album_by_id(artist_id, album_id):
         album.image_url, '300')
     data = AlbumSchema().dump(album)
     return data
+
     
+@current_app.route('/api/v1/me/artists/<artist_id>/albums/<album_id>/image', methods=['POST'])
+@auth.requires_auth
+def add_album_image(artist_id, album_id):
+
+    # validate posted data
+    if 'image_file' not in request.files:
+        return J(to_error_object('no image_file posted')), 400
+
+    # todo VERIFY jpeg
+
+    # get artist
+    artist = admin.artists.by_id_for_owner(artist_id, current_user_email())
+    if not artist:
+        raise Forbidden
+
+    # get album
+    album = admin.albums.get_by_id(album_id)
+    if album.artist.id != artist_id:
+        raise Forbidden
+
+    # persist image
+    file_data = request.files['image_file']
+    object_name = 'art/{0}-{1}/{2}-{3}/{2}-{4}.jpg'.format(
+        artist.normalized_name, 
+        artist.id,
+        admin.names.safe_obj_name(album.title),
+        album.id,
+        ids.new_id()[:8])
+    admin.files.save(file_data, object_name, content_type='image/jpeg')
+    # delete old file, if exists
+    if album.image_url:
+        admin.files.delete(album.image_url)
+
+    # update album with new image_url
+    admin.albums.update_image_url(artist_id=artist.id, album_id=album.id, image_url=object_name)
+
+    # return entity with new profile_url
+    album.profile_image_url = get_resized_image_url(
+        object_name, '300x300')
+    data = AlbumSchema().dump(album)
+    return J(data)
+
 
 def to_error_object(message):
     """ make a JSONAPI error object from a single message string """

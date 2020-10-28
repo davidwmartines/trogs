@@ -106,3 +106,19 @@ def get_by_id(album_id):
         return None
     
     return item_to_album(res['Items'][0])
+
+
+def update_image_url(artist_id, album_id, image_url):
+    print('updating album image url', album_id, image_url)
+    table = db.get_table()
+    table.update_item(
+        Key={
+            'PK': artist_id,
+            'SK': album_id
+        },
+        UpdateExpression='set ImageURL = :image_url',
+        ExpressionAttributeValues={
+            ':image_url': image_url
+        }
+    )
+    print('done')
