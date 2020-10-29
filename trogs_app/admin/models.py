@@ -8,5 +8,13 @@ class Album(Model):
     pass
 
 
+class Track(Model):
+    pass
+
+
+class Single(Model):
+    pass
+
+
 class Artist(Model):
     pass

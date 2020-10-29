@@ -5,7 +5,7 @@ import ids
 from boto3.dynamodb.conditions import Key
 
 from . import names
-from .models import Album, Artist
+from .models import Album, Artist, Track
 
 def item_to_album(item):
     """
@@ -21,8 +21,38 @@ def item_to_album(item):
         sort = item['AC_SK'],
         artist = Artist(id = item['PK'], name=item.get('ArtistName')),
         profile_image_url='',
-        thumbnail_image_url=''
+        thumbnail_image_url='',
+        tracks=[]
     )
+
+
+def item_to_track(item):
+    """
+    Converts a dictionary from the database to an album Track instance.
+    """
+    return Track(
+        id = item['PK'],
+        title=item['TrackTitle'],
+        audio_url=item['AudioURL'],
+        sort = item['AA_SK']
+    )
+
+
+def track_to_item(track):
+    return {
+        'PK': track.id,
+        'SK': track.id,
+        'AA_PK': track.album.id,
+        'AA_SK': track.sort,
+        'TrackTitle': track.title,
+        'AudioURL': track.audio_url,
+        'AlbumTitle': track.album.title,
+        'AlbumID': track.album.id,
+        'ArtistID': track.album.artist.id,
+        'ArtistName': track.album.artist.name,
+        'License': track.album.license
+    }
+
 
 def album_to_item(album):
     """
@@ -108,8 +138,11 @@ def get_by_id(album_id):
 
     if not res['Items']:
         return None
-    
-    return item_to_album(res['Items'][0])
+    items = res['Items']
+
+    album = item_to_album(items[0])
+    album.tracks = list(map(item_to_track, items[slice(1, len(items)+1)]))
+    return album
 
 
 def update_image_url(artist_id, album_id, image_url):
@@ -129,7 +162,7 @@ def update_image_url(artist_id, album_id, image_url):
 
 
 def update(album, data):
-    
+
     for key, val in data.items():
         setattr(album, key, val)
 
@@ -160,6 +193,26 @@ def update(album, data):
         }
     )
     return album
+
+
+def create_track(album, track_title, audio_url):
+
+    sort = "100" # determine
+
+    track = Track(
+        id = ids.new_id(), 
+        title=track_title,
+        audio_url=audio_url,
+        sort = sort,
+        album=album)
+
+    item = track_to_item(track)
+
+    table = db.get_table()
+    table.put_item(Item=item)
+
+    return track
+
 
 
 class TitleExists(Exception):

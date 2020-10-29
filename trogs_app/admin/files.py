@@ -57,3 +57,14 @@ def _get_resource():
                               aws_access_key_id=os.environ['AWS_CONTENT_ACCESS_KEY_ID'],
                               aws_secret_access_key=os.environ['AWS_CONTENT_SECRET_ACCESS_KEY']
                               )
+
+
+content_types = {
+    '.flac': 'audio/flac',
+    '.jpg': 'image/jpeg',
+    '.m4a': 'audio/mp4',
+    '.mp3': 'audio/mpeg',
+    '.oga': 'audio/ogg',
+    '.ogg': 'audio/ogg',
+    '.wav': 'audio/wav'
+}

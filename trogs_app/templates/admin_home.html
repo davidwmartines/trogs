@@ -86,7 +86,7 @@
             style="width: 300px"
             id="file"
             ref="file"
-            accept=".jpg"
+            accept=".jpg,.jpeg"
             v-on:input="handleFileUpload()"
           ></b-form-file>
           <div v-show="uploading">
@@ -231,7 +231,7 @@
           style="width: 300px"
           id="file"
           ref="file"
-          accept=".jpg"
+          accept=".jpg,.jpeg"
           v-on:input="handleFileUpload()"
         ></b-form-file>
         <div v-show="uploading">
@@ -242,6 +242,37 @@
       </div>
     </div>
   </div>
+  <b-container class="mt-4" v-if="$route.params.album_id != 'new'">
+    <b-row>
+      <b-col><h5>Tracks</h5></b-col>
+    </b-row>
+    <b-row v-for="track in album.attributes.tracks" :key="track.data.id">
+      <b-col>
+        {{track.data.attributes.title}}
+      </b-col>
+    </b-row>
+    <b-row class="mt-2">
+      <b-col>
+        <b-form-file
+        v-model="audioFileToUpload"
+        placeholder="+ Add Track"
+        browse-text="Upload File"
+        style="width: 300px"
+        id="audioFile"
+        ref="audioFile"
+        accept="audio/*"
+        v-on:input="handleTrackFileUpload()"
+      ></b-form-file>
+      </b-col>
+      <b-col>
+        <div v-show="uploadingAudio">
+          <b-spinner small></b-spinner>
+          Uploading audio file...
+          <progress max="100" :value.prop="uploadAudioPercentage"></progress>
+        </div>
+      </b-col>
+    </b-row>
+  </b-container>
 
 </div>
 </component>
@@ -464,8 +495,11 @@
         editing: false,
         saving: false,
         fileToUpload: null,
+        audioFileToUpload: null,
         uploadPercentage: 0,
+        uploadAudioPercentage: 0,
         uploading: false,
+        uploadingAudio: false,
         saveFunction: this.create,
         album: {
           id: '',
@@ -584,7 +618,6 @@
             this.uploading = false;
             this.uploadPercentage = 0;
             this.$refs.file.reset();
-            this.uploadPercentage = 0;
             this.album.attributes.profile_image_url =
               response.data.data.attributes.profile_image_url;
           })
@@ -593,6 +626,38 @@
             this.uploading = false;
             this.uploadPercentage = 0;
             this.$refs.file.reset();
+          });
+      },
+      handleTrackFileUpload(){
+        if (!this.audioFileToUpload) {
+          return;
+        }
+        this.uploadingAudio = true;
+        const formData = new FormData();
+        formData.append("audio_file", this.audioFileToUpload);
+        axios
+          .post(`/api/v1/me/artists/${this.$route.params.artist_id}/albums/${this.$route.params.album_id}/tracks`, formData, {
+            headers: {
+              "Content-Type": "multipart/form-data",
+            },
+            onUploadProgress: function (progressEvent) {
+              this.uploadAudioPercentage = parseInt(
+                Math.round((progressEvent.loaded / progressEvent.total) * 80)
+              );
+            }.bind(this),
+          })
+          .then((response) => {
+            this.$root.alertSuccess('New track created');
+            this.uploadingAudio = false;
+            this.$refs.audioFile.reset();
+            this.uploadAudioPercentage = 0;
+            this.album.attributes.tracks.push(response.data)
+          })
+          .catch((e) => {
+            this.$root.alertError(parseAxiosError(e));
+            this.uploadingAudio = false;
+            this.uploadAudioPercentage = 0;
+            this.$refs.audioFile.reset();
           });
       },
       setBreadcrumbs(){

@@ -1,6 +1,6 @@
 
 import json
-
+import os.path
 from flask import Flask, current_app, jsonify, request, session
 from marshmallow import ValidationError, validate
 from marshmallow_jsonapi import fields
@@ -26,6 +26,16 @@ class ArtistSchema(Schema):
         type_ = "artist"
 
 
+class TrackSchema(Schema):
+    id = fields.Str(dump_only=True)
+    title = fields.Str(required=True, validate=validate.Length(min=1, error='Title cannot be blank'))
+    audio_url = fields.Str(dump_only=True)
+    sort= fields.Str(dump_only=True)
+
+    class Meta:
+        type_ = "track"
+
+
 class AlbumSchema(Schema):
     id = fields.Str(dump_only=True)
     title = fields.Str(required=True, validate=validate.Length(min=1, error='Title cannot be blank'))
@@ -35,6 +45,8 @@ class AlbumSchema(Schema):
     sort = fields.Int(dump_only=True)
     profile_image_url = fields.Str(dump_only=True)
     thumbnail_image_url = fields.Str(dump_only=True)
+
+    tracks = fields.List(fields.Nested(TrackSchema), dump_only=True)
 
     class Meta:
         type_ = "album"
@@ -179,8 +191,6 @@ def edit_album(artist_id, album_id):
     data = schema.dump(album)
     return J(data)
 
-    
-
 
 @current_app.route('/api/v1/me/artists/<artist_id>/image', methods=['POST'])
 @auth.requires_auth
@@ -293,7 +303,7 @@ def add_album_image(artist_id, album_id):
 
     try:
         file_data = get_posted_image(request)
-    except InvalidImage as err:
+    except InvalidData as err:
         return J(to_error_object(err.message)), 400
 
     # get artist
@@ -313,7 +323,7 @@ def add_album_image(artist_id, album_id):
         admin.names.safe_obj_name(album.title),
         album.id,
         ids.new_id()[:8])
-    admin.files.save(file_data, object_name, content_type='image/jpeg')
+    admin.files.save(file_data, object_name, content_type=admin.files.content_types['jpg'])
     # delete old file, if exists
     if album.image_url:
         admin.files.delete(album.image_url)
@@ -328,25 +338,73 @@ def add_album_image(artist_id, album_id):
     return J(data)
 
 
+@current_app.route('/api/v1/me/artists/<artist_id>/albums/<album_id>/tracks', methods=['POST'])
+@auth.requires_auth
+def add_album_track(artist_id, album_id):
+
+    try:
+        file_data = get_posted_audio(request)
+    except InvalidData as err:
+        return J(to_error_object(err.message)), 400
+
+     # get artist
+    artist = admin.artists.by_id_for_owner(artist_id, current_user_email())
+    if not artist:
+        raise Forbidden
+
+    # get album
+    album = admin.albums.get_by_id(album_id)
+    if album.artist.id != artist_id:
+        raise Forbidden
+
+    # persist file
+    name, extension = os.path.splitext(file_data.filename)
+    track_title = admin.names.safe_obj_name(name)
+    object_name = 'art/{0}-{1}/{2}-{3}/{4}{5}'.format(
+        artist.normalized_name, 
+        artist.id,
+        admin.names.safe_obj_name(album.title),
+        album.id,
+        track_title,
+        extension)
+    url = admin.files.save(file_data, object_name, content_type=admin.files.content_types.get(extension))
+
+    track = admin.albums.create_track(album, track_title=track_title, audio_url=url)
+
+    data = TrackSchema().dump(track)
+    return J(data)
+
+
 def to_error_object(message):
     """ make a JSONAPI error object from a single message string """
     return {'errors': [{'detail': message}]}
 
 
-class InvalidImage(Exception):
+class InvalidData(Exception):
     def __init__(self, message):
         self.message = message
 
 
+
 def get_posted_image(request, key='image_file'):
     if key not in request.files:
-        raise InvalidImage(message='no image file posted')
+        raise InvalidData(message='no image file posted')
 
     file_data = request.files[key]
     if not file_data.filename.endswith('.jpg') and not file_data.filename.endswith(".jpeg"):
-        raise InvalidImage(message='Only JPEG files can be used for images')
+        raise InvalidData(message='Only JPEG files can be used for images')
 
     return file_data
+
+
+def get_posted_audio(request, key='audio_file'):
+    if key not in request.files:
+        raise InvalidData(message='no audio file posted')
+
+    file_data = request.files[key]
+
+    return file_data
+
 
 
 
