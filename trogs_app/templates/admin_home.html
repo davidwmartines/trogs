@@ -212,7 +212,6 @@
   </div>
 
   <div class="container" v-if="!editing">
- 
     <h2>{{album.attributes.title}}</h3>
     <p>{{album.attributes.description}}</p>
     <p>{{album.attributes.release_date}}</p>
@@ -221,10 +220,7 @@
       <b-button variant="primary" v-on:click="edit()">Edit</b-button>
     </div>
     <img v-if="album.attributes.profile_image_url" :src="album.attributes.profile_image_url" width="300" height="300" />
-    <div
-      v-if="!album.attributes.profile_image_url"
-      class="placeholder box300"
-    ></div>
+    <div v-if="!album.attributes.profile_image_url"class="placeholder box300"></div>
     <div>
       <div>
         <b-form-file
@@ -411,6 +407,7 @@
           .then((response) => {
             this.$root.alertSuccess('Artist updated');
             this.artist = response.data.data;
+            this.origAttributes = Object.assign({}, this.artist.attributes);
             this.editing = false;
             this.saving = false;
           })
@@ -555,6 +552,7 @@
           .then((response) => {
             this.$root.alertSuccess('Album updated');
             this.album = response.data.data;
+            this.origAttributes = Object.assign({}, this.album.attributes);
             this.editing = false;
             this.saving = false;
           })
