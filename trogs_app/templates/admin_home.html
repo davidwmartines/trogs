@@ -269,7 +269,7 @@
           <b-button size="sm" variant="secondary" @click="$set(track, 'confirmDelete', false)" :disabled="track.deleting">Cancel</b-button>
         </b-alert>
         <div class="mt-2">
-          <audio controls><source>{{track.data.attributes.audio_url}}</source</audio>
+          <audio controls><source :src="track.data.attributes.audio_url"/></audio>
         </div>
       </b-card-text>
     </b-card>
