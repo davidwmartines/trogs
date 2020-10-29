@@ -113,7 +113,7 @@
       <b-button v-on:click="cancel()">Cancel</b-button>
     </div>
 
-    <div class="container" v-if="$route.params.artist_id !== 'new'">
+    <div class="container" v-if="$route.params.artist_id !== 'new' && !editing">
       <div class="mt-4">
         <router-link :to="`/artists/${artist.id}/albums`">
           <b-button block variant="outline-success">Albums</b-button>
@@ -129,22 +129,21 @@
           <b-button block variant="outline-success">Singles</b-button>
         </router-link>
       </div>
-      <div>
-        <div class="mt-4 mb-4">
-          <b-button variant="outline-danger" size="sm" v-if="!confirmingDelete" @click="confirmingDelete = true">Delete</b-button>
-          <b-alert variant="warning" :show="confirmingDelete">
-            <h5>Warning</h5>
-            <p>
-              Deleting will PERMANENTLY REMOVE the artist <b>{{artist.attributes.name}}</b> including ALL ALUBUMS, SINGLES and TRACKS.
-            </p>
-            <p>Are you sure?</p>
-            <b-button variant="danger" @click="deleteArtist()" :disabled="deleting">
-              <b-spinner small v-if="deleting"></b-spinner>
-              {{ deleting ? "Deleting..." : "Yes, Delete"}}
-            </b-button>
-            <b-button @click="confirmingDelete = false" :disabled="deleting">Cancel</b-button>
-          </b-alert>
-        </div>
+      <div class="mt-4 mb-4">
+        <hr>
+        <b-button variant="outline-danger" size="sm" v-if="!confirmingDelete" @click="confirmingDelete = true">Delete Artist</b-button>
+        <b-alert variant="warning" :show="confirmingDelete">
+          <h5>Warning</h5>
+          <p>
+            Deleting will PERMANENTLY REMOVE the artist <b>{{artist.attributes.name}}</b> including ALL ALUBUMS, SINGLES and TRACKS.
+          </p>
+          <p>Are you sure?</p>
+          <b-button variant="danger" @click="deleteArtist()" :disabled="deleting">
+            <b-spinner small v-if="deleting"></b-spinner>
+            {{ deleting ? "Deleting..." : "Yes, Delete"}}
+          </b-button>
+          <b-button @click="confirmingDelete = false" :disabled="deleting">Cancel</b-button>
+        </b-alert>
       </div>
     </div>
   </div>
@@ -186,7 +185,7 @@
 <div>
   
   <div class="container" v-if="editing">
-    <h2 v-if="$route.params.album_id === 'new'">New Album</h2>
+    <h2>{{ $route.params.album_id === 'new' ? "New Album" : "Edit Album" }}</h2>
     <b-form-group label="Title" id="input-group-1" label-for="input-title">
       <b-form-input id="input-title" v-model="album.attributes.title" required placeholder="Enter the album title"></b-form-input>
     </b-form-group>
@@ -242,9 +241,9 @@
       </div>
     </div>
   </div>
-  <div class="container mt-4" v-if="$route.params.album_id != 'new'">
+  <div class="container mt-4" v-if="$route.params.album_id != 'new' && !editing">
     <h4>Tracks</h4>
-    <b-card class="mb-1" v-for="track in album.attributes.tracks" :key="track.data.id">
+    <b-card class="mb-1" v-for="track, index in album.attributes.tracks" :key="track.data.id">
       <b-card-title v-if="!track.inRenameMode">{{track.data.attributes.title}}</b-card-title>
       <div v-if="track.inRenameMode">
         <b-form-input class="mb-1" v-model="track.data.attributes.title" required></b-form-input>
@@ -294,6 +293,23 @@
       </b-card-text>
     </b-card>
   </div>
+  <div class="container mt-4 mb-4" v-if="$route.params.album_id != 'new' && !editing">
+    <hr>
+    <b-button variant="outline-danger" size="sm" v-if="!confirmingDelete" @click="confirmingDelete = true">Delete Album</b-button>
+    <b-alert variant="warning" :show="confirmingDelete">
+      <h5>Warning</h5>
+      <p>
+        Deleting will PERMANENTLY REMOVE the album <b>{{album.attributes.title}}</b> including all it's tracks.
+      </p>
+      <p>Are you sure?</p>
+      <b-button variant="danger" @click="deleteAlbum()" :disabled="deleting">
+        <b-spinner small v-if="deleting"></b-spinner>
+        {{ deleting ? "Deleting..." : "Yes, Delete"}}
+      </b-button>
+      <b-button @click="confirmingDelete = false" :disabled="deleting">Cancel</b-button>
+    </b-alert>
+  </div>
+</div>
 
 </div>
 </component>
@@ -523,6 +539,8 @@
         uploading: false,
         uploadingAudio: false,
         saveFunction: this.create,
+        confirmingDelete: false,
+        deleting: false,
         album: {
           id: '',
           type: 'album',
@@ -616,6 +634,9 @@
             this.$root.alertError(parseAxiosError(e));
             this.saving = false;
           });
+      },
+      deleteAlbum(){
+
       },
       handleFileUpload() {
         if (!this.fileToUpload) {
