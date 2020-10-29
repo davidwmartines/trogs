@@ -69,7 +69,11 @@ def get_resized_image_url(path, dim, **kwargs):
     if not path:
         return ''
 
-    return current_app.resize(path, dim, **kwargs)
+    try:
+        return current_app.resize(path, dim, **kwargs)
+    except Exception as e:
+        print(e)
+        return ''
 
 
 @current_app.route('/api/v1/me/artists')
@@ -78,11 +82,9 @@ def my_artists():
     owner = current_user_email()
     artists = admin.artists.list_for_owner(owner)
     for artist in artists:
-        try:
-            artist.thumbnail_image_url = get_resized_image_url(
-                artist.image_url, '50x50')
-        except Exception as e:
-            print(e)
+        artist.thumbnail_image_url = get_resized_image_url(
+            artist.image_url, '50x50')
+
     data = ArtistSchema(many=True).dump(artists)
     return data
 
@@ -97,6 +99,7 @@ def my_artist_by_id(id):
 
     artist.profile_image_url = get_resized_image_url(
         artist.image_url, '300')
+ 
     data = ArtistSchema().dump(artist)
     return data
 
@@ -248,11 +251,8 @@ def list_my_artist_albums(artist_id):
 
     albums = admin.albums.list_for_artist(artist_id)
     for album in albums:
-        try:
-            album.thumbnail_image_url = get_resized_image_url(
-                album.image_url, '80x80')
-        except Exception as e:
-            print(e)
+        album.thumbnail_image_url = get_resized_image_url(
+            album.image_url, '80x80')
     data = AlbumSchema(many=True).dump(albums)
     return data
 
