@@ -145,6 +145,43 @@ def edit_my_artist(artist_id):
     return J(data)
 
 
+@current_app.route('/api/v1/me/artists/<artist_id>/albums/<album_id>', methods=['PATCH'])
+@auth.requires_auth
+def edit_album(artist_id, album_id):
+   
+    # load data and schema-validate
+    schema = AlbumSchema()
+    input_data = request.get_json() or {}
+    try:
+        data = schema.load(input_data)
+    except ValidationError as err:
+        return J(err.messages), 422
+
+    # get artist
+    artist = admin.artists.by_id_for_owner(artist_id, current_user_email())
+    if not artist:
+        raise Forbidden
+
+    # get album
+    album = admin.albums.get_by_id(album_id)
+    if album.artist.id != artist_id:
+        raise Forbidden
+
+    # save
+    try:
+        album = admin.albums.update(album, data)
+    except admin.albums.TitleExists as err:
+        return J(to_error_object(err.message)), 422
+
+    # return result
+    album.profile_image_url = get_resized_image_url(
+        album.image_url, '300x300')
+    data = schema.dump(album)
+    return J(data)
+
+    
+
+
 @current_app.route('/api/v1/me/artists/<artist_id>/image', methods=['POST'])
 @auth.requires_auth
 def add_artist_image(artist_id):

@@ -16,10 +16,10 @@ def item_to_album(item):
         title=item['AlbumTitle'],
         description=item.get('Description', ''),
         license = item.get('License', ''),
-        release_date = item['ReleaseDate'],
+        release_date = item.get('ReleaseDate'),
         image_url=item.get('ImageURL'),
         sort = item['AC_SK'],
-        artist = Artist(id = item['PK'], name=item['ArtistName']),
+        artist = Artist(id = item['PK'], name=item.get('ArtistName')),
         profile_image_url='',
         thumbnail_image_url=''
     )
@@ -77,7 +77,8 @@ def add(artist, data):
         IndexName='IX_ARTIST_CONTENT',
         ScanIndexForward=True,
         KeyConditionExpression=Key('AC_PK').eq(
-            artist.id) & Key('AC_SK').begins_with('2')
+            artist.id) & Key('AC_SK').begins_with('2'),
+        ProjectionExpression='PK, AA_PK, AC_SK, AlbumTitle'
     )
     existing_albums = list(map(item_to_album, res['Items']))
     if any(album.title == existing.title for existing in existing_albums):
@@ -125,6 +126,40 @@ def update_image_url(artist_id, album_id, image_url):
         }
     )
     print('done')
+
+
+def update(album, data):
+    
+    for key, val in data.items():
+        setattr(album, key, val)
+
+    # get existing albums to check name
+    table = db.get_table()
+    res = table.query(
+        IndexName='IX_ARTIST_CONTENT',
+        ScanIndexForward=True,
+        KeyConditionExpression=Key('AC_PK').eq(
+            album.artist.id) & Key('AC_SK').begins_with('2'),
+        ProjectionExpression='PK, AA_PK, AC_SK, AlbumTitle'
+    )
+    existing_albums = list(map(item_to_album, res['Items']))
+    if any((album.title == existing.title and album.id != existing.id) for existing in existing_albums):
+        raise TitleExists
+
+    table.update_item(
+        Key={
+            'PK': album.artist.id,
+            'SK': album.id
+        },
+        UpdateExpression='set AlbumTitle = :title, ReleaseDate = :release_date, License = :license, Description = :description',
+        ExpressionAttributeValues={
+            ':title': album.title,
+            ':release_date': album.release_date,
+            ':license': album.license,
+            ':description': album.description
+        }
+    )
+    return album
 
 
 class TitleExists(Exception):

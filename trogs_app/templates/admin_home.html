@@ -250,8 +250,6 @@
 </div>
 </component>
 
-
-
 {% endraw %} {% endblock %} {% block scripts %} {% if env == 'development' %}
 <script src="https://cdn.jsdelivr.net/npm/vue@2.6.12/dist/vue.js"></script>
 <script src="https://unpkg.com/vue-router/dist/vue-router.js"></script>
@@ -540,7 +538,30 @@
           });
       },
       update(){
-
+        this.saving = true;
+        const patchData = {
+          data: {
+            attributes: {
+             title: this.album.attributes.title,
+             release_date: this.album.attributes.release_date,
+             license: this.album.attributes.license,
+             description: this.album.attributes.description
+            },
+            type: 'album'
+          },
+        };
+        axios
+          .patch(`/api/v1/me/artists/${this.$route.params.artist_id}/albums/${this.$route.params.album_id}`, patchData)
+          .then((response) => {
+            this.$root.alertSuccess('Album updated');
+            this.album = response.data.data;
+            this.editing = false;
+            this.saving = false;
+          })
+          .catch((e) => {
+            this.$root.alertError(parseAxiosError(e));
+            this.saving = false;
+          });
       },
       handleFileUpload() {
         if (!this.fileToUpload) {
