@@ -453,7 +453,7 @@ def delete_my_album(artist_id, album_id):
     if album.artist.id != artist_id:
         raise Forbidden
 
-    admin.albums.delete(album)
+    admin.albums.delete_album(album)
 
     return '', 204
 

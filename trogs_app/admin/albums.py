@@ -316,8 +316,18 @@ def change_track_title(album, track_id, new_title):
     return track
 
 
-def delete(album):
-    pass
+def delete_album(album):
+    table = db.get_table()
+    if len(album.tracks) == 0:
+        table.delete_item(
+            Key={'PK': album.artist.id, 'SK': album.id}
+        )
+    else:
+        items_to_delete = []
+        items_to_delete.append({'PK': album.artist.id, 'SK': album.id})
+        items_to_delete.extend(map(lambda track: ({'PK': track.id, 'SK': track.id}), album.tracks))
+        db.transactionally_delete(items_to_delete)
+
 
 
 def delete_track(album, track_id):

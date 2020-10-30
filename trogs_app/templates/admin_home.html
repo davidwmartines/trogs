@@ -638,8 +638,17 @@
           });
       },
       deleteAlbum(){
-        console.error('delete not implemented');
-      },
+        this.deleting = true;
+        axios
+          .delete(`/api/v1/me/artists/${this.$route.params.artist_id}/albums/${this.$route.params.album_id}`)
+          .then(() => router.push({
+            name: 'AlbumList',
+            params: { artist_id: this.$route.params.artist_id } }))
+          .catch((e) => {
+            this.$root.alertError(parseAxiosError(e));
+            this.deleting = false
+          });
+        },
       handleFileUpload() {
         if (!this.fileToUpload) {
           return;
@@ -796,7 +805,7 @@
   const routes = [
     { path: "/", component: ArtistList },
     { path: "/artists/:artist_id", component: ArtistDetail },
-    { path: "/artists/:artist_id/albums", component: AlbumList },
+    { path: "/artists/:artist_id/albums", component: AlbumList, name: 'AlbumList' },
     { path: "/artists/:artist_id/albums/:album_id", component: AlbumDetail },
     { path: "/artists/:artist_id/singles", component: SingleList },
     { path: "/artists/:artist_id/featured", component: Featured },
