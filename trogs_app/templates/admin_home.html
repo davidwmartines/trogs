@@ -244,10 +244,11 @@
   <div class="container mt-4" v-if="$route.params.album_id != 'new' && !editing">
     <h4>Tracks</h4>
     <b-card class="mb-1" v-for="track, index in album.attributes.tracks" :key="track.data.id">
+      <b-alert :show="track.alertShow" :variant="track.alertVariant">{{track.alert}}</b-alert>
       <b-card-title v-if="!track.inRenameMode">{{track.data.attributes.title}}</b-card-title>
       <div v-if="track.inRenameMode">
         <b-form-input class="mb-1" v-model="track.data.attributes.title" required></b-form-input>
-        <b-button size="sm" variant="primary" @click="renameTrack(track)" :disabled="track.deleting">
+        <b-button size="sm" variant="primary" @click="renameTrack(track)" :disabled="track.deleting || track.data.attributes.title === track.origTitle">
           <b-spinner small v-if="track.renaming"></b-spinner>
           {{ track.renaming ? "Saving..." : "Save" }}
         </b-button>
@@ -637,7 +638,7 @@
           });
       },
       deleteAlbum(){
-
+        console.error('delete not implemented');
       },
       handleFileUpload() {
         if (!this.fileToUpload) {
@@ -705,9 +706,33 @@
           });
       },
       renameTrack(track){
-        console.log('rename', track);
-        track.renaming = false;
-        track.inRenameMode = false;
+        this.$set(track, 'renaming',true);
+        this.$set(track, 'alertShow', 0);
+        const patchData = {
+          data: {
+            attributes: {
+             title: track.data.attributes.title,
+            },
+            type: 'track'
+          },
+        };
+        axios
+          .patch(`/api/v1/me/artists/${this.$route.params.artist_id}/albums/${this.$route.params.album_id}/tracks/${track.data.id}`, patchData)
+          .then((response) => {
+            this.$set(track, 'alert', 'Track renamed');
+            this.$set(track, 'alertShow', 2);
+            this.$set(track, 'alertVariant', 'success');
+            this.$set(track, 'renaming', false);
+            this.$set(track, 'inRenameMode', false);
+            this.$set(track, 'data.attributes.title', response.data.data.attributes.title);
+            this.$set(track, 'origTitle', response.data.data.attributes.title);
+          })
+          .catch((e) => {
+            this.$set(track, 'alert', parseAxiosError(e));
+            this.$set(track, 'alertShow', 5);
+            this.$set(track, 'alertVariant', 'danger');
+            this.$set(track, 'renaming', false);
+          });
       },
       deleteTrack(track){
         console.log('delete', track);
@@ -735,10 +760,6 @@
             this.$root.alertError(parseAxiosError(e));
             this.$set(track, 'moving', false);
           });
-      },
-      sortTrackDown(track){
-
-        track.moving=true;
       },
       setBreadcrumbs(){
         this.$root.setBreadcrumbs([

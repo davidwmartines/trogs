@@ -8,6 +8,7 @@ from . import names
 from . import exceptions
 from .models import Album, Artist, Track
 
+
 def item_to_album(item):
     """
     Converts a dictionary from the database to an Album instance.
@@ -16,11 +17,11 @@ def item_to_album(item):
         id=item['AA_PK'],
         title=item['AlbumTitle'],
         description=item.get('Description', ''),
-        license = item.get('License', ''),
-        release_date = item.get('ReleaseDate'),
+        license=item.get('License', ''),
+        release_date=item.get('ReleaseDate'),
         image_url=item.get('ImageURL'),
-        sort = item['AC_SK'],
-        artist = Artist(id = item['PK'], name=item.get('ArtistName')),
+        sort=item['AC_SK'],
+        artist=Artist(id=item['PK'], name=item.get('ArtistName')),
         profile_image_url='',
         thumbnail_image_url='',
         tracks=[]
@@ -32,10 +33,10 @@ def item_to_track(item):
     Converts a dictionary from the database to an album Track instance.
     """
     return Track(
-        id = item['PK'],
+        id=item['PK'],
         title=item['TrackTitle'],
         audio_url=item['AudioURL'],
-        sort = item['AA_SK']
+        sort=item['AA_SK']
     )
 
 
@@ -75,6 +76,7 @@ def album_to_item(album):
         'ImageURL': album.image_url
     }
 
+
 def list_for_artist(artist_id):
     """
     Gets a list of albums for the artist
@@ -85,7 +87,8 @@ def list_for_artist(artist_id):
     res = table.query(
         IndexName='IX_ARTIST_CONTENT',
         ScanIndexForward=True,
-        KeyConditionExpression=Key('AC_PK').eq(artist_id) & Key('AC_SK').begins_with('2')
+        KeyConditionExpression=Key('AC_PK').eq(
+            artist_id) & Key('AC_SK').begins_with('2')
     )
 
     return list(map(item_to_album, res['Items']))
@@ -100,7 +103,7 @@ def add(artist, data):
     if not hasattr(album, 'license'):
         setattr(album, 'license', '')
     if not hasattr(album, 'description'):
-        setattr(album, 'description', '') 
+        setattr(album, 'description', '')
 
     table = db.get_table()
     # get existing albums to check name and get next sort
@@ -122,7 +125,8 @@ def add(artist, data):
     else:
         album.sort = '200'
 
-    print("creating '{0}', id '{1}', sort {2}".format(album.title, album.id, album.sort))
+    print("creating '{0}', id '{1}', sort {2}".format(
+        album.title, album.id, album.sort))
 
     table.put_item(Item=album_to_item(album))
     return album
@@ -210,10 +214,10 @@ def create_track(album, track_title, audio_url):
         sort = '100'
 
     track = Track(
-        id = ids.new_id(), 
+        id=ids.new_id(),
         title=track_title,
         audio_url=audio_url,
-        sort = sort,
+        sort=sort,
         album=album)
 
     item = track_to_item(track)
@@ -226,13 +230,15 @@ def create_track(album, track_title, audio_url):
 def sort_track(album, track_id, direction):
 
     if len(album.tracks) < 2:
-        raise exceptions.ModelException(message='too few tracks to perform a sort')
+        raise exceptions.ModelException(
+            message='too few tracks to perform a sort')
 
     if direction not in ['up', 'down']:
         raise exceptions.InvalidData('invalid direction')
 
     # get index of track being moved
-    track_index = next((i for i, t in enumerate(album.tracks) if t.id == track_id), None)
+    track_index = next((i for i, t in enumerate(
+        album.tracks) if t.id == track_id), None)
     if track_index is None:
         raise exceptions.InvalidData("invaid track id")
 
@@ -256,14 +262,15 @@ def sort_track(album, track_id, direction):
 
     #print('move track {0} from {1} to {2}'.format(track_to_move.title, current_sort, track_to_move.sort))
     #print('bump track {0} to {1}'.format(track_to_bump.title, track_to_bump.sort))
-    
+
     # persist changes to both tracks in transaction
-    updates = [_make_sort_update(track_to_move), _make_sort_update(track_to_bump)]
-    #print(updates)
+    updates = [_make_sort_update(track_to_move),
+               _make_sort_update(track_to_bump)]
+    # print(updates)
     db.get_client().transact_write_items(TransactItems=updates)
 
-    #re-sort list
-    album.tracks.sort(key = lambda i:i.sort)
+    # re-sort list
+    album.tracks.sort(key=lambda i: i.sort)
 
 
 def _make_sort_update(track):
@@ -281,3 +288,29 @@ def _make_sort_update(track):
             'TableName': db.TABLE_NAME
         }
     }
+
+
+def change_track_title(album, track_id, new_title):
+    # get track to rename
+    track = next((t for t in album.tracks if t.id == track_id), None)
+    if track is None:
+        raise exceptions.InvalidData("invaid track")
+
+    # check unique name
+    if any((existing_track.title == new_title and existing_track.id != track.id) for existing_track in album.tracks):
+        raise exceptions.TrackTitleExists
+
+    track.title = new_title
+
+    table = db.get_table()
+    table.update_item(
+        Key={
+            'PK': track.id,
+            'SK': track.id
+        },
+        UpdateExpression='set TrackTitle = :new_title',
+        ExpressionAttributeValues={
+            ':new_title': track.title
+        }
+    )
+    return track

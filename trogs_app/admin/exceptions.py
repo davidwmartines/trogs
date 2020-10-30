@@ -13,4 +13,4 @@ class AlbumTitleExists(ModelException):
     message = 'Artist already has an album with that title.'
 
 class TrackTitleExists(ModelException):
-    message = "Album already has a tracj with that title."
+    message = "Album already has a track with that title."

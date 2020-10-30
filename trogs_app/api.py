@@ -394,6 +394,9 @@ def sort_album_track(artist_id, album_id, track_id):
     if album.artist.id != artist_id:
         raise Forbidden
 
+    if not any(track.id == track_id for track in album.tracks):
+        raise Forbidden
+
     direction = request.get_json()['data']['attributes']['direction']
 
     try:
@@ -402,6 +405,37 @@ def sort_album_track(artist_id, album_id, track_id):
         return J(to_error_object(err.message)), 422
 
     data = AlbumSchema().dump(album)
+    return J(data)
+
+@current_app.route('/api/v1/me/artists/<artist_id>/albums/<album_id>/tracks/<track_id>', methods=['PATCH'])
+@auth.requires_auth
+def rename_track(artist_id, album_id, track_id):
+
+    schema = TrackSchema()
+    try:
+        data = schema.load(request.get_json() or {})
+    except ValidationError as err:
+        return J(err.messages), 422
+
+     # get artist
+    artist = admin.artists.by_id_for_owner(artist_id, current_user_email())
+    if not artist:
+        raise Forbidden
+
+    # get album
+    album = admin.albums.get_by_id(album_id)
+    if album.artist.id != artist_id:
+        raise Forbidden
+
+    if not any(track.id == track_id for track in album.tracks):
+        raise Forbidden
+
+    try:
+        track = admin.albums.change_track_title(album, track_id, new_title=data['title'])
+    except admin.exceptions.ModelException as err:
+        return J(to_error_object(err.message)), 422
+
+    data =  TrackSchema().dump(track)
     return J(data)
 
 
