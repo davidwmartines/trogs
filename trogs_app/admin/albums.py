@@ -254,8 +254,12 @@ def sort_track(album, track_id, direction):
     track_to_move.sort = track_to_bump.sort
     track_to_bump.sort = current_sort
 
+    #print('move track {0} from {1} to {2}'.format(track_to_move.title, current_sort, track_to_move.sort))
+    #print('bump track {0} to {1}'.format(track_to_bump.title, track_to_bump.sort))
+    
     # persist changes to both tracks in transaction
     updates = [_make_sort_update(track_to_move), _make_sort_update(track_to_bump)]
+    #print(updates)
     db.get_client().transact_write_items(TransactItems=updates)
 
     #re-sort list
@@ -272,8 +276,8 @@ def _make_sort_update(track):
                 'PK': {'S': track.id},
                 'SK': {'S': track.id}
             },
-            'UpdateExpression': 'set Sort = :sort',
-            'ExpressionAttributeValues': {':sort': {'S', track.sort}},
+            'UpdateExpression': 'set AA_SK = :sort',
+            'ExpressionAttributeValues': {':sort': {'S': track.sort}},
             'TableName': db.TABLE_NAME
         }
     }

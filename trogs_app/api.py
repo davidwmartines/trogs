@@ -382,7 +382,7 @@ def add_album_track(artist_id, album_id):
 
 @current_app.route('/api/v1/me/artists/<artist_id>/albums/<album_id>/tracks/<track_id>/sort', methods=['POST'])
 @auth.requires_auth
-def sort_album_track(aritst_id, album_id, track_id, direction):
+def sort_album_track(artist_id, album_id, track_id):
 
     # get artist
     artist = admin.artists.by_id_for_owner(artist_id, current_user_email())
@@ -394,12 +394,14 @@ def sort_album_track(aritst_id, album_id, track_id, direction):
     if album.artist.id != artist_id:
         raise Forbidden
 
+    direction = request.get_json()['data']['attributes']['direction']
+
     try:
         admin.albums.sort_track(album, track_id, direction)
     except admin.exceptions.ModelException as err:
         return J(to_error_object(err.message)), 422
 
-    data = TrackSchema(many=True).dump(album.tracks)
+    data = AlbumSchema().dump(album)
     return J(data)
 
 
