@@ -255,8 +255,9 @@
       </div>
       <b-card-text>
         <div v-if="(!track.inRenameMode && !track.confirmDelete)">
-          <b-button size="sm" variant="secondary" @click="sortTrackUp(track)" title="Move UP">^</b-button>
-          <b-button size="sm" variant="secondary" @click="sortTrackDown(track)" title="Move DOWN">v</b-button>
+          <b-spinner small v-if="track.moving"></b-spinner>
+          <b-button size="sm" variant="secondary" @click="sortTrackUp(track)" title="Move UP" v-if="!track.moving">^</b-button>
+          <b-button size="sm" variant="secondary" @click="sortTrackDown(track)" title="Move DOWN" v-if="!track.moving">v</b-button>
           <b-button size="sm" variant="primary" @click="$set(track, 'inRenameMode', true); $set(track, 'origTitle', track.data.attributes.title)">Rename</b-button>
           <b-button size="sm" variant="danger" @click="$set(track, 'confirmDelete', true)">Delete</b-button>
         </div>
@@ -714,10 +715,29 @@
         track.confirmDelete=false;
       },
       sortTrackUp(track){
-        console.log('sort up', track);
+        track.moving = true;
+        const postData = {
+          data: {
+            attributes: {
+              direction: 'up'
+            },
+            type: 'sort'
+          }
+        };
+        axios
+          .post(`/api/v1/me/artists/${this.$route.params.artist_id}/albums/${this.$route.params.album_id}/tracks/${track.data.id}/sort`, postData)
+          .then((response) => {
+            track.moving = false;
+            this.album.attributes.tracks = response.data;
+          })
+          .catch((e) => {
+            this.$root.alertError(parseAxiosError(e));
+            track.moving = false;
+          });
       },
       sortTrackDown(track){
-        console.log('sort down', track)
+
+        track.moving=true;
       },
       setBreadcrumbs(){
         this.$root.setBreadcrumbs([

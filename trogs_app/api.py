@@ -11,6 +11,7 @@ import admin.albums
 import admin.artists
 import admin.files
 import admin.names
+import admin.exceptions
 import auth
 import ids
 
@@ -50,6 +51,7 @@ class AlbumSchema(Schema):
 
     class Meta:
         type_ = "album"
+
 
 
 def J(*args, **kwargs):
@@ -122,7 +124,7 @@ def add_my_artist():
     # save
     try:
         artist = admin.artists.create(data)
-    except admin.artists.NameIsTaken as err:
+    except admin.exceptions.ModelException as err:
         return J(to_error_object(err.message)), 422
 
     # return result
@@ -150,7 +152,7 @@ def edit_my_artist(artist_id):
     # save
     try:
         artist = admin.artists.update(artist, data)
-    except admin.artists.NameIsTaken as err:
+    except admin.exceptions.ModelException as err:
         return J(to_error_object(err.message)), 422
 
     # return result
@@ -185,7 +187,7 @@ def edit_album(artist_id, album_id):
     # save
     try:
         album = admin.albums.update(album, data)
-    except admin.albums.TitleExists as err:
+    except admin.exceptions.ModelException as err:
         return J(to_error_object(err.message)), 422
 
     # return result
@@ -201,7 +203,7 @@ def add_artist_image(artist_id):
 
     try:
         file_data = get_posted_image(request)
-    except InvalidImage as err:
+    except admin.exceptions.InvalidData as err:
         return J(to_error_object(err.message)), 400
    
     # get artist
@@ -273,7 +275,7 @@ def add_my_album(artist_id):
 
     try:
         newAlbum = admin.albums.add(artist, data)
-    except admin.albums.TitleExists as err:
+    except admin.exceptions.ModelException as err:
         return J(to_error_object(err.message)), 422
 
     return J(schema.dump(newAlbum))
@@ -344,7 +346,7 @@ def add_album_track(artist_id, album_id):
 
     try:
         file_data = get_posted_audio(request)
-    except InvalidData as err:
+    except admin.exceptions.InvalidData as err:
         return J(to_error_object(err.message)), 400
 
      # get artist
@@ -369,9 +371,35 @@ def add_album_track(artist_id, album_id):
         extension)
     url = admin.files.save(file_data, object_name, content_type=admin.files.content_types.get(extension))
 
-    track = admin.albums.create_track(album, track_title=track_title, audio_url=url)
+    try:
+        track = admin.albums.create_track(album, track_title=track_title, audio_url=url)
+    except admin.exceptions.ModelException as err:
+        return J(to_error_object(err.message)), 422
 
     data = TrackSchema().dump(track)
+    return J(data)
+
+
+@current_app.route('/api/v1/me/artists/<artist_id>/albums/<album_id>/tracks/<track_id>/sort', methods=['POST'])
+@auth.requires_auth
+def sort_album_track(aritst_id, album_id, track_id, direction):
+
+    # get artist
+    artist = admin.artists.by_id_for_owner(artist_id, current_user_email())
+    if not artist:
+        raise Forbidden
+
+    # get album
+    album = admin.albums.get_by_id(album_id)
+    if album.artist.id != artist_id:
+        raise Forbidden
+
+    try:
+        admin.albums.sort_track(album, track_id, direction)
+    except admin.exceptions.ModelException as err:
+        return J(to_error_object(err.message)), 422
+
+    data = TrackSchema(many=True).dump(album.tracks)
     return J(data)
 
 
@@ -380,26 +408,20 @@ def to_error_object(message):
     return {'errors': [{'detail': message}]}
 
 
-class InvalidData(Exception):
-    def __init__(self, message):
-        self.message = message
-
-
-
 def get_posted_image(request, key='image_file'):
     if key not in request.files:
-        raise InvalidData(message='no image file posted')
+        raise admin.exceptions.InvalidData(message='no image file posted')
 
     file_data = request.files[key]
     if not file_data.filename.endswith('.jpg') and not file_data.filename.endswith(".jpeg"):
-        raise InvalidData(message='Only JPEG files can be used for images')
+        raise admin.exceptions.InvalidData(message='Only JPEG files can be used for images')
 
     return file_data
 
 
 def get_posted_audio(request, key='audio_file'):
     if key not in request.files:
-        raise InvalidData(message='no audio file posted')
+        raise admin.exceptions.InvalidData(message='no audio file posted')
 
     file_data = request.files[key]
 

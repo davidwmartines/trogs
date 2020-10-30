@@ -5,6 +5,7 @@ import ids
 from boto3.dynamodb.conditions import Key
 
 from . import names
+from . import exceptions
 from .models import Artist
 
 
@@ -95,7 +96,7 @@ def create(data):
     artist.image_url = ''
 
     if name_is_taken(artist.normalized_name):
-        raise NameIsTaken
+        raise exceptions.NameIsTaken
 
     item = artist_to_item(artist)
     table = db.get_table()
@@ -233,5 +234,3 @@ def name_is_taken(test_name, exclude_id=None):
     return len(filter(lambda item: item['PK'] != exclude_id, result['Items'])) != 0
 
 
-class NameIsTaken(Exception):
-    message = 'Artist name is not available.'

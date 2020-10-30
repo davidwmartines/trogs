@@ -5,6 +5,7 @@ import ids
 from boto3.dynamodb.conditions import Key
 
 from . import names
+from . import exceptions
 from .models import Album, Artist, Track
 
 def item_to_album(item):
@@ -112,7 +113,7 @@ def add(artist, data):
     )
     existing_albums = list(map(item_to_album, res['Items']))
     if any(album.title == existing.title for existing in existing_albums):
-        raise TitleExists
+        raise exceptions.AlbumTitleExists
 
     if len(existing_albums) > 0:
         last_album = existing_albums[-1]
@@ -177,7 +178,7 @@ def update(album, data):
     )
     existing_albums = list(map(item_to_album, res['Items']))
     if any((album.title == existing.title and album.id != existing.id) for existing in existing_albums):
-        raise TitleExists
+        raise exceptions.AlbumTitleExists
 
     table.update_item(
         Key={
@@ -197,7 +198,16 @@ def update(album, data):
 
 def create_track(album, track_title, audio_url):
 
-    sort = "100" # determine
+    if len(album.tracks) > 0:
+
+        if any(existing_track.title == track_title for existing_track in album.tracks):
+            raise exceptions.TrackTitleExists
+
+        last_track = album.tracks[-1]
+        last_sort = int(last_track.sort)
+        sort = str(last_sort + 1)
+    else:
+        sort = '100'
 
     track = Track(
         id = ids.new_id(), 
@@ -207,13 +217,63 @@ def create_track(album, track_title, audio_url):
         album=album)
 
     item = track_to_item(track)
-
     table = db.get_table()
     table.put_item(Item=item)
 
     return track
 
 
+def sort_track(album, track_id, direction):
 
-class TitleExists(Exception):
-    message = 'Artist already has an album with that title.'
+    if len(album.tracks) < 2:
+        raise exceptions.ModelException(message='too few tracks to perform a sort')
+
+    if direction not in ['up', 'down']:
+        raise exceptions.InvalidData('invalid direction')
+
+    # get index of track being moved
+    track_index = next((i for i, t in enumerate(album.tracks) if t.id == track_id), None)
+    if track_index is None:
+        raise exceptions.InvalidData("invaid track id")
+
+    # determine track to "bump" (i.e. swap sorts with)
+    if direction == 'up':
+        if track_index == 0:
+            track_to_bump = album.tracks[-1]
+        else:
+            track_to_bump = album.tracks[track_index-1]
+    else:
+        if track_index == len(album.tracks)-1:
+            track_to_bump = album.tracks[0]
+        else:
+            track_to_bump = album.tracks[track_index+1]
+
+    # swap their sorts
+    track_to_move = album.tracks[track_index]
+    current_sort = track_to_move.sort
+    track_to_move.sort = track_to_bump.sort
+    track_to_bump.sort = current_sort
+
+    # persist changes to both tracks in transaction
+    updates = [_make_sort_update(track_to_move), _make_sort_update(track_to_bump)]
+    db.get_client().transact_write_items(TransactItems=updates)
+
+    #re-sort list
+    album.tracks.sort(key = lambda i:i.sort)
+
+
+def _make_sort_update(track):
+    """
+    creates a TransactWriteItem for updating the sort of a track.
+    """
+    return {
+        'Update': {
+            'Key': {
+                'PK': {'S': track.id},
+                'SK': {'S': track.id}
+            },
+            'UpdateExpression': 'set Sort = :sort',
+            'ExpressionAttributeValues': {':sort': {'S', track.sort}},
+            'TableName': db.TABLE_NAME
+        }
+    }
