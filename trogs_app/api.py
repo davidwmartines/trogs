@@ -12,6 +12,7 @@ import admin.artists
 import admin.files
 import admin.names
 import admin.exceptions
+import admin.singles
 import auth
 import ids
 
@@ -51,6 +52,18 @@ class AlbumSchema(Schema):
 
     class Meta:
         type_ = "album"
+
+
+class SingleSchema(Schema):
+    id = fields.Str(dump_only=True)
+    title = fields.Str(required=True, validate=validate.Length(min=1, error='Title cannot be blank'))
+    release_date = fields.Str(required=True)
+    license = fields.Str(default='')
+    audio_url = fields.Str(dump_only=True)
+    sort= fields.Str(dump_only=True)
+
+    class Meta:
+        type_ = "single"
 
 
 
@@ -477,6 +490,21 @@ def delete_album_track(artist_id, album_id, track_id):
 
     admin.albums.delete_track(album, track_id)
     data = AlbumSchema().dump(album)
+    return J(data)
+
+
+@current_app.route('/api/v1/me/artists/<artist_id>/singles')
+@auth.requires_auth
+def my_artist_singles(artist_id):
+
+    # get artist
+    artist = admin.artists.by_id_for_owner(artist_id, current_user_email())
+    if not artist:
+        raise Forbidden
+
+    singles = admin.singles.list_for_artist(artist_id)
+
+    data = SingleSchema(many=True).dump(singles)
     return J(data)
 
 

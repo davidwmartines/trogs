@@ -6,7 +6,7 @@ import ids
 from boto3.dynamodb.conditions import Key
 
 from . import exceptions, names
-from .models import Album, Artist, Track
+from .models import Album, Artist, Track, parse_release_date
 
 
 def item_to_album(item):
@@ -26,12 +26,6 @@ def item_to_album(item):
         thumbnail_image_url='',
         tracks=[]
     )
-
-
-def parse_release_date(item):
-    date_string = item.get(
-        'ReleaseDate', datetime.datetime.now().strftime('%Y-%m-%d'))
-    return dateutil.parser.parse(date_string).strftime('%Y-%m-%d')
 
 
 def item_to_track(item):

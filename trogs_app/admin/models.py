@@ -18,3 +18,9 @@ class Single(Model):
 
 class Artist(Model):
     pass
+
+import datetime, dateutil
+def parse_release_date(item):
+    date_string = item.get(
+        'ReleaseDate', datetime.datetime.now().strftime('%Y-%m-%d'))
+    return dateutil.parser.parse(date_string).strftime('%Y-%m-%d')

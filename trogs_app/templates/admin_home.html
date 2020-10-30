@@ -316,6 +316,66 @@
 </div>
 </component>
 
+<component id="SingleList" style="display: none;">
+<div class="container">
+  <h2>Singles</h2>
+  <b-alert show><small>Upload individual songs here.  You can add them to an album later.</small></b-alert>
+  <div v-if="loading">
+    <b-spinner></b-spinner>
+  </div>
+  <b-card class="mb-1" v-for="single, index in singles" :key="single.id">
+    <b-alert :show="single.alertShow" :variant="single.alertVariant">{{single.alert}}</b-alert>
+    <b-card-title v-if="!single.inRenameMode">{{single.attributes.title}}</b-card-title>
+    <div v-if="single.inRenameMode">
+      <b-form-input class="mb-1" v-model="single.attributes.title" required></b-form-input>
+      <b-button size="sm" variant="primary" @click="renameSingle(single)" :disabled="single.deleting || single.attributes.title === single.origTitle">
+        <b-spinner small v-if="single.renaming"></b-spinner>
+        {{ single.renaming ? "Saving..." : "Save" }}
+      </b-button>
+      <b-button size="sm" variant="secondary" @click="$set(single, 'inRenameMode', false); $set(single.attributes, 'title', single.origTitle)" :disabled="single.deleting">Cancel</b-button>
+    </div>
+    <b-card-text>
+      <div v-if="(!single.inRenameMode && !single.confirmDelete)">
+        <span v-if="single.moving"><b-spinner small ></b-spinner> Sorting...</span>
+        <b-button size="sm" variant="secondary" @click="sortSingle(single, 'up')" title="Move UP" v-if="!single.moving">^</b-button>
+        <b-button size="sm" variant="secondary" @click="sortSingle(single, 'down')" title="Move DOWN" v-if="!single.moving">v</b-button>
+        <b-button size="sm" variant="primary" @click="$set(single, 'inRenameMode', true); $set(single, 'origTitle', single.attributes.title)">Rename</b-button>
+        <b-button size="sm" variant="danger" @click="$set(single, 'confirmDelete', true)">Delete</b-button>
+      </div>
+      <b-alert variant="warning" :show="single.confirmDelete">
+        <p>Are you sure you want to delete <b>{{single.attributes.title}}</b>?</p>
+        <b-button size="sm" variant="danger" @click="deleteSingle(single)" :disabled="single.deleting">
+          <b-spinner small v-if="single.deleting"></b-spinner>
+          {{ single.deleting ? "Deleting..." : "Yes, Delete"}}
+        </b-button>
+        <b-button size="sm" variant="secondary" @click="$set(single, 'confirmDelete', false)" :disabled="single.deleting">Cancel</b-button>
+      </b-alert>
+      <div class="mt-2">
+        <audio controls><source :src="single.attributes.audio_url"/></audio>
+      </div>
+    </b-card-text>
+  </b-card>
+  <b-card v-if="!loading">
+    <b-card-text>
+      <b-form-file
+        v-model="audioFileToUpload"
+        placeholder="+ Add"
+        browse-text="Upload Audio File"
+        id="audioFile"
+        ref="audioFile"
+        accept="audio/*"
+        v-on:input="handleTrackFileUpload()"
+      ></b-form-file>
+      <div class="text-right"><small>flac, m4a, mp3, oga, ogg, wav</small></div>
+      <div v-show="uploadingAudio">
+        <b-spinner small></b-spinner>
+        Uploading audio file...
+        <progress max="100" :value.prop="uploadAudioPercentage"></progress>
+      </div>
+    </b-card-text>
+  </b-card>
+</div>
+</component>
 {% endraw %} {% endblock %} {% block scripts %} {% if env == 'development' %}
 <script src="{{url_for('static', filename='vue.js')}}"></script>
 <script src="{{url_for('static', filename='vue-router.js')}}"></script>
@@ -791,9 +851,132 @@
     template: "#AlbumDetail"
   };
 
-  const Featured = { template: "<div>featured</div>" };
-  const SingleList = { template: "<div>singles</div>" };
+  const SingleList = {
+    data: function(){
+      return {
+        loading: false,
+        uploadAudioPercentage: 0,
+        uploadingAudio: false,
+        confirmingDelete: false,
+        audioFileToUpload: null,
+        singles: []
+      };
+    },
+    mounted() {
+      this.loading = true;
+      axios.get(`/api/v1/me/artists/${this.$route.params.artist_id}/singles`)
+        .then((response) => {
+          this.singles = response.data.data;
+          this.loading = false;
+          this.$root.setBreadcrumbs([
+            {text: this.$root.currentArtist, to: `/artists/${this.$route.params.artist_id}`},
+            {text:'Singles', to: this.$route.fullPath}
+          ]);
+        })
+        .catch((e) => console.error(e));
+    },
+    methods: {
+      handleAudioFileUpload(){
+        if (!this.audioFileToUpload) {
+          return;
+        }
+        this.uploadingAudio = true;
+        const formData = new FormData();
+        formData.append("audio_file", this.audioFileToUpload);
+        axios
+          .post(`/api/v1/me/artists/${this.$route.params.artist_id}/singles`, formData, {
+            headers: {
+              "Content-Type": "multipart/form-data",
+            },
+            onUploadProgress: function (progressEvent) {
+              this.uploadAudioPercentage = parseInt(
+                Math.round((progressEvent.loaded / progressEvent.total) * 80)
+              );
+            }.bind(this),
+          })
+          .then((response) => {
+            this.$root.alertSuccess('New single created');
+            this.uploadingAudio = false;
+            this.$refs.audioFile.reset();
+            this.uploadAudioPercentage = 0;
+            this.singles.push(response.data)
+          })
+          .catch((e) => {
+            this.$root.alertError(parseAxiosError(e));
+            this.uploadingAudio = false;
+            this.uploadAudioPercentage = 0;
+            this.$refs.audioFile.reset();
+          });
+      },
+      renameSingle(single){
+        this.$set(single, 'renaming', true);
+        this.$set(single, 'alertShow', 0);
+        const patchData = {
+          data: {
+            attributes: {
+             title: single.attributes.title,
+            },
+            type: 'single'
+          },
+        };
+        axios
+          .patch(`/api/v1/me/artists/${this.$route.params.artist_id}/singles/${single.id}`, patchData)
+          .then((response) => {
+            this.$set(single, 'alert', 'Renamed');
+            this.$set(single, 'alertShow', 2);
+            this.$set(single, 'alertVariant', 'success');
+            this.$set(single, 'renaming', false);
+            this.$set(single, 'inRenameMode', false);
+            this.$set(single, 'attributes.title', response.data.data.attributes.title);
+            this.$set(single, 'origTitle', response.data.data.attributes.title);
+          })
+          .catch((e) => {
+            this.$set(single, 'alert', parseAxiosError(e));
+            this.$set(single, 'alertShow', 5);
+            this.$set(single, 'alertVariant', 'danger');
+            this.$set(single, 'renaming', false);
+          });
+      },
+      sortSingle(single, direction){
+        this.$set(single, 'moving', true);
+        const postData = {
+          data: {
+            attributes: {
+              direction
+            },
+            type: 'sort'
+          }
+        };
+        axios
+          .post(`/api/v1/me/artists/${this.$route.params.artist_id}/singles/${single.id}/sort`, postData)
+          .then((response) => {
+            this.$set(single, 'moving', false);
+          })
+          .catch((e) => {
+            this.$root.alertError(parseAxiosError(e));
+            this.$set(single, 'moving', false);
+          });
+      },
+      deleteSingle(single){
+        this.$set(single, 'deleting', true);
+        axios
+          .delete(`/api/v1/me/artists/${this.$route.params.artist_id}/singles/${single.id}`)
+          .then(() => {
+            this.singles = this.singles.filter(s => s.id !== single.id);
+            this.$root.alertSuccess('Deleted');
+          })
+          .catch((e) => {
+            this.$root.alertError(parseAxiosError(e));
+            this.$set(single, 'deleting', false);
+            this.$set(single, 'confirmDelete', false);
+          });
+      },
+    },
+    template: "#SingleList"
+  };
   
+  const Featured = { template: "<div>featured</div>" };
+
   const parseAxiosError = (e) => {
     if (e.response && e.response.data && e.response.data.errors) {
       return e.response.data.errors[0].detail;
