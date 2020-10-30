@@ -417,7 +417,7 @@ def rename_track(artist_id, album_id, track_id):
     except ValidationError as err:
         return J(err.messages), 422
 
-     # get artist
+    # get artist
     artist = admin.artists.by_id_for_owner(artist_id, current_user_email())
     if not artist:
         raise Forbidden
@@ -436,6 +436,47 @@ def rename_track(artist_id, album_id, track_id):
         return J(to_error_object(err.message)), 422
 
     data =  TrackSchema().dump(track)
+    return J(data)
+
+
+@current_app.route('/api/v1/me/artists/<artist_id>/albums/<album_id>', methods=['DELETE'])
+@auth.requires_auth
+def delete_my_album(artist_id, album_id):
+
+    # get artist
+    artist = admin.artists.by_id_for_owner(artist_id, current_user_email())
+    if not artist:
+        raise Forbidden
+
+    # get album
+    album = admin.albums.get_by_id(album_id)
+    if album.artist.id != artist_id:
+        raise Forbidden
+
+    admin.albums.delete(album)
+
+    return '', 204
+
+
+@current_app.route('/api/v1/me/artists/<artist_id>/albums/<album_id>/tracks/<track_id>', methods=['DELETE'])
+@auth.requires_auth
+def delete_album_track(artist_id, album_id, track_id):
+
+    # get artist
+    artist = admin.artists.by_id_for_owner(artist_id, current_user_email())
+    if not artist:
+        raise Forbidden
+
+    # get album
+    album = admin.albums.get_by_id(album_id)
+    if album.artist.id != artist_id:
+        raise Forbidden
+
+    if not any(track.id == track_id for track in album.tracks):
+        raise Forbidden
+
+    admin.albums.delete_track(album, track_id)
+    data = AlbumSchema().dump(album)
     return J(data)
 
 

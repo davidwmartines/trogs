@@ -314,3 +314,27 @@ def change_track_title(album, track_id, new_title):
         }
     )
     return track
+
+
+def delete(album):
+    pass
+
+
+def delete_track(album, track_id):
+    index = next((i for i, t in enumerate(
+        album.tracks) if t.id == track_id), None)
+    if index is None:
+        raise exceptions.InvalidData("invaid track")
+
+    track = album.tracks[index]
+    album.tracks.remove(track)
+
+    table = db.get_table()
+    table.delete_item(
+        Key={
+            'PK': track.id,
+            'SK': track.id
+        }
+    )
+
+    return album

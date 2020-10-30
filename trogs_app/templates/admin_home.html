@@ -735,9 +735,19 @@
           });
       },
       deleteTrack(track){
-        console.log('delete', track);
-        track.deleting = false;
-        track.confirmDelete=false;
+        this.$set(track, 'deleting', true);
+        axios.delete(`/api/v1/me/artists/${this.$route.params.artist_id}/albums/${this.$route.params.album_id}/tracks/${track.data.id}`)
+        .then((response) => {
+          this.$set(track, 'deleting', false);
+          this.$set(track, 'confirmDelete', false);
+          this.album = response.data.data;
+          this.origAttributes = Object.assign({}, this.album.attributes);
+          this.$root.alertSuccess('Track deleted');
+        }).catch((e) => {
+          this.$root.alertError(parseAxiosError(e));
+          this.$set(track, 'deleting', false);
+          this.$set(track, 'confirmDelete', false);
+        });
       },
       sortTrack(track, direction){
         this.$set(track, 'moving', true);
