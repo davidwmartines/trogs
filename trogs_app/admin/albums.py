@@ -1,11 +1,11 @@
 import datetime
 
+import dateutil.parser
 import db
 import ids
 from boto3.dynamodb.conditions import Key
 
-from . import names
-from . import exceptions
+from . import exceptions, names
 from .models import Album, Artist, Track
 
 
@@ -18,7 +18,7 @@ def item_to_album(item):
         title=item['AlbumTitle'],
         description=item.get('Description', ''),
         license=item.get('License', ''),
-        release_date=item.get('ReleaseDate'),
+        release_date=parse_release_date(item),
         image_url=item.get('ImageURL'),
         sort=item['AC_SK'],
         artist=Artist(id=item['PK'], name=item.get('ArtistName')),
@@ -26,6 +26,12 @@ def item_to_album(item):
         thumbnail_image_url='',
         tracks=[]
     )
+
+
+def parse_release_date(item):
+    date_string = item.get(
+        'ReleaseDate', datetime.datetime.now().strftime('%Y-%m-%d'))
+    return dateutil.parser.parse(date_string).strftime('%Y-%m-%d')
 
 
 def item_to_track(item):
@@ -325,9 +331,9 @@ def delete_album(album):
     else:
         items_to_delete = []
         items_to_delete.append({'PK': album.artist.id, 'SK': album.id})
-        items_to_delete.extend(map(lambda track: ({'PK': track.id, 'SK': track.id}), album.tracks))
+        items_to_delete.extend(
+            map(lambda track: ({'PK': track.id, 'SK': track.id}), album.tracks))
         db.transactionally_delete(items_to_delete)
-
 
 
 def delete_track(album, track_id):

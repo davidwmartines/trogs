@@ -212,9 +212,9 @@
 
   <div class="container" v-if="!editing">
     <h2>{{album.attributes.title}}</h3>
-    <p>{{album.attributes.description}}</p>
-    <p>{{album.attributes.release_date}}</p>
-    <p>{{album.attributes.license}}</p>
+    <div><small>{{album.attributes.description}}</small></div>
+    <div><small>Release Date: {{album.attributes.release_date}}</small></div>
+    <div><small>License: {{album.attributes.license}}</small></div>
     <div class="mb-2">
       <b-button variant="primary" v-on:click="edit()">Edit</b-button>
     </div>
