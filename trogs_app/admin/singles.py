@@ -8,6 +8,7 @@ from . import names
 from . import exceptions
 from .models import Artist, Single, parse_release_date
 
+DEFAULT_LICENSE = 'by-nc-nd'
 
 def item_to_single(item):
     return Single(
@@ -44,3 +45,45 @@ def list_for_artist(artist_id):
             artist_id) & Key('AC_SK').begins_with('3')
     )
     return list(map(item_to_single, res['Items']))
+
+
+def get_by_id(single_id):
+    pass
+
+
+def update(single, data):
+    pass
+
+
+def create(artist, single_title, audio_url):
+    existing_singles = list_for_artist(artist.id)
+    if len(existing_singles) > 0:
+        if any(ex.title == single_title for ex in existing_singles):
+            dedupe_num = 0
+            test_title = single_title
+            while any(ex.title == test_title for ex in existing_singles):
+                dedupe_num += 1
+                test_title = single_title + ' ' + str(dedupe_num)
+            single_title = test_title
+
+        last = existing_singles[-1]
+        last_sort = int(last.sort)
+        sort = str(last_sort + 1)
+    else:
+        sort = '300'
+
+    single = Single(
+        id=ids.new_id(),
+        title=single_title,
+        audio_url=audio_url,
+        sort=sort,
+        artist=artist,
+        license=DEFAULT_LICENSE,
+        release_date=datetime.datetime.utcnow().strftime('%Y-%m-%d')
+        )
+
+    item = single_to_item(single)
+    table = db.get_table()
+    table.put_item(Item=item)
+
+    return single

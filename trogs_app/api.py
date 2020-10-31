@@ -373,14 +373,15 @@ def add_album_track(artist_id, album_id):
         raise Forbidden
 
     # persist file
-    name, extension = os.path.splitext(file_data.filename)
-    track_title = admin.names.safe_obj_name(name)
-    object_name = 'art/{0}-{1}/{2}-{3}/{4}{5}'.format(
+    track_title, extension = os.path.splitext(file_data.filename)
+    safe_title = admin.names.safe_obj_name(track_title)
+    object_name = 'art/{0}-{1}/{2}-{3}/{4}-{5}{6}'.format(
         artist.normalized_name, 
         artist.id,
         admin.names.safe_obj_name(album.title),
         album.id,
-        track_title,
+        safe_title,
+        ids.new_id()[:8],
         extension)
     url = admin.files.save(file_data, object_name, content_type=admin.files.content_types.get(extension))
 
@@ -505,6 +506,71 @@ def my_artist_singles(artist_id):
     singles = admin.singles.list_for_artist(artist_id)
 
     data = SingleSchema(many=True).dump(singles)
+    return J(data)
+
+
+@current_app.route('/api/v1/me/artists/<artist_id>/singles', methods=['POST'])
+@auth.requires_auth
+def add_single(artist_id):
+
+    try:
+        file_data = get_posted_audio(request)
+    except admin.exceptions.InvalidData as err:
+        return J(to_error_object(err.message)), 400
+
+     # get artist
+    artist = admin.artists.by_id_for_owner(artist_id, current_user_email())
+    if not artist:
+        raise Forbidden
+
+    # persist file
+    single_title, extension = os.path.splitext(file_data.filename)
+    safe_title = admin.names.safe_obj_name(single_title)
+    object_name = 'art/{0}-{1}/{2}-{3}{4}'.format(
+        artist.normalized_name, 
+        artist.id,
+        safe_title,
+        ids.new_id()[:8],
+        extension)
+    url = admin.files.save(file_data, object_name, content_type=admin.files.content_types.get(extension))
+
+    try:
+        single = admin.singles.create(artist, single_title=single_title, audio_url=url)
+    except admin.exceptions.ModelException as err:
+        return J(to_error_object(err.message)), 422
+
+    data = SingleSchema().dump(single)
+    return J(data)
+
+
+@current_app.route('/api/v1/me/artists/<artist_id>/singles/<single_id>', methods=['PATCH'])
+@auth.requires_auth
+def update_single(artist_id, single_id):
+    
+    schema = SingleSchema()
+    try:
+        data = schema.load(request.get_json() or {})
+    except ValidationError as err:
+        return J(err.messages), 422
+    
+    # get artist
+    artist = admin.artists.by_id_for_owner(artist_id, current_user_email())
+    if not artist:
+        raise Forbidden
+
+    single = admin.singles.get_by_id(single_id)
+    if not single:
+        raise NotFound
+
+    if single.artist.id != artist_id:
+        raise Forbidden
+    
+    try:
+        admin.singles.update(single, data)
+    except admin.exceptions.ModelException as err:
+        return J(to_error_object(err.message))
+
+    data = schema.dump(single)
     return J(data)
 
 

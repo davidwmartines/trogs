@@ -325,21 +325,34 @@
   </div>
   <b-card class="mb-1" v-for="single, index in singles" :key="single.id">
     <b-alert :show="single.alertShow" :variant="single.alertVariant">{{single.alert}}</b-alert>
-    <b-card-title v-if="!single.inRenameMode">{{single.attributes.title}}</b-card-title>
-    <div v-if="single.inRenameMode">
+    <b-card-title v-if="!single.inEditMode">{{single.attributes.title}}</b-card-title>
+    <div v-if="!single.inEditMode">
+      <small>Release Date: {{single.attributes.release_date}}</small>
+      <br>
+      <small>License: {{single.attributes.license}}</small>
+    </div>
+    <div v-if="single.inEditMode">
       <b-form-input class="mb-1" v-model="single.attributes.title" required></b-form-input>
-      <b-button size="sm" variant="primary" @click="renameSingle(single)" :disabled="single.deleting || single.attributes.title === single.origTitle">
-        <b-spinner small v-if="single.renaming"></b-spinner>
+      <b-form-group>
+        <b-form-datepicker required v-model="single.attributes.release_date"></b-form-datepicker>
+        <b-form-select  v-model="single.attributes.license" :options="licenses">
+          <template #first>
+            <b-form-select-option value="">Select a License</b-form-select-option>
+          </template>
+        </b-form-select>
+      </b-form-group>
+      <b-button size="sm" variant="primary" @click="update(single)" :disabled="single.deleting || single.attributes.title === single.origAttrs.title">
+        <b-spinner small v-if="single.saving"></b-spinner>
         {{ single.renaming ? "Saving..." : "Save" }}
       </b-button>
-      <b-button size="sm" variant="secondary" @click="$set(single, 'inRenameMode', false); $set(single.attributes, 'title', single.origTitle)" :disabled="single.deleting">Cancel</b-button>
+      <b-button size="sm" variant="secondary" @click="cancelEdit(single)" :disabled="single.deleting || single.saving">Cancel</b-button>
     </div>
     <b-card-text>
-      <div v-if="(!single.inRenameMode && !single.confirmDelete)">
+      <div v-if="(!single.inEditMode && !single.confirmDelete)">
         <span v-if="single.moving"><b-spinner small ></b-spinner> Sorting...</span>
         <b-button size="sm" variant="secondary" @click="sortSingle(single, 'up')" title="Move UP" v-if="!single.moving">^</b-button>
         <b-button size="sm" variant="secondary" @click="sortSingle(single, 'down')" title="Move DOWN" v-if="!single.moving">v</b-button>
-        <b-button size="sm" variant="primary" @click="$set(single, 'inRenameMode', true); $set(single, 'origTitle', single.attributes.title)">Rename</b-button>
+        <b-button size="sm" variant="primary" @click="editMode(single)">Edit</b-button>
         <b-button size="sm" variant="danger" @click="$set(single, 'confirmDelete', true)">Delete</b-button>
       </div>
       <b-alert variant="warning" :show="single.confirmDelete">
@@ -364,7 +377,7 @@
         id="audioFile"
         ref="audioFile"
         accept="audio/*"
-        v-on:input="handleTrackFileUpload()"
+        v-on:input="handleAudioFileUpload()"
       ></b-form-file>
       <div class="text-right"><small>flac, m4a, mp3, oga, ogg, wav</small></div>
       <div v-show="uploadingAudio">
@@ -388,6 +401,16 @@
 <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
 {% endif %}
 <script>
+ 
+ const licenseList= [
+    {value : 'by', text: 'CC-BY (Creative Commons Attribution 4.0 International License)'},
+    {value : 'by-sa', text: 'CC BY-SA (Creative Commons Attribution-ShareAlike 4.0 International License)'},
+    {value : 'by-nd', text: 'CC BY-ND (Creative Commons Attribution-NoDerivatives 4.0 International License)'},
+    {value : 'by-nc', text: 'CC BY-NC (Creative Commons Attribution-NonCommercial 4.0 International License)'},
+    {value : 'by-nc-sa', text: 'CC BY-NC-SA (Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License)'},
+    {value : 'by-nc-nd', text: 'CC BY-NC-ND (Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International License)'},
+  ];
+
   const ArtistList = {
     data: function () {
       return {
@@ -609,14 +632,7 @@
           attributes: { title: '', release_date: new Date().toISOString(), description: ''},
         },
         origAttributes: {},
-        licenses : [
-            {value : 'by', text: 'CC-BY (Creative Commons Attribution 4.0 International License)'},
-            {value : 'by-sa', text: 'CC BY-SA (Creative Commons Attribution-ShareAlike 4.0 International License)'},
-            {value : 'by-nd', text: 'CC BY-ND (Creative Commons Attribution-NoDerivatives 4.0 International License)'},
-            {value : 'by-nc', text: 'CC BY-NC (Creative Commons Attribution-NonCommercial 4.0 International License)'},
-            {value : 'by-nc-sa', text: 'CC BY-NC-SA (Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License)'},
-            {value : 'by-nc-nd', text: 'CC BY-NC-ND (Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International License)'},
-          ]
+        licenses: licenseList
       };
     },
     mounted(){
@@ -859,7 +875,8 @@
         uploadingAudio: false,
         confirmingDelete: false,
         audioFileToUpload: null,
-        singles: []
+        singles: [],
+        licenses: licenseList
       };
     },
     mounted() {
@@ -899,7 +916,7 @@
             this.uploadingAudio = false;
             this.$refs.audioFile.reset();
             this.uploadAudioPercentage = 0;
-            this.singles.push(response.data)
+            this.singles.push(response.data.data)
           })
           .catch((e) => {
             this.$root.alertError(parseAxiosError(e));
@@ -908,13 +925,23 @@
             this.$refs.audioFile.reset();
           });
       },
-      renameSingle(single){
-        this.$set(single, 'renaming', true);
+      editMode(single){
+        this.$set(single, 'inEditMode', true);
+        this.$set(single, 'origAttrs', Object.assign({}, single.attributes));
+      },
+      cancelEdit(single){
+        this.$set(single, 'inEditMode', false);
+        this.$set(single, 'attributes', Object.assign({}, single.origAttrs));
+      },
+      updateSingle(single){
+        this.$set(single, 'saving', true);
         this.$set(single, 'alertShow', 0);
         const patchData = {
           data: {
             attributes: {
              title: single.attributes.title,
+             release_date: single.attributes.release_date,
+             license: single.attributes.license
             },
             type: 'single'
           },
@@ -925,16 +952,16 @@
             this.$set(single, 'alert', 'Renamed');
             this.$set(single, 'alertShow', 2);
             this.$set(single, 'alertVariant', 'success');
-            this.$set(single, 'renaming', false);
-            this.$set(single, 'inRenameMode', false);
-            this.$set(single, 'attributes.title', response.data.data.attributes.title);
-            this.$set(single, 'origTitle', response.data.data.attributes.title);
+            this.$set(single, 'saving', false);
+            this.$set(single, 'inEditMode', false);
+            this.$set(single, 'origAttrs', Object.assign({}, response.data.data.attributes));
+            this.$set(single, 'attributes', response.data.data.attributes);
           })
           .catch((e) => {
             this.$set(single, 'alert', parseAxiosError(e));
             this.$set(single, 'alertShow', 5);
             this.$set(single, 'alertVariant', 'danger');
-            this.$set(single, 'renaming', false);
+            this.$set(single, 'saving', false);
           });
       },
       sortSingle(single, direction){
