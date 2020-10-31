@@ -205,7 +205,12 @@ def create_track(album, track_title, audio_url):
     if len(album.tracks) > 0:
 
         if any(existing_track.title == track_title for existing_track in album.tracks):
-            raise exceptions.TrackTitleExists
+            dedupe_num = 0
+            test_title = track_title
+            while any(existing_track.title == test_title for existing_track in album.tracks):
+                dedupe_num += 1
+                test_title = track_title + ' ' + str(dedupe_num)
+            track_title = test_title
 
         last_track = album.tracks[-1]
         last_sort = int(last_track.sort)
