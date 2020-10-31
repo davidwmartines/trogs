@@ -9,6 +9,9 @@
           "SK": {
             "S": "track3"
           },
+          "ArtistID": {
+            "S": "artist1"
+          },
           "ArtistName": {
             "S": "The Beatles"
           },
