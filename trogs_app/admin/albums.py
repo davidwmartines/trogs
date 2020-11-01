@@ -36,7 +36,8 @@ def item_to_track(item):
         id=item['PK'],
         title=item['TrackTitle'],
         audio_url=item['AudioURL'],
-        sort=item['AA_SK']
+        sort=item['AA_SK'],
+        featured=bool(item.get('Featured', False))
     )
 
 
@@ -49,7 +50,6 @@ def track_to_item(track):
         'TrackTitle': track.title,
         'AudioURL': track.audio_url,
         'AlbumTitle': track.album.title,
-        'AlbumID': track.album.id,
         'ArtistID': track.album.artist.id,
         'ArtistName': track.album.artist.name,
         'License': track.album.license

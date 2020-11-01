@@ -19,6 +19,11 @@ class Single(Model):
 class Artist(Model):
     pass
 
+
+class Featured(Model):
+    pass
+
+
 import datetime, dateutil
 def parse_release_date(item):
     date_string = item.get(

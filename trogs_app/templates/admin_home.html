@@ -273,6 +273,10 @@
         <div class="mt-2">
           <audio controls><source :src="track.data.attributes.audio_url"/></audio>
         </div>
+        <div>
+          <b-spinner small v-if="track.featuring"></b-spinner>
+          <b-checkbox switch v-model="track.data.attributes.featured" @change="trackFeaturedChange(track)" :disabled="track.featuring">Featured</b-checkbox>
+        </div>
       </b-card-text>
     </b-card>
     <b-card>
@@ -314,6 +318,31 @@
 </div>
 
 </div>
+</component>
+
+<component id="Featured" style="display:none">
+  <div class="container">
+    <h2>Featured Tracks</h2>
+    <b-alert show><small>Select up to 3 album tracks or singles to list as Featured on the artist's profile page.  You can change the sort order or remove them from the featured list here.</small></b-alert>
+    <div v-if="loading">
+      <b-spinner variant="primary"></b-spinner>
+    </div>
+    <b-card class="mb-1" v-for="track, index in tracks" :key="track.id">
+      <b-card-title>{{track.attributes.title}}</b-card-title>
+      <b-card-text>
+        <div v-if="track.attributes.album">from the album {{track.attributes.album.data.attributes.title}}</div>
+        <div>
+          <span v-if="track.moving"><b-spinner small ></b-spinner> Sorting...</span>
+          <b-button size="sm" variant="secondary" @click="sortTrack(track, 'up')" title="Move UP" v-if="!track.moving" :disabled="loading">^</b-button>
+          <b-button size="sm" variant="secondary" @click="sortTrack(track, 'down')" title="Move DOWN" v-if="!track.moving" :disabled="loading">v</b-button>
+          <b-button size="sm" variant="warning" @click="unFeature(track)" :disabled="loading">Remove from featured</b-button>
+        </div>
+        <div class="mt-2">
+          <audio controls><source :src="track.attributes.audio_url"/></audio>
+        </div>
+      </b-card-text>
+    </b-card>
+  </div>
 </component>
 
 <component id="SingleList" style="display: none;">
@@ -393,6 +422,8 @@
   </b-card>
 </div>
 </component>
+
+
 {% endraw %} {% endblock %} {% block scripts %} {% if env == 'development' %}
 <script src="{{url_for('static', filename='vue.js')}}"></script>
 <script src="{{url_for('static', filename='vue-router.js')}}"></script>
@@ -860,6 +891,34 @@
             this.$set(track, 'moving', false);
           });
       },
+      trackFeaturedChange(track){
+        this.$set(track, 'featuring', true);
+        this.$set(track, 'alertShow', 0);
+        newState =!track.data.attributes.featured
+        const postData = {
+          data: {
+            attributes: {
+              featured: newState
+            },
+            type: 'featured'
+          }
+        };
+        axios
+          .post(`/api/v1/me/artists/${this.$route.params.artist_id}/featured/${track.data.id}`, postData)
+          .then((response) => {
+            this.$set(track, 'alert', 'Saved');
+            this.$set(track, 'alertShow', 3);
+            this.$set(track, 'alertVariant', 'success');
+            this.$set(track, 'featuring', false);
+          })
+          .catch((e) => {
+            this.$set(track, 'alert', parseAxiosError(e));
+            this.$set(track, 'alertShow', 5);
+            this.$set(track, 'alertVariant', 'danger');
+            this.$set(track, 'featuring', false);
+            track.data.attributes.featured = !newState;
+          });
+      },
       setBreadcrumbs(){
         this.$root.setBreadcrumbs([
               {text: this.$root.currentArtist, to: `/artists/${this.$route.params.artist_id}`},
@@ -1012,7 +1071,33 @@
     template: "#SingleList"
   };
   
-  const Featured = { template: "<div>featured</div>" };
+  const Featured = {
+    data: function(){
+      return {
+        loading: false,
+        tracks : []
+      };
+    },
+    mounted(){
+      this.loading = true;
+      axios.get(`/api/v1/me/artists/${this.$route.params.artist_id}/featured`)
+        .then((response) => {
+          this.tracks = response.data.data;
+          this.loading = false;
+          this.$root.setBreadcrumbs([
+            {text: this.$root.currentArtist, to: `/artists/${this.$route.params.artist_id}`},
+            {text:'Featured', to: this.$route.fullPath}
+          ]);
+        })
+        .catch((e) => console.error(e));
+    },
+    methods:{
+      unFeature(track){
+
+      }
+    },
+    template: "#Featured"
+  };
 
   const parseAxiosError = (e) => {
     if (e.response && e.response.data && e.response.data.errors) {

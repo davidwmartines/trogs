@@ -174,7 +174,7 @@ def add_track(artistName, albumTitle, trackTitle, audioUrl, sortNum=None):
         'TrackTitle': trackTitle,
         'AudioURL': audioUrl,
         'AlbumTitle': albumTitle,
-        'AlbumID': album['AA_PK'],
+        #'AlbumID': album['AA_PK'],
         'ArtistID': album['PK'],
         'ArtistName': album['ArtistName'],
         'License': album['License']
@@ -318,9 +318,10 @@ def unfeature_track(id):
     update_exp = 'remove Featured'
     update_exp_vals = None
 
+
     # if album track, ok to remove from AC
-    if 'AlbumID' in track:
-        update_exp + ', AC_SK, AC_PK'
+    if 'AA_PK' in track:
+        update_exp += ', AC_SK, AC_PK'
     else:
         # determine sort for single
         sort = '300'
@@ -338,7 +339,8 @@ def unfeature_track(id):
         update_exp_vals = {':AC_SK': sort}
 
     # update
-    
+    print('update_exp', update_exp)
+
     if update_exp_vals:
         res = table.update_item(
             Key=key,

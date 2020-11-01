@@ -14,6 +14,7 @@ import admin.names
 import admin.exceptions
 import admin.singles
 import admin.sanitize
+import admin.features
 import auth
 import ids
 
@@ -33,6 +34,7 @@ class TrackSchema(Schema):
     id = fields.Str(dump_only=True)
     title = fields.Str(required=True, validate=validate.Length(min=1, error='Title cannot be blank'))
     audio_url = fields.Str(dump_only=True)
+    featured = fields.Bool(dump_only=True)
     sort= fields.Str(dump_only=True)
 
     class Meta:
@@ -62,9 +64,20 @@ class SingleSchema(Schema):
     license = fields.Str(default='')
     audio_url = fields.Str(dump_only=True)
     sort= fields.Str(dump_only=True)
+    featured = fields.Bool(dump_only=True)
 
     class Meta:
         type_ = "single"
+
+
+class FeaturedSchema(Schema):
+    id = fields.Str(dump_only=True)
+    title = fields.Str(dump_only=True)
+    audio_url = fields.Str(dump_only=True)
+    sort= fields.Str(dump_only=True)
+    album = fields.Nested(AlbumSchema, dump_only=True)
+    class Meta:
+        type_ = "featured"
 
 
 
@@ -276,6 +289,45 @@ def list_my_artist_albums(artist_id):
     return data
 
 
+@current_app.route('/api/v1/me/artists/<artist_id>/featured')
+@auth.requires_auth
+def list_my_artist_featured(artist_id):
+
+    # get artist
+    artist = admin.artists.by_id_for_owner(artist_id, current_user_email())
+    if not artist:
+        raise Forbidden
+
+    featured = admin.features.list_for_artist(artist_id)
+    data = FeaturedSchema(many=True).dump(featured)
+    return data
+
+
+@current_app.route('/api/v1/me/artists/<artist_id>/featured/<item_id>', methods=['POST'])
+@auth.requires_auth
+def feature_artist_item(artist_id, item_id):
+    try:
+        featured = bool(request.get_json()['data']['attributes']['featured'])
+    except Exception:
+        return J(to_error_object('Invalid POST data')), 400
+
+    # get artist
+    artist = admin.artists.by_id_for_owner(artist_id, current_user_email())
+    if not artist:
+        raise Forbidden
+
+    method = admin.features.feature_item
+    if not featured:
+        method = admin.features.unfeature_item
+
+    try:
+        method(artist_id, item_id)
+    except admin.exceptions.ModelException as err:
+        return J(to_error_object(err.message)), 422
+
+    return '', 204
+
+    
 @current_app.route('/api/v1/me/artists/<artist_id>/albums', methods=['POST'])
 @auth.requires_auth
 def add_my_album(artist_id):

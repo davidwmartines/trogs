@@ -19,6 +19,7 @@ def item_to_single(item):
         license=item.get('License', ''),
         release_date=parse_release_date(item),
         sort=item['AC_SK'],
+        featured=bool(item.get('Featured', False)),
         artist=Artist(id=item['AC_PK'], name=item.get('ArtistName'))
     )
 
