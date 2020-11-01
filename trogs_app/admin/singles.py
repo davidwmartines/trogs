@@ -47,14 +47,6 @@ def list_for_artist(artist_id):
     return list(map(item_to_single, res['Items']))
 
 
-def get_by_id(single_id):
-    pass
-
-
-def update(single, data):
-    pass
-
-
 def create(artist, single_title, audio_url):
     existing_singles = list_for_artist(artist.id)
     if len(existing_singles) > 0:
@@ -87,3 +79,45 @@ def create(artist, single_title, audio_url):
     table.put_item(Item=item)
 
     return single
+
+
+def get_by_id(single_id):
+    table = db.get_table()
+
+    res = table.query(
+        KeyConditionExpression=Key('PK').eq(single_id) & Key('SK').eq(single_id)
+    )
+
+    if len(res['Items']) == 0:
+        return None
+
+    return item_to_single(res['Items'][0])
+
+
+def update(single, data):
+    for key, val in data.items():
+        setattr(single, key, val)
+
+    # check name
+    existing_singles = list_for_artist(single.artist.id)
+    if any((ex.title == single.title and ex.id != single.id) for ex in existing_singles):
+        raise exceptions.SingleTitleExists
+
+    table = db.get_table()
+    table.update_item(
+        Key={
+            'PK': single.id,
+            'SK': single.id
+        },
+        UpdateExpression='set TrackTitle = :title, ReleaseDate = :release_date, License = :license',
+        ExpressionAttributeValues={
+            ':title': single.title,
+            ':release_date': single.release_date,
+            ':license': single.license
+        }
+    )
+    return single
+
+
+def delete(single):
+    pass

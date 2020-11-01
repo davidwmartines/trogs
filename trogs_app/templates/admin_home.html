@@ -332,16 +332,20 @@
       <small>License: {{single.attributes.license}}</small>
     </div>
     <div v-if="single.inEditMode">
-      <b-form-input class="mb-1" v-model="single.attributes.title" required></b-form-input>
-      <b-form-group>
-        <b-form-datepicker required v-model="single.attributes.release_date"></b-form-datepicker>
-        <b-form-select  v-model="single.attributes.license" :options="licenses">
+      <b-form-group label="Title" label-for="title-input">
+        <b-form-input class="mb-1" v-model="single.attributes.title" id="title-input" required></b-form-input>
+      </b-form-group>
+      <b-form-group label="Release Date" label-for="date-input">
+        <b-form-datepicker id="date-input" required v-model="single.attributes.release_date"></b-form-datepicker>
+      </b-form-group>
+      <b-form-group label="License" label-for="license-select">
+        <b-form-select id="license-select"  v-model="single.attributes.license" :options="licenses">
           <template #first>
             <b-form-select-option value="">Select a License</b-form-select-option>
           </template>
         </b-form-select>
       </b-form-group>
-      <b-button size="sm" variant="primary" @click="update(single)" :disabled="single.deleting || single.attributes.title === single.origAttrs.title">
+      <b-button size="sm" variant="primary" @click="updateSingle(single)" :disabled="single.deleting || single.saving || !isModified(single)">
         <b-spinner small v-if="single.saving"></b-spinner>
         {{ single.renaming ? "Saving..." : "Save" }}
       </b-button>
@@ -933,6 +937,11 @@
         this.$set(single, 'inEditMode', false);
         this.$set(single, 'attributes', Object.assign({}, single.origAttrs));
       },
+      isModified(single){
+        return single.attributes.title !== single.origAttrs.title ||
+          single.attributes.release_date !== single.origAttrs.release_date ||
+          single.attributes.license !== single.origAttrs.license;
+      },
       updateSingle(single){
         this.$set(single, 'saving', true);
         this.$set(single, 'alertShow', 0);
@@ -949,7 +958,7 @@
         axios
           .patch(`/api/v1/me/artists/${this.$route.params.artist_id}/singles/${single.id}`, patchData)
           .then((response) => {
-            this.$set(single, 'alert', 'Renamed');
+            this.$set(single, 'alert', 'Changes Saved');
             this.$set(single, 'alertShow', 2);
             this.$set(single, 'alertVariant', 'success');
             this.$set(single, 'saving', false);

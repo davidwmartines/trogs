@@ -13,6 +13,7 @@ import admin.files
 import admin.names
 import admin.exceptions
 import admin.singles
+import admin.sanitize
 import auth
 import ids
 
@@ -128,6 +129,7 @@ def add_my_artist():
     input_data = request.get_json() or {}
     try:
         data = schema.load(input_data)
+        admin.sanitize.trim_strings(data)
     except ValidationError as err:
         return J(err.messages), 422
 
@@ -154,6 +156,7 @@ def edit_my_artist(artist_id):
     input_data = request.get_json() or {}
     try:
         data = schema.load(input_data)
+        admin.sanitize.trim_strings(data)
     except ValidationError as err:
         return J(err.messages), 422
 
@@ -184,6 +187,7 @@ def edit_album(artist_id, album_id):
     input_data = request.get_json() or {}
     try:
         data = schema.load(input_data)
+        admin.sanitize.trim_strings(data)
     except ValidationError as err:
         return J(err.messages), 422
 
@@ -428,6 +432,7 @@ def rename_track(artist_id, album_id, track_id):
     schema = TrackSchema()
     try:
         data = schema.load(request.get_json() or {})
+        admin.sanitize.trim_strings(data)
     except ValidationError as err:
         return J(err.messages), 422
 
@@ -550,6 +555,7 @@ def update_single(artist_id, single_id):
     schema = SingleSchema()
     try:
         data = schema.load(request.get_json() or {})
+        admin.sanitize.trim_strings(data)
     except ValidationError as err:
         return J(err.messages), 422
     
@@ -566,12 +572,18 @@ def update_single(artist_id, single_id):
         raise Forbidden
     
     try:
-        admin.singles.update(single, data)
+        single = admin.singles.update(single, data)
     except admin.exceptions.ModelException as err:
-        return J(to_error_object(err.message))
+        return J(to_error_object(err.message)), 422
 
     data = schema.dump(single)
     return J(data)
+
+
+@current_app.route('/api/v1/me/artists/<artist_id>/singles/<single_id>', methods=['DELETE'])
+@auth.requires_auth
+def delete_single(artist_id, single_id):
+    pass
 
 
 def to_error_object(message):
