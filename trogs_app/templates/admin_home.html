@@ -987,6 +987,7 @@
           .post(`/api/v1/me/artists/${this.$route.params.artist_id}/singles/${single.id}/sort`, postData)
           .then((response) => {
             this.$set(single, 'moving', false);
+            this.singles = response.data.data;
           })
           .catch((e) => {
             this.$root.alertError(parseAxiosError(e));

@@ -402,6 +402,11 @@ def add_album_track(artist_id, album_id):
 @auth.requires_auth
 def sort_album_track(artist_id, album_id, track_id):
 
+    try:
+        direction = request.get_json()['data']['attributes']['direction']
+    except Exception:
+        return J(to_error_object('Invalid POST data')), 400
+
     # get artist
     artist = admin.artists.by_id_for_owner(artist_id, current_user_email())
     if not artist:
@@ -414,8 +419,6 @@ def sort_album_track(artist_id, album_id, track_id):
 
     if not any(track.id == track_id for track in album.tracks):
         raise Forbidden
-
-    direction = request.get_json()['data']['attributes']['direction']
 
     try:
         admin.albums.sort_track(album, track_id, direction)
@@ -580,10 +583,33 @@ def update_single(artist_id, single_id):
     return J(data)
 
 
+
+@current_app.route('/api/v1/me/artists/<artist_id>/singles/<single_id>/sort', methods=['POST'])
+@auth.requires_auth
+def sort_single(artist_id, single_id):
+
+    try:
+        direction = request.get_json()['data']['attributes']['direction']
+    except Exception:
+        return J(to_error_object('Invalid POST data')), 400
+
+    artist = admin.artists.by_id_for_owner(artist_id, current_user_email())
+    if not artist:
+        raise Forbidden
+    
+    try:
+        singles = admin.singles.sort(artist, single_id, direction)
+    except admin.exceptions.ModelException as err:
+        return J(to_error_object(err.message)), 422
+
+    data = SingleSchema(many=True).dump(singles)
+    return J(data)
+
+
 @current_app.route('/api/v1/me/artists/<artist_id>/singles/<single_id>', methods=['DELETE'])
 @auth.requires_auth
 def delete_single(artist_id, single_id):
-     # get artist
+    # get artist
     artist = admin.artists.by_id_for_owner(artist_id, current_user_email())
     if not artist:
         raise Forbidden
@@ -626,6 +652,7 @@ def get_posted_audio(request, key='audio_file'):
     file_data = request.files[key]
 
     return file_data
+
 
 
 
