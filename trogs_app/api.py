@@ -583,7 +583,24 @@ def update_single(artist_id, single_id):
 @current_app.route('/api/v1/me/artists/<artist_id>/singles/<single_id>', methods=['DELETE'])
 @auth.requires_auth
 def delete_single(artist_id, single_id):
-    pass
+     # get artist
+    artist = admin.artists.by_id_for_owner(artist_id, current_user_email())
+    if not artist:
+        raise Forbidden
+
+    single = admin.singles.get_by_id(single_id)
+    if not single:
+        raise NotFound
+
+    if single.artist.id != artist_id:
+        raise Forbidden
+    
+    try:
+        admin.singles.delete(single)
+    except admin.exceptions.ModelException as err:
+        return J(to_error_object(err.message)), 422
+
+    return '', 204
 
 
 def to_error_object(message):

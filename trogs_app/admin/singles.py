@@ -4,11 +4,12 @@ import db
 import ids
 from boto3.dynamodb.conditions import Key
 
-from . import names
-from . import exceptions
+from . import exceptions, names
 from .models import Artist, Single, parse_release_date
 
+
 DEFAULT_LICENSE = 'by-nc-nd'
+
 
 def item_to_single(item):
     return Single(
@@ -72,7 +73,7 @@ def create(artist, single_title, audio_url):
         artist=artist,
         license=DEFAULT_LICENSE,
         release_date=datetime.datetime.utcnow().strftime('%Y-%m-%d')
-        )
+    )
 
     item = single_to_item(single)
     table = db.get_table()
@@ -85,7 +86,8 @@ def get_by_id(single_id):
     table = db.get_table()
 
     res = table.query(
-        KeyConditionExpression=Key('PK').eq(single_id) & Key('SK').eq(single_id)
+        KeyConditionExpression=Key('PK').eq(
+            single_id) & Key('SK').eq(single_id)
     )
 
     if len(res['Items']) == 0:
@@ -120,4 +122,7 @@ def update(single, data):
 
 
 def delete(single):
-    pass
+    table = db.get_table()
+    table.delete_item(
+        Key={'PK': single.id, 'SK': single.id}
+    )
