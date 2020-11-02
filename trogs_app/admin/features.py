@@ -146,5 +146,64 @@ def unfeature_item(artist_id, item_id):
         )
 
 
-def sort_featured(artist_id, item_id, direction):
-    pass
+def sort_featured(artist, item_id, direction):
+    items = list_for_artist(artist.id)
+
+    if len(items) < 2:
+        raise exceptions.InvalidData(
+            message='too few featured to perform a sort')
+
+    if direction not in ['up', 'down']:
+        raise exceptions.InvalidData('invalid direction')
+
+    # get index of track being moved
+    track_index = next((i for i, t in enumerate(
+        items) if t.id == item_id), None)
+    if track_index is None:
+        raise exceptions.InvalidData("invaid item id")
+
+    # determine track to "bump" (i.e. swap sorts with)
+    if direction == 'up':
+        if track_index == 0:
+            track_to_bump = items[-1]
+        else:
+            track_to_bump = items[track_index-1]
+    else:
+        if track_index == len(items)-1:
+            track_to_bump = items[0]
+        else:
+            track_to_bump = items[track_index+1]
+
+    # swap their sorts
+    track_to_move = items[track_index]
+    current_sort = track_to_move.sort
+    track_to_move.sort = track_to_bump.sort
+    track_to_bump.sort = current_sort
+
+    # persist changes to both tracks in transaction
+    updates = [_make_sort_update(track_to_move),
+               _make_sort_update(track_to_bump)]
+    # print(updates)
+    db.get_client().transact_write_items(TransactItems=updates)
+
+    # re-sort list
+    items.sort(key=lambda i: i.sort)
+
+    return items
+
+
+def _make_sort_update(featured_item):
+    """
+    creates a TransactWriteItem for updating the sort of featured item.
+    """
+    return {
+        'Update': {
+            'Key': {
+                'PK': {'S': featured_item.id},
+                'SK': {'S': featured_item.id}
+            },
+            'UpdateExpression': 'set AC_SK = :sort',
+            'ExpressionAttributeValues': {':sort': {'S': featured_item.sort}},
+            'TableName': db.TABLE_NAME
+        }
+    }

@@ -327,7 +327,29 @@ def feature_artist_item(artist_id, item_id):
 
     return '', 204
 
-    
+
+@current_app.route('/api/v1/me/artists/<artist_id>/featured/<item_id>/sort', methods=['POST'])
+@auth.requires_auth
+def sort_featured(artist_id, item_id):
+
+    try:
+        direction = request.get_json()['data']['attributes']['direction']
+    except Exception:
+        return J(to_error_object('Invalid POST data')), 400
+
+    artist = admin.artists.by_id_for_owner(artist_id, current_user_email())
+    if not artist:
+        raise Forbidden
+
+    try:
+        featured = admin.features.sort_featured(artist, item_id, direction)
+    except admin.exceptions.ModelException as err:
+        return J(to_error_object(err.message)), 422
+
+    data = FeaturedSchema(many=True).dump(featured)
+    return J(data)
+
+
 @current_app.route('/api/v1/me/artists/<artist_id>/albums', methods=['POST'])
 @auth.requires_auth
 def add_my_album(artist_id):

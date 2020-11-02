@@ -257,8 +257,8 @@
       <b-card-text>
         <div v-if="(!track.inRenameMode && !track.confirmDelete)">
           <span v-if="track.moving"><b-spinner small ></b-spinner> Sorting...</span>
-          <b-button size="sm" variant="secondary" @click="sortTrack(track, 'up')" title="Move UP" v-if="!track.moving">^</b-button>
-          <b-button size="sm" variant="secondary" @click="sortTrack(track, 'down')" title="Move DOWN" v-if="!track.moving">v</b-button>
+          <b-button size="sm" variant="secondary" @click="sortTrack(track, 'up')" title="Move UP" v-if="!track.moving" :disabled="!canSort">^</b-button>
+          <b-button size="sm" variant="secondary" @click="sortTrack(track, 'down')" title="Move DOWN" v-if="!track.moving" :disabled="!canSort">v</b-button>
           <b-button size="sm" variant="primary" @click="$set(track, 'inRenameMode', true); $set(track, 'origTitle', track.data.attributes.title)">Rename</b-button>
           <b-button size="sm" variant="danger" @click="$set(track, 'confirmDelete', true)">Delete</b-button>
         </div>
@@ -333,8 +333,8 @@
         <div v-if="track.attributes.album">from the album {{track.attributes.album.data.attributes.title}}</div>
         <div>
           <span v-if="track.moving"><b-spinner small ></b-spinner> Sorting...</span>
-          <b-button size="sm" variant="secondary" @click="sortTrack(track, 'up')" title="Move UP" v-if="!track.moving" :disabled="loading">^</b-button>
-          <b-button size="sm" variant="secondary" @click="sortTrack(track, 'down')" title="Move DOWN" v-if="!track.moving" :disabled="loading">v</b-button>
+          <b-button size="sm" variant="secondary" @click="sortFeatured(track, 'up')" title="Move UP" v-if="!track.moving" :disabled="loading || !canSort">^</b-button>
+          <b-button size="sm" variant="secondary" @click="sortFeatured(track, 'down')" title="Move DOWN" v-if="!track.moving" :disabled="loading || !canSort">v</b-button>
           <b-button size="sm" variant="warning" @click="unFeature(track)" :disabled="loading">Remove from featured</b-button>
         </div>
         <div class="mt-2">
@@ -383,8 +383,8 @@
     <b-card-text>
       <div v-if="(!single.inEditMode && !single.confirmDelete)">
         <span v-if="single.moving"><b-spinner small ></b-spinner> Sorting...</span>
-        <b-button size="sm" variant="secondary" @click="sortSingle(single, 'up')" title="Move UP" v-if="!single.moving">^</b-button>
-        <b-button size="sm" variant="secondary" @click="sortSingle(single, 'down')" title="Move DOWN" v-if="!single.moving">v</b-button>
+        <b-button size="sm" variant="secondary" @click="sortSingle(single, 'up')" title="Move UP" v-if="!single.moving" :disabled="!canSort">^</b-button>
+        <b-button size="sm" variant="secondary" @click="sortSingle(single, 'down')" title="Move DOWN" v-if="!single.moving" :disabled="!canSort">v</b-button>
         <b-button size="sm" variant="primary" @click="editMode(single)">Edit</b-button>
         <b-button size="sm" variant="danger" @click="$set(single, 'confirmDelete', true)">Delete</b-button>
       </div>
@@ -665,6 +665,7 @@
         saveFunction: this.create,
         confirmingDelete: false,
         deleting: false,
+        canSort: false,
         album: {
           id: '',
           type: 'album',
@@ -682,6 +683,7 @@
           .then((response) => {
             this.album = response.data.data;
             this.origAttributes = Object.assign({}, this.album.attributes);
+            this.canSort = this.album.attributes.tracks.length > 1;
             this.setBreadcrumbs();
           })
           .catch((e) => console.error(e));
@@ -820,7 +822,11 @@
             this.uploadingAudio = false;
             this.$refs.audioFile.reset();
             this.uploadAudioPercentage = 0;
-            this.album.attributes.tracks.push(response.data)
+            if(!this.album.attributes.tracks){
+              this.album.attributes.tracks = [];
+            }
+            this.album.attributes.tracks.push(response.data);
+            this.canSort = this.album.attributes.tracks.length > 1;
           })
           .catch((e) => {
             this.$root.alertError(parseAxiosError(e));
@@ -865,6 +871,7 @@
           this.$set(track, 'deleting', false);
           this.$set(track, 'confirmDelete', false);
           this.album = response.data.data;
+          this.canSort = this.album.attributes.tracks.length > 1;
           this.origAttributes = Object.assign({}, this.album.attributes);
           this.$root.alertSuccess('Track deleted');
         }).catch((e) => {
@@ -942,6 +949,7 @@
         uploadingAudio: false,
         confirmingDelete: false,
         audioFileToUpload: null,
+        canSort: false,
         singles: [],
         licenses: licenseList
       };
@@ -951,6 +959,7 @@
       axios.get(`/api/v1/me/artists/${this.$route.params.artist_id}/singles`)
         .then((response) => {
           this.singles = response.data.data;
+          this.canSort = this.singles.length > 1;
           this.loading = false;
           this.$root.setBreadcrumbs([
             {text: this.$root.currentArtist, to: `/artists/${this.$route.params.artist_id}`},
@@ -983,7 +992,8 @@
             this.uploadingAudio = false;
             this.$refs.audioFile.reset();
             this.uploadAudioPercentage = 0;
-            this.singles.push(response.data.data)
+            this.singles.push(response.data.data);
+            this.canSort = this.singles.length > 1;
           })
           .catch((e) => {
             this.$root.alertError(parseAxiosError(e));
@@ -1091,6 +1101,7 @@
           .delete(`/api/v1/me/artists/${this.$route.params.artist_id}/singles/${single.id}`)
           .then(() => {
             this.singles = this.singles.filter(s => s.id !== single.id);
+            this.canSort = this.singles.length > 1;
             this.$root.alertSuccess('Deleted');
           })
           .catch((e) => {
@@ -1107,7 +1118,8 @@
     data: function(){
       return {
         loading: false,
-        tracks : []
+        tracks : [],
+        canSort : false
       };
     },
     mounted(){
@@ -1115,6 +1127,7 @@
       axios.get(`/api/v1/me/artists/${this.$route.params.artist_id}/featured`)
         .then((response) => {
           this.tracks = response.data.data;
+          this.canSort = this.tracks.length > 1;
           this.loading = false;
           this.$root.setBreadcrumbs([
             {text: this.$root.currentArtist, to: `/artists/${this.$route.params.artist_id}`},
@@ -1125,8 +1138,49 @@
     },
     methods:{
       unFeature(track){
-
-      }
+      this.loading = true;
+        const postData = {
+          data: {
+            attributes: {
+              featured: false
+            },
+            type: 'featured'
+          }
+        };
+        axios
+          .post(`/api/v1/me/artists/${this.$route.params.artist_id}/featured/${track.id}`, postData)
+          .then((response) => {
+            this.tracks = this.tracks.filter(i => i.id !== track.id);
+            this.canSort = this.tracks.length > 1;
+            this.loading = false;
+            this.$root.alertSuccess("Removed");
+          })
+          .catch((e) => {
+            this.$root.alertError(parseAxiosError(e));
+            this.loading = false;
+          });
+      },
+      sortFeatured(featured, direction){
+        this.$set(featured, 'moving', true);
+        const postData = {
+          data: {
+            attributes: {
+              direction
+            },
+            type: 'sort'
+          }
+        };
+        axios
+          .post(`/api/v1/me/artists/${this.$route.params.artist_id}/featured/${featured.id}/sort`, postData)
+          .then((response) => {
+            this.$set(featured, 'moving', false);
+            this.tracks = response.data.data;
+          })
+          .catch((e) => {
+            this.$root.alertError(parseAxiosError(e));
+            this.$set(featured, 'moving', false);
+          });
+      },
     },
     template: "#Featured"
   };

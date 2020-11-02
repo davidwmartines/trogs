@@ -133,7 +133,7 @@ def sort(artist, single_id, direction):
     singles = list_for_artist(artist.id)
 
     if len(singles) < 2:
-        raise exceptions.ModelException(
+        raise exceptions.InvalidData(
             message='too few singles to perform a sort')
 
     if direction not in ['up', 'down']:
