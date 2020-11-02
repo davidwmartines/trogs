@@ -399,6 +399,10 @@
       <div class="mt-2">
         <audio controls><source :src="single.attributes.audio_url"/></audio>
       </div>
+      <div>
+        <b-spinner small v-if="single.featuring"></b-spinner>
+        <b-checkbox switch v-model="single.attributes.featured" @change="singleFeaturedChange(single)" :disabled="single.featuring">Featured</b-checkbox>
+      </div>
     </b-card-text>
   </b-card>
   <b-card v-if="!loading">
@@ -1051,6 +1055,34 @@
           .catch((e) => {
             this.$root.alertError(parseAxiosError(e));
             this.$set(single, 'moving', false);
+          });
+      },
+      singleFeaturedChange(single){
+        this.$set(single, 'featuring', true);
+        this.$set(single, 'alertShow', 0);
+        newState = !single.attributes.featured
+        const postData = {
+          data: {
+            attributes: {
+              featured: newState
+            },
+            type: 'featured'
+          }
+        };
+        axios
+          .post(`/api/v1/me/artists/${this.$route.params.artist_id}/featured/${single.id}`, postData)
+          .then((response) => {
+            this.$set(single, 'alert', 'Saved');
+            this.$set(single, 'alertShow', 3);
+            this.$set(single, 'alertVariant', 'success');
+            this.$set(single, 'featuring', false);
+          })
+          .catch((e) => {
+            this.$set(single, 'alert', parseAxiosError(e));
+            this.$set(single, 'alertShow', 5);
+            this.$set(single, 'alertVariant', 'danger');
+            this.$set(single, 'featuring', false);
+            single.attributes.featured = !newState;
           });
       },
       deleteSingle(single){
