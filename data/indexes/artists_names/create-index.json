@@ -16,8 +16,8 @@
         "ProjectionType": "KEYS_ONLY"
       },
       "ProvisionedThroughput": {
-        "ReadCapacityUnits": 5,
-        "WriteCapacityUnits": 5
+        "ReadCapacityUnits": 1,
+        "WriteCapacityUnits": 1
       }
     }
   }
