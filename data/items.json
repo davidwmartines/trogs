@@ -1,5 +1,5 @@
 {
-  "art": [
+  "art2": [
     {
       "PutRequest": {
         "Item": {
@@ -8,6 +8,9 @@
           },
           "SK": {
             "S": "track3"
+          },
+          "ArtistID": {
+            "S": "artist1"
           },
           "ArtistName": {
             "S": "The Beatles"
@@ -23,6 +26,9 @@
           },
           "ReleaseDate": {
             "S": "1998-12-31"
+          },
+          "AudioURL":{
+            "S": "https://..."
           }
         }
       }
@@ -44,6 +50,9 @@
           },
           "AA_SK": {
             "S": "Yes"
+          },
+          "Owner": {
+            "S": "test@test.com"
           }
         }
       }
@@ -85,7 +94,7 @@
             "S": "artist1"
           },
           "AA_SK": {
-            "S": "001"
+            "S": "100"
           },
           "AC_SK": {
             "S": "100"
@@ -116,6 +125,9 @@
           },
           "AC_PK": {
             "S": "artist1"
+          },
+          "AudioURL":{
+            "S": "https://..."
           }
         }
       }
@@ -173,6 +185,9 @@
           },
           "AC_SK": {
             "S": "000"
+          },
+          "Owner": {
+            "S": "davidwmartines@gmail.com"
           }
         }
       }
@@ -184,7 +199,7 @@
             "S": "artist1"
           },
           "AA_SK": {
-            "S": "002"
+            "S": "101"
           },
           "SK": {
             "S": "track2"
@@ -203,6 +218,9 @@
           },
           "AlbumTitle": {
             "S": "Revolver"
+          },
+          "AudioURL":{
+            "S": "https://..."
           }
         }
       }

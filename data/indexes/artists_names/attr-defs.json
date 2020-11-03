@@ -1,0 +1,10 @@
+[
+  {
+    "AttributeName": "NormalizedName",
+    "AttributeType": "S"
+  },
+  {
+    "AttributeName": "PK",
+    "AttributeType": "S"
+  }
+]

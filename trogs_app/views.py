@@ -40,4 +40,5 @@ def track(id):
 @current_app.route('/create')
 @auth.requires_auth
 def create():
-    return render_template('admin_home.html')
+    return render_template('admin_home.html', env=current_app.env)
+

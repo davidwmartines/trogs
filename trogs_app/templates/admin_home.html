@@ -1,10 +1,1251 @@
-{% extends "layout.html" %}
+{% extends "layout.html" %} {% block title %} Create on MushMud {% endblock %}
+{% block head %}
+<link
+  type="text/css"
+  rel="stylesheet"
+  href="{{url_for('static', filename='bootstrap.min.css')}}"
+/>
+<link
+  type="text/css"
+  rel="stylesheet"
+  href="{{url_for('static', filename='bootstrap-vue.min.css')}}"
+/>
+{% endblock %} {% block content %}
 
-{% block title %}
-Create on MushMud
-{% endblock %}
+<section id="app">
+  <div class="container">
+    {{ session['profile']['email']}}{% raw %}
+  </div>
+  <div class="container">
+    <b-breadcrumb>
+      <b-breadcrumb-item v-for="item in breadcrumbs" v-bind:key="item.text" :to="item.to">{{item.text}}</b-breadcrumb-item>
+   </b-breadcrumb>
+  </div>
+  <div class="container">
+    <b-alert :show="showSuccess" dismissible fade variant="success" @dismissed="showSuccess=0" >{{successMessage}}</b-alert>
+    <b-alert :show="showError" dismissible variant="danger" @dismissed="showError=false">{{errorMessage}}</b-alert>
+  </div>
+  <router-view></router-view>
+</section>
 
-{% block content %}
+<component id="ArtistList" style="display: none">
+  <div>
+    <b-container>
+      <b-row>
+        <b-col>
+          <h1>My Artists</h1>
+        </b-col>
+      </b-row>
+      <b-row v-if="loading">
+        <b-col><b-spinner variant="primary"></b-spinner></b-col>
+      </b-row>
+      <b-row v-for="artist in artists" :key="artist.id" class="mb-2" align-v="center">
+        <b-col col lg="1" class="pr-0">
+          <router-link :to="`/artists/${artist.id}`">
+            <img v-if="artist.attributes.thumbnail_image_url" :src="artist.attributes.thumbnail_image_url" width="50" height="50"/>
+            <div v-if="!artist.attributes.thumbnail_image_url" class="placeholder box50"></div>
+          </router-link>
+          </b-col>
+          <b-col cols="9" md="auto" class="pl-0">
+            <router-link :to="`/artists/${artist.id}`">
+              <p>{{artist.attributes.name}}</p>
+            </router-link>
+          </b-col>
+        </b-row>
+      </b-row>
+    </b-container>
+    <div class="container">
+      <router-link to="/artists/new">
+        <b-button variant="primary">+ Add New Artist</b-button>
+      </router-link>
+    </div>
+  </div>
+</component>
 
-start
+<component id="ArtistDetail" style="display: none">
+  <div>
+    
+    <div class="container" v-if="!editing">
+      <b-spinner variant="primary" v-if="loading"></b-spinner>
+      <div class="mb-2">
+        <h1>{{artist.attributes.name}}</h1>
+        <p>{{artist.attributes.bio}}</p>
+        <div>
+          <b-button variant="primary" v-on:click="edit()">Edit</b-button>
+        </div>
+      </div >
+     <div>
+        <img v-if="artist.attributes.profile_image_url" :src="artist.attributes.profile_image_url" width="300" />
+        <div v-if="!artist.attributes.profile_image_url" class="placeholder box300"></div>
+        <div>
+          <b-form-file
+            v-model="fileToUpload"
+            size="sm"
+            placeholder="Change Picture"
+            browse-text="Upload JPEG File"
+            style="width: 300px"
+            id="file"
+            ref="file"
+            accept=".jpg,.jpeg"
+            v-on:input="handleFileUpload()"
+          ></b-form-file>
+          <div v-show="uploading">
+            <b-spinner small></b-spinner>
+            Saving picture...
+            <progress max="100" :value.prop="uploadPercentage"></progress>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="container" v-if="editing">
+      <h1 v-if="$route.params.artist_id === 'new'">Add a new artist</h1>
+      <b-form-group label="Artist Name" id="input-group-1" label-for="input-name">
+        <b-form-input id="input-name" v-model="artist.attributes.name" :disabled="$route.params.artist_id !== 'new'" required placeholder="Enter a name for the artist"></b-form-input>
+      </b-form-group>
+      <b-form-group label="Bio" id="input-group-2" label-for="text-bio">
+        <b-form-textarea id="text-bio" v-model="artist.attributes.bio" placeholder="Enter a brief bio about the artist" rows="2" max-rows="2"></b-form-textarea>
+      </b-form-group>
+      <b-button variant="primary" v-on:click="saveFunction" :disabled="saving">
+        <b-spinner small v-if="saving"></b-spinner>
+      {{ saving ? "Saving..." : "Save"}}
+      </b-button>
+      <b-button v-on:click="cancel()">Cancel</b-button>
+    </div>
+
+    <div class="container" v-if="$route.params.artist_id !== 'new' && !editing">
+      <div class="mt-4">
+        <router-link :to="`/artists/${artist.id}/albums`">
+          <b-button block variant="outline-success">Albums</b-button>
+        </router-link>
+      </div>
+      <div class="mt-4">
+        <router-link :to="`/artists/${artist.id}/featured`">
+          <b-button block variant="outline-success">Featured Tracks</b-button>
+        </router-link>
+      </div>
+      <div class="mt-4">
+        <router-link :to="`/artists/${artist.id}/singles`">
+          <b-button block variant="outline-success">Singles</b-button>
+        </router-link>
+      </div>
+      <div class="mt-4 mb-4">
+        <hr>
+        <b-button variant="outline-danger" size="sm" v-if="!confirmingDelete" @click="confirmingDelete = true">Delete Artist</b-button>
+        <b-alert variant="warning" :show="confirmingDelete">
+          <h5>Warning</h5>
+          <p>
+            Deleting will PERMANENTLY REMOVE the artist <b>{{artist.attributes.name}}</b> including ALL ALUBUMS, SINGLES and TRACKS.
+          </p>
+          <p>Are you sure?</p>
+          <b-button variant="danger" @click="deleteArtist()" :disabled="deleting">
+            <b-spinner small v-if="deleting"></b-spinner>
+            {{ deleting ? "Deleting..." : "Yes, Delete"}}
+          </b-button>
+          <b-button @click="confirmingDelete = false" :disabled="deleting">Cancel</b-button>
+        </b-alert>
+      </div>
+    </div>
+  </div>
+</component>
+
+<component id="AlbumList" style="display: none">
+  <div>
+    <div class="container">
+      <h2>Albums</h2>
+    </div>
+    <b-container>
+      <b-row v-if="loading">
+        <b-col><b-spinner variant="primary"></b-spinner></b-col>
+      </b-row>
+      <b-row v-for="album in albums" :key="album.id" class="mb-2" align-v="center">
+        <b-col col lg="1" class="pr-0">
+          <router-link :to="`/artists/${$route.params.artist_id}/albums/${album.id}`">
+            <img v-if="album.attributes.thumbnail_image_url" :src="album.attributes.thumbnail_image_url" width="50" height="50"/>
+            <div v-if="!album.attributes.thumbnail_image_url" class="placeholder box50"></div>
+          </router-link>
+          </b-col>
+          <b-col cols="9" md="auto" class="pl-0">
+            <router-link :to="`/artists/${$route.params.artist_id}/albums/${album.id}`">
+              <p>{{album.attributes.title}}</p>
+            </router-link>
+          </b-col>
+        </b-row>
+      </b-row>
+    </b-container>
+    <div class="container">
+      <router-link :to="`/artists/${$route.params.artist_id}/albums/new`">
+        <b-button variant="primary">+ Add Album</b-button>
+      </router-link>
+    </div>
+  </div>
+</component>
+
+<component id="AlbumDetail" style="display: none">
+<div>
+  
+  <div class="container" v-if="editing">
+    <h2>{{ $route.params.album_id === 'new' ? "New Album" : "Edit Album" }}</h2>
+    <b-form-group label="Title" id="input-group-1" label-for="input-title">
+      <b-form-input id="input-title" v-model="album.attributes.title" required placeholder="Enter the album title"></b-form-input>
+    </b-form-group>
+    <b-form-group label="Release Date" id="input-group-2" label-for="input-release-date">
+      <b-form-datepicker required id="input-release-date" v-model="album.attributes.release_date"></b-form-datepicker>
+    </b-form-group>
+    <b-form-group label="License" id="input-group-3" label-for="select-license">
+      <b-form-select id="select-license" v-model="album.attributes.license" :options="licenses">
+        <template #first>
+          <b-form-select-option value=""></b-form-select-option>
+        </template>
+      </b-form-select>
+      <a href="https://creativecommons.org/licenses/" class="license" target="_blank">License Descriptions</a>
+    </b-form-group>
+    <b-form-group label="Description" id="input-group-4" label-for="text-description">
+      <b-form-textarea id="text-description" v-model="album.attributes.description" placeholder="Enter a brief description" rows="3" max-rows="3"></b-form-textarea>
+    </b-form-group>
+    <b-button variant="primary" v-on:click="saveFunction" :disabled="saving">
+      <b-spinner small v-if="saving"></b-spinner>
+    {{ saving ? "Saving..." : "Save"}}
+    </b-button>
+    <b-button v-on:click="cancel()">Cancel</b-button>
+  </div>
+
+  <div class="container" v-if="!editing">
+    <h2>{{album.attributes.title}}</h3>
+    <div><small>{{album.attributes.description}}</small></div>
+    <div><small>Release Date: {{album.attributes.release_date}}</small></div>
+    <div><small>License: {{album.attributes.license}}</small></div>
+    <div class="mb-2">
+      <b-button variant="primary" v-on:click="edit()">Edit</b-button>
+    </div>
+    <img v-if="album.attributes.profile_image_url" :src="album.attributes.profile_image_url" width="300" height="300" />
+    <div v-if="!album.attributes.profile_image_url"class="placeholder box300"></div>
+    <div class="mt-1">
+      <div>
+        <b-form-file
+          v-model="fileToUpload"
+          size="sm"
+          placeholder="Change Picture"
+          browse-text="Upload JPEG File"
+          style="width: 300px;"
+          id="file"
+          ref="file"
+          accept=".jpg,.jpeg"
+          v-on:input="handleFileUpload()"
+        ></b-form-file>
+        <div v-show="uploading">
+          <b-spinner small></b-spinner>
+          Saving picture...
+          <progress max="100" :value.prop="uploadPercentage"></progress>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="container mt-4" v-if="$route.params.album_id != 'new' && !editing">
+    <h4>Tracks</h4>
+    <b-card class="mb-1" v-for="track, index in album.attributes.tracks" :key="track.data.id">
+      <b-alert :show="track.alertShow" :variant="track.alertVariant">{{track.alert}}</b-alert>
+      <b-card-title v-if="!track.inRenameMode">{{track.data.attributes.title}}</b-card-title>
+      <div v-if="track.inRenameMode">
+        <b-form-input class="mb-1" v-model="track.data.attributes.title" required></b-form-input>
+        <b-button size="sm" variant="primary" @click="renameTrack(track)" :disabled="track.deleting || track.data.attributes.title === track.origTitle">
+          <b-spinner small v-if="track.renaming"></b-spinner>
+          {{ track.renaming ? "Saving..." : "Save" }}
+        </b-button>
+        <b-button size="sm" variant="secondary" @click="$set(track, 'inRenameMode', false); $set(track.data.attributes, 'title', track.origTitle)" :disabled="track.deleting">Cancel</b-button>
+      </div>
+      <b-card-text>
+        <div v-if="(!track.inRenameMode && !track.confirmDelete)">
+          <span v-if="track.moving"><b-spinner small ></b-spinner> Sorting...</span>
+          <b-button size="sm" variant="secondary" @click="sortTrack(track, 'up')" title="Move UP" v-if="!track.moving" :disabled="!canSort">^</b-button>
+          <b-button size="sm" variant="secondary" @click="sortTrack(track, 'down')" title="Move DOWN" v-if="!track.moving" :disabled="!canSort">v</b-button>
+          <b-button size="sm" variant="primary" @click="$set(track, 'inRenameMode', true); $set(track, 'origTitle', track.data.attributes.title)">Rename</b-button>
+          <b-button size="sm" variant="danger" @click="$set(track, 'confirmDelete', true)">Delete</b-button>
+        </div>
+        <b-alert variant="warning" :show="track.confirmDelete">
+          <p>Are you sure you want to delete <b>{{track.data.attributes.title}}</b>?</p>
+          <b-button size="sm" variant="danger" @click="deleteTrack(track)" :disabled="track.deleting">
+            <b-spinner small v-if="track.deleting"></b-spinner>
+            {{ track.deleting ? "Deleting..." : "Yes, Delete"}}
+          </b-button>
+          <b-button size="sm" variant="secondary" @click="$set(track, 'confirmDelete', false)" :disabled="track.deleting">Cancel</b-button>
+        </b-alert>
+        <div class="mt-2">
+          <audio controls><source :src="track.data.attributes.audio_url"/></audio>
+        </div>
+        <div>
+          <b-spinner small v-if="track.featuring"></b-spinner>
+          <b-checkbox switch v-model="track.data.attributes.featured" @change="trackFeaturedChange(track)" :disabled="track.featuring">Featured</b-checkbox>
+        </div>
+      </b-card-text>
+    </b-card>
+    <b-card>
+      <b-card-text>
+        <b-form-file
+          v-model="audioFileToUpload"
+          placeholder="+ Add Track"
+          browse-text="Upload Audio File"
+          id="audioFile"
+          ref="audioFile"
+          accept="audio/*"
+          v-on:input="handleTrackFileUpload()"
+        ></b-form-file>
+        <div class="text-right"><small>flac, m4a, mp3, oga, ogg, wav</small></div>
+        <div v-show="uploadingAudio">
+          <b-spinner small></b-spinner>
+          Uploading audio file...
+          <progress max="100" :value.prop="uploadAudioPercentage"></progress>
+        </div>
+      </b-card-text>
+    </b-card>
+  </div>
+  <div class="container mt-4 mb-4" v-if="$route.params.album_id != 'new' && !editing">
+    <hr>
+    <b-button variant="outline-danger" size="sm" v-if="!confirmingDelete" @click="confirmingDelete = true">Delete Album</b-button>
+    <b-alert variant="warning" :show="confirmingDelete">
+      <h5>Warning</h5>
+      <p>
+        Deleting will PERMANENTLY REMOVE the album <b>{{album.attributes.title}}</b> including all it's tracks.
+      </p>
+      <p>Are you sure?</p>
+      <b-button variant="danger" @click="deleteAlbum()" :disabled="deleting">
+        <b-spinner small v-if="deleting"></b-spinner>
+        {{ deleting ? "Deleting..." : "Yes, Delete"}}
+      </b-button>
+      <b-button @click="confirmingDelete = false" :disabled="deleting">Cancel</b-button>
+    </b-alert>
+  </div>
+</div>
+
+</div>
+</component>
+
+<component id="Featured" style="display:none">
+  <div class="container">
+    <h2>Featured Tracks</h2>
+    <b-alert show><small>Select up to 3 album tracks or singles to list as Featured on the artist's profile page.  You can change the sort order or remove them from the featured list here.</small></b-alert>
+    <div v-if="loading">
+      <b-spinner variant="primary"></b-spinner>
+    </div>
+    <b-card class="mb-1" v-for="track, index in tracks" :key="track.id">
+      <b-card-title>{{track.attributes.title}}</b-card-title>
+      <b-card-text>
+        <div v-if="track.attributes.album">from the album {{track.attributes.album.data.attributes.title}}</div>
+        <div>
+          <span v-if="track.moving"><b-spinner small ></b-spinner> Sorting...</span>
+          <b-button size="sm" variant="secondary" @click="sortFeatured(track, 'up')" title="Move UP" v-if="!track.moving" :disabled="loading || !canSort">^</b-button>
+          <b-button size="sm" variant="secondary" @click="sortFeatured(track, 'down')" title="Move DOWN" v-if="!track.moving" :disabled="loading || !canSort">v</b-button>
+          <b-button size="sm" variant="warning" @click="unFeature(track)" :disabled="loading">Remove from featured</b-button>
+        </div>
+        <div class="mt-2">
+          <audio controls><source :src="track.attributes.audio_url"/></audio>
+        </div>
+      </b-card-text>
+    </b-card>
+  </div>
+</component>
+
+<component id="SingleList" style="display: none;">
+<div class="container">
+  <h2>Singles</h2>
+  <b-alert show><small>Upload individual songs here.  You can add them to an album later.</small></b-alert>
+  <div v-if="loading">
+    <b-spinner></b-spinner>
+  </div>
+  <b-card class="mb-1" v-for="single, index in singles" :key="single.id">
+    <b-alert :show="single.alertShow" :variant="single.alertVariant">{{single.alert}}</b-alert>
+    <b-card-title v-if="!single.inEditMode">{{single.attributes.title}}</b-card-title>
+    <div v-if="!single.inEditMode">
+      <small>Release Date: {{single.attributes.release_date}}</small>
+      <br>
+      <small>License: {{single.attributes.license}}</small>
+    </div>
+    <div v-if="single.inEditMode">
+      <b-form-group label="Title" label-for="title-input">
+        <b-form-input class="mb-1" v-model="single.attributes.title" id="title-input" required></b-form-input>
+      </b-form-group>
+      <b-form-group label="Release Date" label-for="date-input">
+        <b-form-datepicker id="date-input" required v-model="single.attributes.release_date"></b-form-datepicker>
+      </b-form-group>
+      <b-form-group label="License" label-for="license-select">
+        <b-form-select id="license-select"  v-model="single.attributes.license" :options="licenses">
+          <template #first>
+            <b-form-select-option value="">Select a License</b-form-select-option>
+          </template>
+        </b-form-select>
+      </b-form-group>
+      <b-button size="sm" variant="primary" @click="updateSingle(single)" :disabled="single.deleting || single.saving || !isModified(single)">
+        <b-spinner small v-if="single.saving"></b-spinner>
+        {{ single.renaming ? "Saving..." : "Save" }}
+      </b-button>
+      <b-button size="sm" variant="secondary" @click="cancelEdit(single)" :disabled="single.deleting || single.saving">Cancel</b-button>
+    </div>
+    <b-card-text>
+      <div v-if="(!single.inEditMode && !single.confirmDelete)">
+        <span v-if="single.moving"><b-spinner small ></b-spinner> Sorting...</span>
+        <b-button size="sm" variant="secondary" @click="sortSingle(single, 'up')" title="Move UP" v-if="!single.moving" :disabled="!canSort">^</b-button>
+        <b-button size="sm" variant="secondary" @click="sortSingle(single, 'down')" title="Move DOWN" v-if="!single.moving" :disabled="!canSort">v</b-button>
+        <b-button size="sm" variant="primary" @click="editMode(single)">Edit</b-button>
+        <b-button size="sm" variant="danger" @click="$set(single, 'confirmDelete', true)">Delete</b-button>
+      </div>
+      <b-alert variant="warning" :show="single.confirmDelete">
+        <p>Are you sure you want to delete <b>{{single.attributes.title}}</b>?</p>
+        <b-button size="sm" variant="danger" @click="deleteSingle(single)" :disabled="single.deleting">
+          <b-spinner small v-if="single.deleting"></b-spinner>
+          {{ single.deleting ? "Deleting..." : "Yes, Delete"}}
+        </b-button>
+        <b-button size="sm" variant="secondary" @click="$set(single, 'confirmDelete', false)" :disabled="single.deleting">Cancel</b-button>
+      </b-alert>
+      <div class="mt-2">
+        <audio controls><source :src="single.attributes.audio_url"/></audio>
+      </div>
+      <div>
+        <b-spinner small v-if="single.featuring"></b-spinner>
+        <b-checkbox switch v-model="single.attributes.featured" @change="singleFeaturedChange(single)" :disabled="single.featuring">Featured</b-checkbox>
+      </div>
+    </b-card-text>
+  </b-card>
+  <b-card v-if="!loading">
+    <b-card-text>
+      <b-form-file
+        v-model="audioFileToUpload"
+        placeholder="+ Add"
+        browse-text="Upload Audio File"
+        id="audioFile"
+        ref="audioFile"
+        accept="audio/*"
+        v-on:input="handleAudioFileUpload()"
+      ></b-form-file>
+      <div class="text-right"><small>flac, m4a, mp3, oga, ogg, wav</small></div>
+      <div v-show="uploadingAudio">
+        <b-spinner small></b-spinner>
+        Uploading audio file...
+        <progress max="100" :value.prop="uploadAudioPercentage"></progress>
+      </div>
+    </b-card-text>
+  </b-card>
+</div>
+</component>
+
+
+{% endraw %} {% endblock %} {% block scripts %} {% if env == 'development' %}
+<script src="{{url_for('static', filename='vue.js')}}"></script>
+<script src="{{url_for('static', filename='vue-router.js')}}"></script>
+<script src="{{url_for('static', filename='bootstrap-vue.js')}}"></script>
+<script src="{{url_for('static', filename='axios.min.js')}}"></script>
+{% else %}
+<script src="https://cdn.jsdelivr.net/npm/vue@2.6.12/dist/vue.min.js"></script>
+<script src="https://unpkg.com/vue-router/dist/vue-router.min.js"></script>
+<script src="https://unpkg.com/bootstrap-vue@latest/dist/bootstrap-vue.min.js"></script>
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+{% endif %}
+<script>
+ 
+ const licenseList= [
+    {value : 'by', text: 'CC-BY (Creative Commons Attribution 4.0 International License)'},
+    {value : 'by-sa', text: 'CC BY-SA (Creative Commons Attribution-ShareAlike 4.0 International License)'},
+    {value : 'by-nd', text: 'CC BY-ND (Creative Commons Attribution-NoDerivatives 4.0 International License)'},
+    {value : 'by-nc', text: 'CC BY-NC (Creative Commons Attribution-NonCommercial 4.0 International License)'},
+    {value : 'by-nc-sa', text: 'CC BY-NC-SA (Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License)'},
+    {value : 'by-nc-nd', text: 'CC BY-NC-ND (Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International License)'},
+  ];
+
+  const ArtistList = {
+    data: function () {
+      return {
+        loading: true,
+        artists: [],
+      };
+    },
+    mounted() {
+      axios
+        .get("/api/v1/me/artists")
+        .then((response) => {
+          this.artists = response.data.data;
+          this.loading = false;
+        })
+        .catch((e) => console.error(e));
+    },
+    template: "#ArtistList",
+  };
+
+  const ArtistDetail = {
+    data: function () {
+      return {
+        loading: false,
+        editing: false,
+        fileToUpload: null,
+        uploadPercentage: 0,
+        uploading: false,
+        saving: false,
+        saveFunction: this.create,
+        confirmingDelete: false,
+        deleting: false,
+        origAttributes: {},
+        artist: {
+          id: "",
+          type: "artist",
+          attributes: { name: "", bio: "", image_url: "" },
+        },
+      };
+    },
+    mounted() {
+      if (this.$route.params.artist_id === "new") {
+        this.editing = true;
+      } else {
+        this.loading = true;
+        axios
+          .get(`/api/v1/me/artists/${this.$route.params.artist_id}`)
+          .then((response) => {
+            this.loading = false;
+            this.artist = response.data.data;
+            this.origAttributes = Object.assign({}, this.artist.attributes);
+            this.setBreadcrumbs();
+          })
+          .catch((e) => {
+            this.loading = false;
+            console.error(e);
+          });
+          this.saveFunction = this.update;
+        }
+    },
+    methods: {
+      edit() {
+        this.editing = true;
+      },
+      cancel() {
+        this.editing = false;
+        if (this.$route.params.artist_id === "new") {
+          router.push("/");
+        } else {
+          this.artist.attributes = Object.assign({}, this.origAttributes);
+        }
+      },
+      handleFileUpload() {
+        if (!this.fileToUpload) {
+          return;
+        }
+        this.uploading = true;
+        const formData = new FormData();
+        formData.append("image_file", this.fileToUpload);
+        axios
+          .post(`/api/v1/me/artists/${this.artist.id}/image`, formData, {
+            headers: {
+              "Content-Type": "multipart/form-data",
+            },
+            onUploadProgress: function (progressEvent) {
+              this.uploadPercentage = parseInt(
+                Math.round((progressEvent.loaded / progressEvent.total) * 80)
+              );
+            }.bind(this),
+          })
+          .then((response) => {
+            this.$root.alertSuccess('New picture saved');
+            this.uploading = false;
+            this.uploadPercentage = 0;
+            this.$refs.file.reset();
+            this.uploadPercentage = 0;
+            this.artist.attributes.profile_image_url =
+              response.data.data.attributes.profile_image_url;
+          })
+          .catch((e) => {
+            this.$root.alertError(parseAxiosError(e));
+            this.uploading = false;
+            this.uploadPercentage = 0;
+            this.$refs.file.reset();
+          });
+      },
+      create() {
+        this.saving = true;
+        const postData = {
+          data: {
+            type: "artist",
+            attributes: {
+              name: this.artist.attributes.name,
+              bio: this.artist.attributes.bio,
+            },
+          },
+        };
+        axios
+          .post("/api/v1/me/artists", postData)
+          .then((response) => {
+            this.$root.alertSuccess('Artist created');
+            this.artist = response.data.data;
+            this.origBio = this.artist.attributes.bio;
+            this.origName = this.artist.attributes.name
+            this.editing = false;
+            this.saving = false;
+            this.saveFunction = this.update;
+            router.push(`/artists/${response.data.data.id}`);
+            this.setBreadcrumbs();
+          })
+          .catch((e) => {
+            this.saving = false;
+            this.$root.alertError(parseAxiosError(e));
+          });
+      },
+      update() {
+        this.saving = true;
+        const patchData = {
+          data: {
+            type: "artist",
+            attributes: {
+              name: this.artist.attributes.name,
+              bio: this.artist.attributes.bio,
+            },
+          },
+        };
+        axios
+          .patch(`/api/v1/me/artists/${this.$route.params.artist_id}`, patchData)
+          .then((response) => {
+            this.$root.alertSuccess('Artist updated');
+            this.artist = response.data.data;
+            this.origAttributes = Object.assign({}, this.artist.attributes);
+            this.editing = false;
+            this.saving = false;
+          })
+          .catch((e) => {
+            this.$root.alertError(parseAxiosError(e));
+            this.saving = false;
+          });
+      },
+      deleteArtist(){
+        this.deleting = true;
+        axios
+          .delete(`/api/v1/me/artists/${this.$route.params.artist_id}`)
+          .then(() => router.push("/"))
+          .catch((e) => {
+            this.$root.alertError(parseAxiosError(e));
+            this.deleting = false
+          });
+      },
+      setBreadcrumbs(){
+        this.$root.currentArtist = this.artist.attributes.name;
+        this.$root.setBreadcrumbs([{text: this.artist.attributes.name, to: this.$route.fullPath}])
+      }
+    },
+    template: "#ArtistDetail",
+  };
+
+  const AlbumList = {
+    data: function () {
+      return {
+        loading: true,
+        albums: []
+      };
+    },
+    mounted() {
+      this.loading = true;
+      axios
+        .get(`/api/v1/me/artists/${this.$route.params.artist_id}/albums`)
+        .then((response) => {
+          this.albums = response.data.data;
+          this.loading = false;
+          this.$root.setBreadcrumbs([
+            {text: this.$root.currentArtist, to: `/artists/${this.$route.params.artist_id}`},
+            {text:'Albums', to: this.$route.fullPath}
+          ]);
+        })
+        .catch((e) => console.error(e));
+    },
+    template: "#AlbumList" 
+  };
+
+  const AlbumDetail = {
+    data: function(){
+      return {
+        editing: false,
+        saving: false,
+        fileToUpload: null,
+        audioFileToUpload: null,
+        uploadPercentage: 0,
+        uploadAudioPercentage: 0,
+        uploading: false,
+        uploadingAudio: false,
+        saveFunction: this.create,
+        confirmingDelete: false,
+        deleting: false,
+        canSort: false,
+        album: {
+          id: '',
+          type: 'album',
+          attributes: { title: '', release_date: new Date().toISOString(), description: ''},
+        },
+        origAttributes: {},
+        licenses: licenseList
+      };
+    },
+    mounted(){
+      if (this.$route.params.album_id === "new") {
+        this.editing = true;
+      } else{
+        axios.get(`/api/v1/me/artists/${this.$route.params.artist_id}/albums/${this.$route.params.album_id}`)
+          .then((response) => {
+            this.album = response.data.data;
+            this.origAttributes = Object.assign({}, this.album.attributes);
+            this.canSort = this.album.attributes.tracks.length > 1;
+            this.setBreadcrumbs();
+          })
+          .catch((e) => console.error(e));
+          this.saveFunction = this.update;
+      }
+    },
+    methods :{
+      edit() {
+        this.editing = true;
+      },
+      cancel() {
+        this.editing = false;
+        if (this.$route.params.album_id === "new") {
+          router.go(-1);
+        } else {
+          this.album.attributes = Object.assign({}, this.origAttributes);
+        }
+      },
+      create(){
+        this.saving = true;
+        const postData = {
+          data: {
+            attributes : this.album.attributes,
+            type: 'album'
+          }
+        };
+        axios
+          .post(`/api/v1/me/artists/${this.$route.params.artist_id}/albums`, postData)
+          .then((response) => {
+            this.$root.alertSuccess('Album created');
+            this.album = response.data.data;
+            this.origAttributes = Object.assign({}, this.album.attributes);
+            this.editing = false;
+            this.saving = false;
+            this.saveFunction = this.update;
+            router.push(`/artists/${this.$route.params.artist_id}/albums/${response.data.data.id}`);
+            this.setBreadcrumbs();
+          })
+          .catch((e) => {
+            this.saving = false;
+            this.$root.alertError(parseAxiosError(e));
+          });
+      },
+      update(){
+        this.saving = true;
+        const patchData = {
+          data: {
+            attributes: {
+             title: this.album.attributes.title,
+             release_date: this.album.attributes.release_date,
+             license: this.album.attributes.license,
+             description: this.album.attributes.description
+            },
+            type: 'album'
+          },
+        };
+        axios
+          .patch(`/api/v1/me/artists/${this.$route.params.artist_id}/albums/${this.$route.params.album_id}`, patchData)
+          .then((response) => {
+            this.$root.alertSuccess('Album updated');
+            this.album = response.data.data;
+            this.origAttributes = Object.assign({}, this.album.attributes);
+            this.editing = false;
+            this.saving = false;
+          })
+          .catch((e) => {
+            this.$root.alertError(parseAxiosError(e));
+            this.saving = false;
+          });
+      },
+      deleteAlbum(){
+        this.deleting = true;
+        axios
+          .delete(`/api/v1/me/artists/${this.$route.params.artist_id}/albums/${this.$route.params.album_id}`)
+          .then(() => router.push({
+            name: 'AlbumList',
+            params: { artist_id: this.$route.params.artist_id } }))
+          .catch((e) => {
+            this.$root.alertError(parseAxiosError(e));
+            this.deleting = false
+          });
+        },
+      handleFileUpload() {
+        if (!this.fileToUpload) {
+          return;
+        }
+        this.uploading = true;
+        const formData = new FormData();
+        formData.append("image_file", this.fileToUpload);
+        axios
+          .post(`/api/v1/me/artists/${this.$route.params.artist_id}/albums/${this.$route.params.album_id}/image`, formData, {
+            headers: {
+              "Content-Type": "multipart/form-data",
+            },
+            onUploadProgress: function (progressEvent) {
+              this.uploadPercentage = parseInt(
+                Math.round((progressEvent.loaded / progressEvent.total) * 80)
+              );
+            }.bind(this),
+          })
+          .then((response) => {
+            this.$root.alertSuccess('New picture saved');
+            this.uploading = false;
+            this.uploadPercentage = 0;
+            this.$refs.file.reset();
+            this.album.attributes.profile_image_url =
+              response.data.data.attributes.profile_image_url;
+          })
+          .catch((e) => {
+            this.$root.alertError(parseAxiosError(e));
+            this.uploading = false;
+            this.uploadPercentage = 0;
+            this.$refs.file.reset();
+          });
+      },
+      handleTrackFileUpload(){
+        if (!this.audioFileToUpload) {
+          return;
+        }
+        this.uploadingAudio = true;
+        const formData = new FormData();
+        formData.append("audio_file", this.audioFileToUpload);
+        axios
+          .post(`/api/v1/me/artists/${this.$route.params.artist_id}/albums/${this.$route.params.album_id}/tracks`, formData, {
+            headers: {
+              "Content-Type": "multipart/form-data",
+            },
+            onUploadProgress: function (progressEvent) {
+              this.uploadAudioPercentage = parseInt(
+                Math.round((progressEvent.loaded / progressEvent.total) * 80)
+              );
+            }.bind(this),
+          })
+          .then((response) => {
+            this.$root.alertSuccess('New track created');
+            this.uploadingAudio = false;
+            this.$refs.audioFile.reset();
+            this.uploadAudioPercentage = 0;
+            if(!this.album.attributes.tracks){
+              this.album.attributes.tracks = [];
+            }
+            this.album.attributes.tracks.push(response.data);
+            this.canSort = this.album.attributes.tracks.length > 1;
+          })
+          .catch((e) => {
+            this.$root.alertError(parseAxiosError(e));
+            this.uploadingAudio = false;
+            this.uploadAudioPercentage = 0;
+            this.$refs.audioFile.reset();
+          });
+      },
+      renameTrack(track){
+        this.$set(track, 'renaming',true);
+        this.$set(track, 'alertShow', 0);
+        const patchData = {
+          data: {
+            attributes: {
+             title: track.data.attributes.title,
+            },
+            type: 'track'
+          },
+        };
+        axios
+          .patch(`/api/v1/me/artists/${this.$route.params.artist_id}/albums/${this.$route.params.album_id}/tracks/${track.data.id}`, patchData)
+          .then((response) => {
+            this.$set(track, 'alert', 'Track renamed');
+            this.$set(track, 'alertShow', 2);
+            this.$set(track, 'alertVariant', 'success');
+            this.$set(track, 'renaming', false);
+            this.$set(track, 'inRenameMode', false);
+            this.$set(track, 'data.attributes.title', response.data.data.attributes.title);
+            this.$set(track, 'origTitle', response.data.data.attributes.title);
+          })
+          .catch((e) => {
+            this.$set(track, 'alert', parseAxiosError(e));
+            this.$set(track, 'alertShow', 5);
+            this.$set(track, 'alertVariant', 'danger');
+            this.$set(track, 'renaming', false);
+          });
+      },
+      deleteTrack(track){
+        this.$set(track, 'deleting', true);
+        axios.delete(`/api/v1/me/artists/${this.$route.params.artist_id}/albums/${this.$route.params.album_id}/tracks/${track.data.id}`)
+        .then((response) => {
+          this.$set(track, 'deleting', false);
+          this.$set(track, 'confirmDelete', false);
+          this.album = response.data.data;
+          this.canSort = this.album.attributes.tracks.length > 1;
+          this.origAttributes = Object.assign({}, this.album.attributes);
+          this.$root.alertSuccess('Track deleted');
+        }).catch((e) => {
+          this.$root.alertError(parseAxiosError(e));
+          this.$set(track, 'deleting', false);
+          this.$set(track, 'confirmDelete', false);
+        });
+      },
+      sortTrack(track, direction){
+        this.$set(track, 'moving', true);
+        const postData = {
+          data: {
+            attributes: {
+              direction
+            },
+            type: 'sort'
+          }
+        };
+        axios
+          .post(`/api/v1/me/artists/${this.$route.params.artist_id}/albums/${this.$route.params.album_id}/tracks/${track.data.id}/sort`, postData)
+          .then((response) => {
+            this.$set(track, 'moving', false);
+            this.album = response.data.data;
+            this.origAttributes = Object.assign({}, this.album.attributes);
+          })
+          .catch((e) => {
+            this.$root.alertError(parseAxiosError(e));
+            this.$set(track, 'moving', false);
+          });
+      },
+      trackFeaturedChange(track){
+        this.$set(track, 'featuring', true);
+        this.$set(track, 'alertShow', 0);
+        newState =!track.data.attributes.featured
+        const postData = {
+          data: {
+            attributes: {
+              featured: newState
+            },
+            type: 'featured'
+          }
+        };
+        axios
+          .post(`/api/v1/me/artists/${this.$route.params.artist_id}/featured/${track.data.id}`, postData)
+          .then((response) => {
+            this.$set(track, 'alert', 'Saved');
+            this.$set(track, 'alertShow', 3);
+            this.$set(track, 'alertVariant', 'success');
+            this.$set(track, 'featuring', false);
+          })
+          .catch((e) => {
+            this.$set(track, 'alert', parseAxiosError(e));
+            this.$set(track, 'alertShow', 5);
+            this.$set(track, 'alertVariant', 'danger');
+            this.$set(track, 'featuring', false);
+            track.data.attributes.featured = !newState;
+          });
+      },
+      setBreadcrumbs(){
+        this.$root.setBreadcrumbs([
+              {text: this.$root.currentArtist, to: `/artists/${this.$route.params.artist_id}`},
+              {text: 'Albums', to: `/artists/${this.$route.params.artist_id}/albums`},
+              {text: this.album.attributes.title, to: this.$route.fullPath}
+            ]);
+      }
+    },
+    template: "#AlbumDetail"
+  };
+
+  const SingleList = {
+    data: function(){
+      return {
+        loading: false,
+        uploadAudioPercentage: 0,
+        uploadingAudio: false,
+        confirmingDelete: false,
+        audioFileToUpload: null,
+        canSort: false,
+        singles: [],
+        licenses: licenseList
+      };
+    },
+    mounted() {
+      this.loading = true;
+      axios.get(`/api/v1/me/artists/${this.$route.params.artist_id}/singles`)
+        .then((response) => {
+          this.singles = response.data.data;
+          this.canSort = this.singles.length > 1;
+          this.loading = false;
+          this.$root.setBreadcrumbs([
+            {text: this.$root.currentArtist, to: `/artists/${this.$route.params.artist_id}`},
+            {text:'Singles', to: this.$route.fullPath}
+          ]);
+        })
+        .catch((e) => console.error(e));
+    },
+    methods: {
+      handleAudioFileUpload(){
+        if (!this.audioFileToUpload) {
+          return;
+        }
+        this.uploadingAudio = true;
+        const formData = new FormData();
+        formData.append("audio_file", this.audioFileToUpload);
+        axios
+          .post(`/api/v1/me/artists/${this.$route.params.artist_id}/singles`, formData, {
+            headers: {
+              "Content-Type": "multipart/form-data",
+            },
+            onUploadProgress: function (progressEvent) {
+              this.uploadAudioPercentage = parseInt(
+                Math.round((progressEvent.loaded / progressEvent.total) * 80)
+              );
+            }.bind(this),
+          })
+          .then((response) => {
+            this.$root.alertSuccess('New single created');
+            this.uploadingAudio = false;
+            this.$refs.audioFile.reset();
+            this.uploadAudioPercentage = 0;
+            this.singles.push(response.data.data);
+            this.canSort = this.singles.length > 1;
+          })
+          .catch((e) => {
+            this.$root.alertError(parseAxiosError(e));
+            this.uploadingAudio = false;
+            this.uploadAudioPercentage = 0;
+            this.$refs.audioFile.reset();
+          });
+      },
+      editMode(single){
+        this.$set(single, 'inEditMode', true);
+        this.$set(single, 'origAttrs', Object.assign({}, single.attributes));
+      },
+      cancelEdit(single){
+        this.$set(single, 'inEditMode', false);
+        this.$set(single, 'attributes', Object.assign({}, single.origAttrs));
+      },
+      isModified(single){
+        return single.attributes.title !== single.origAttrs.title ||
+          single.attributes.release_date !== single.origAttrs.release_date ||
+          single.attributes.license !== single.origAttrs.license;
+      },
+      updateSingle(single){
+        this.$set(single, 'saving', true);
+        this.$set(single, 'alertShow', 0);
+        const patchData = {
+          data: {
+            attributes: {
+             title: single.attributes.title,
+             release_date: single.attributes.release_date,
+             license: single.attributes.license
+            },
+            type: 'single'
+          },
+        };
+        axios
+          .patch(`/api/v1/me/artists/${this.$route.params.artist_id}/singles/${single.id}`, patchData)
+          .then((response) => {
+            this.$set(single, 'alert', 'Changes Saved');
+            this.$set(single, 'alertShow', 2);
+            this.$set(single, 'alertVariant', 'success');
+            this.$set(single, 'saving', false);
+            this.$set(single, 'inEditMode', false);
+            this.$set(single, 'origAttrs', Object.assign({}, response.data.data.attributes));
+            this.$set(single, 'attributes', response.data.data.attributes);
+          })
+          .catch((e) => {
+            this.$set(single, 'alert', parseAxiosError(e));
+            this.$set(single, 'alertShow', 5);
+            this.$set(single, 'alertVariant', 'danger');
+            this.$set(single, 'saving', false);
+          });
+      },
+      sortSingle(single, direction){
+        this.$set(single, 'moving', true);
+        const postData = {
+          data: {
+            attributes: {
+              direction
+            },
+            type: 'sort'
+          }
+        };
+        axios
+          .post(`/api/v1/me/artists/${this.$route.params.artist_id}/singles/${single.id}/sort`, postData)
+          .then((response) => {
+            this.$set(single, 'moving', false);
+            this.singles = response.data.data;
+          })
+          .catch((e) => {
+            this.$root.alertError(parseAxiosError(e));
+            this.$set(single, 'moving', false);
+          });
+      },
+      singleFeaturedChange(single){
+        this.$set(single, 'featuring', true);
+        this.$set(single, 'alertShow', 0);
+        newState = !single.attributes.featured
+        const postData = {
+          data: {
+            attributes: {
+              featured: newState
+            },
+            type: 'featured'
+          }
+        };
+        axios
+          .post(`/api/v1/me/artists/${this.$route.params.artist_id}/featured/${single.id}`, postData)
+          .then((response) => {
+            this.$set(single, 'alert', 'Saved');
+            this.$set(single, 'alertShow', 3);
+            this.$set(single, 'alertVariant', 'success');
+            this.$set(single, 'featuring', false);
+          })
+          .catch((e) => {
+            this.$set(single, 'alert', parseAxiosError(e));
+            this.$set(single, 'alertShow', 5);
+            this.$set(single, 'alertVariant', 'danger');
+            this.$set(single, 'featuring', false);
+            single.attributes.featured = !newState;
+          });
+      },
+      deleteSingle(single){
+        this.$set(single, 'deleting', true);
+        axios
+          .delete(`/api/v1/me/artists/${this.$route.params.artist_id}/singles/${single.id}`)
+          .then(() => {
+            this.singles = this.singles.filter(s => s.id !== single.id);
+            this.canSort = this.singles.length > 1;
+            this.$root.alertSuccess('Deleted');
+          })
+          .catch((e) => {
+            this.$root.alertError(parseAxiosError(e));
+            this.$set(single, 'deleting', false);
+            this.$set(single, 'confirmDelete', false);
+          });
+      },
+    },
+    template: "#SingleList"
+  };
+  
+  const Featured = {
+    data: function(){
+      return {
+        loading: false,
+        tracks : [],
+        canSort : false
+      };
+    },
+    mounted(){
+      this.loading = true;
+      axios.get(`/api/v1/me/artists/${this.$route.params.artist_id}/featured`)
+        .then((response) => {
+          this.tracks = response.data.data;
+          this.canSort = this.tracks.length > 1;
+          this.loading = false;
+          this.$root.setBreadcrumbs([
+            {text: this.$root.currentArtist, to: `/artists/${this.$route.params.artist_id}`},
+            {text:'Featured', to: this.$route.fullPath}
+          ]);
+        })
+        .catch((e) => console.error(e));
+    },
+    methods:{
+      unFeature(track){
+      this.loading = true;
+        const postData = {
+          data: {
+            attributes: {
+              featured: false
+            },
+            type: 'featured'
+          }
+        };
+        axios
+          .post(`/api/v1/me/artists/${this.$route.params.artist_id}/featured/${track.id}`, postData)
+          .then((response) => {
+            this.tracks = this.tracks.filter(i => i.id !== track.id);
+            this.canSort = this.tracks.length > 1;
+            this.loading = false;
+            this.$root.alertSuccess("Removed");
+          })
+          .catch((e) => {
+            this.$root.alertError(parseAxiosError(e));
+            this.loading = false;
+          });
+      },
+      sortFeatured(featured, direction){
+        this.$set(featured, 'moving', true);
+        const postData = {
+          data: {
+            attributes: {
+              direction
+            },
+            type: 'sort'
+          }
+        };
+        axios
+          .post(`/api/v1/me/artists/${this.$route.params.artist_id}/featured/${featured.id}/sort`, postData)
+          .then((response) => {
+            this.$set(featured, 'moving', false);
+            this.tracks = response.data.data;
+          })
+          .catch((e) => {
+            this.$root.alertError(parseAxiosError(e));
+            this.$set(featured, 'moving', false);
+          });
+      },
+    },
+    template: "#Featured"
+  };
+
+  const parseAxiosError = (e) => {
+    if (e.response && e.response.data && e.response.data.errors) {
+      return e.response.data.errors[0].detail;
+    } else {
+      return e;
+    }
+  };
+
+  const routes = [
+    { path: "/", component: ArtistList },
+    { path: "/artists/:artist_id", component: ArtistDetail },
+    { path: "/artists/:artist_id/albums", component: AlbumList, name: 'AlbumList' },
+    { path: "/artists/:artist_id/albums/:album_id", component: AlbumDetail },
+    { path: "/artists/:artist_id/singles", component: SingleList },
+    { path: "/artists/:artist_id/featured", component: Featured },
+  ];
+  const router = new VueRouter({
+    routes,
+  });
+ 
+  // Root Component
+  new Vue({
+    router,
+    el: "#app",
+    data: {
+     showSuccess: 0,
+     showError: false,
+     successMessage: '',
+     errorMessage: '',
+     breadcrumbs: [],
+     currentArtist: null
+    },
+    mounted(){
+      this.setBreadcrumbs([]);
+    },
+    methods: {
+      alertSuccess(message){
+        this.showSuccess = 3;
+        this.successMessage = message;
+      },
+      alertError(message){
+        this.showError = true;
+        this.errorMessage = message;
+      },
+      setBreadcrumbs(childItems){
+        this.breadcrumbs = [
+          {text: 'My Artists', to: '/'}
+        ].concat(childItems);
+      }
+    },
+    watch: {
+      '$route' (to, from) {
+        if(to.path === '/'){
+          this.currentArtist = null;
+          this.setBreadcrumbs([]);
+        }
+        // clear eror message from previous view
+        this.showError = false;
+      }
+    }
+  });
+</script>
+
 {% endblock %}

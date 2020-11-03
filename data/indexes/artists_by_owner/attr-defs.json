@@ -1,0 +1,10 @@
+[
+  {
+    "AttributeName": "Owner",
+    "AttributeType": "S"
+  },
+  {
+    "AttributeName": "PK",
+    "AttributeType": "S"
+  }
+]

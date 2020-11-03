@@ -7,22 +7,6 @@
     {
       "AttributeName": "SK",
       "AttributeType": "S"
-    },
-    {
-      "AttributeName": "AA_PK",
-      "AttributeType": "S"
-    },
-    {
-      "AttributeName": "AA_SK",
-      "AttributeType": "S"
-    },
-    {
-      "AttributeName": "AC_PK",
-      "AttributeType": "S"
-    },
-    {
-      "AttributeName": "AC_SK",
-      "AttributeType": "S"
     }
   ],
   "TableName": "art2",
@@ -39,47 +23,5 @@
   "ProvisionedThroughput": {
     "ReadCapacityUnits": 5,
     "WriteCapacityUnits": 5
-  },
-  "GlobalSecondaryIndexes": [
-    {
-      "IndexName": "IX_ARTIST_CONTENT",
-      "KeySchema": [
-        {
-          "AttributeName": "AC_PK",
-          "KeyType": "HASH"
-        },
-        {
-          "AttributeName": "AC_SK",
-          "KeyType": "RANGE"
-        }
-      ],
-      "Projection": {
-        "ProjectionType": "ALL"
-      },
-      "ProvisionedThroughput": {
-        "ReadCapacityUnits": 5,
-        "WriteCapacityUnits": 5
-      }
-    },
-    {
-      "IndexName": "IX_ARTISTS_ALBUMS",
-      "KeySchema": [
-        {
-          "AttributeName": "AA_PK",
-          "KeyType": "HASH"
-        },
-        {
-          "AttributeName": "AA_SK",
-          "KeyType": "RANGE"
-        }
-      ],
-      "Projection": {
-        "ProjectionType": "ALL"
-      },
-      "ProvisionedThroughput": {
-        "ReadCapacityUnits": 5,
-        "WriteCapacityUnits": 5
-      }
-    }
-  ]
+  }
 }
