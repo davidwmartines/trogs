@@ -7,13 +7,16 @@ from . import exceptions
 # The total number of featured tracks/singles allowed per artist.
 MAX_FEATURES = 3
 
+# Default sort for featured, as well as ArtistContent sort for featured tracks
+DEFAULT_SORT = '100'
+
 
 def item_to_featured(item):
     featured = Featured(
         id=item['PK'],
         title=item['TrackTitle'],
         audio_url=item['AudioURL'],
-        sort=item['AC_SK'],
+        sort=item['FeatureSort'],
         album=None
     )
 
@@ -26,16 +29,16 @@ def item_to_featured(item):
 
 def list_for_artist(artist_id):
     table = db.get_table()
-    response = table.query(
+    content = table.query(
         IndexName='IX_ARTIST_CONTENT',
         ScanIndexForward=True,
-        KeyConditionExpression=Key('AC_PK').eq(
-            artist_id) & Key('AC_SK').begins_with('1')
+        KeyConditionExpression=Key('AC_PK').eq(artist_id)
     )
-    if len(response['Items']) == 0:
+    if len(content['Items']) == 0:
         return None
 
-    return list(map(item_to_featured, response['Items']))
+    featured = filter(lambda i: bool(i.get('Featured', False)), content['Items'])
+    return sorted(list(map(item_to_featured, featured)), key=lambda f: f.sort)
 
 
 def feature_item(artist_id, item_id):
@@ -53,29 +56,41 @@ def feature_item(artist_id, item_id):
         raise exceptions.InvalidData('track not in artist')
 
     # validate feature count and determine feature sort
-    res = table.query(
-        IndexName='IX_ARTIST_CONTENT',
-        ScanIndexForward=True,
-        KeyConditionExpression=Key('AC_PK').eq(
-            artist_id) & Key('AC_SK').begins_with('1')
-    )
-    if len(res['Items']) >= MAX_FEATURES:
+    existing_features = list_for_artist(artist_id)
+    if len(existing_features) >= MAX_FEATURES:
         raise exceptions.ExcessFeaturedAttempted(MAX_FEATURES)
 
-    sort = '100'
-    if len(res['Items']) > 0:
-        last_track = res['Items'][-1]
-        last_sort = int(last_track['AC_SK'])
-        sort = str(last_sort + 1)
+    feature_sort = DEFAULT_SORT
+    if len(existing_features) > 0:
+        last_track = existing_features[-1]
+        last_sort = int(last_track.sort)
+        feature_sort = str(last_sort + 1)
+
+    # if an album track, need to add ArtistContent sort.
+    if 'AC_SK' not in track:
+        response = table.query(
+            IndexName='IX_ARTIST_CONTENT',
+            ScanIndexForward=True,
+            KeyConditionExpression=Key('AC_PK').eq(artist_id) & Key('AC_SK').begins_with(DEFAULT_SORT[0])
+        )
+        if len(response['Items']) > 0:
+            last_featured_track = response['Items'][-1]
+            last_sort = int(last_featured_track['AC_SK'])
+            next_sort = last_sort + 1
+            track['AC_SK'] = str(next_sort)
+        else:
+            track['AC_SK'] = DEFAULT_SORT
+
 
     # define update
-    update_exp = 'set AC_PK = :AC_PK, AC_SK = :AC_SK, Featured = :Featured'
+    update_exp = 'set AC_PK = :AC_PK, AC_SK = :AC_SK, Featured = :Featured, FeatureSort = :FeatureSort'
     update_exp_vals = {
         # adding item to artist content and sorting:
         ':AC_PK': artist_id,
-        ':AC_SK': sort,
+        ':AC_SK': track['AC_SK'],
         # set featured flag true
-        ':Featured': True
+        ':Featured': True,
+        ':FeatureSort': feature_sort
     }
 
     # update
@@ -108,42 +123,19 @@ def unfeature_item(artist_id, item_id):
         'PK': item_id,
         'SK': item_id
     }
-    update_exp = 'remove Featured'
-    update_exp_vals = None
+    update_exp = 'remove Featured, FeatureSort'
 
-    # if album track, ok to remove from AC
+    # if album track, remove from AC
     if 'AA_PK' in track:
         update_exp += ', AC_SK, AC_PK'
-    else:
-        # if single, need to add back to singles list with sort
-        sort = '300'
-        res = table.query(
-            IndexName='IX_ARTIST_CONTENT',
-            ScanIndexForward=True,
-            KeyConditionExpression=Key('AC_PK').eq(
-                artist_id) & Key('AC_SK').begins_with('3')
-        )
-        if len(res['Items']) > 0:
-            last_track = res['Items'][-1]
-            last_sort = int(last_track['AC_SK'])
-            sort = str(last_sort + 1)
-        update_exp += ' set AC_SK = :AC_SK'
-        update_exp_vals = {':AC_SK': sort}
 
     # update
     print('update_exp', update_exp)
 
-    if update_exp_vals:
-        res = table.update_item(
-            Key=key,
-            UpdateExpression=update_exp,
-            ExpressionAttributeValues=update_exp_vals
-        )
-    else:
-        res = table.update_item(
-            Key=key,
-            UpdateExpression=update_exp
-        )
+    table.update_item(
+        Key=key,
+        UpdateExpression=update_exp
+    )
 
 
 def sort_featured(artist, item_id, direction):
@@ -202,7 +194,7 @@ def _make_sort_update(featured_item):
                 'PK': {'S': featured_item.id},
                 'SK': {'S': featured_item.id}
             },
-            'UpdateExpression': 'set AC_SK = :sort',
+            'UpdateExpression': 'set FeatureSort = :sort',
             'ExpressionAttributeValues': {':sort': {'S': featured_item.sort}},
             'TableName': db.TABLE_NAME
         }

@@ -8,7 +8,11 @@ from . import exceptions, names
 from .models import Artist, Single, parse_release_date
 
 
+# license given to singles upon upload
 DEFAULT_LICENSE = 'by-nc-nd'
+
+# Artist-Content (AC) sort for singles
+DEFAULT_SORT = '300'
 
 
 def item_to_single(item):
@@ -44,7 +48,7 @@ def list_for_artist(artist_id):
         IndexName='IX_ARTIST_CONTENT',
         ScanIndexForward=True,
         KeyConditionExpression=Key('AC_PK').eq(
-            artist_id) & Key('AC_SK').begins_with('3')
+            artist_id) & Key('AC_SK').begins_with(DEFAULT_SORT[0])
     )
     return list(map(item_to_single, res['Items']))
 
@@ -64,7 +68,7 @@ def create(artist, single_title, audio_url):
         last_sort = int(last.sort)
         sort = str(last_sort + 1)
     else:
-        sort = '300'
+        sort = DEFAULT_SORT
 
     single = Single(
         id=ids.new_id(),
