@@ -38,7 +38,8 @@ def single_to_item(single):
         'AC_SK': single.sort,
         'ArtistID': single.artist.id,
         'ArtistName': single.artist.name,
-        'License': single.license
+        'License': single.license,
+        'ReleaseDate': single.release_date
     }
 
 
