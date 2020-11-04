@@ -40,3 +40,16 @@ def add_artist_normalized_names():
                 ReturnValues='UPDATED_NEW'
             )
         #print(res)
+
+
+def add_feature_sort():
+    
+    # get featured tracks
+
+    #if no FeatureSort attr
+
+        #set FeatureSort = existing AC_SK
+
+        #if single, set AC_SK to 300 or ++ existing singles.
+
+    pass
