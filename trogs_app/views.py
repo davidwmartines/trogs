@@ -42,3 +42,8 @@ def track(id):
 def create():
     return render_template('admin_home.html', env=current_app.env)
 
+
+@current_app.route("/health")
+def heath_check():
+    return "ok", 200
+
