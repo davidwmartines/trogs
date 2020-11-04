@@ -93,8 +93,14 @@
           "ArtistID": {
             "S": "artist1"
           },
+          "AA_PK": {
+            "S": "album1"
+          },
           "AA_SK": {
             "S": "100"
+          },
+          "AC_PK": {
+            "S": "artist1"
           },
           "AC_SK": {
             "S": "100"
@@ -108,11 +114,11 @@
           "TrackTitle": {
             "S": "Taxman"
           },
-          "AA_PK": {
-            "S": "album1"
-          },
           "Featured": {
             "BOOL": true
+          },
+          "FeatureSort": {
+            "S": "100"
           },
           "PK": {
             "S": "track1"
@@ -122,9 +128,6 @@
           },
           "Count": {
             "N": "11"
-          },
-          "AC_PK": {
-            "S": "artist1"
           },
           "AudioURL":{
             "S": "https://..."

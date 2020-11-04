@@ -47,7 +47,7 @@ def map_detail(items):
         'artistId': artist['AC_PK'],
         'name': artist['AA_SK'],
         'image_url': artist.get('ImageURL'),
-        'featured_tracks': list(map(map_track, filter(is_featured, children))),
+        'featured_tracks': sorted(list(map(map_track, filter(is_featured, children))),key = lambda t: t['feature_sort']),
         'albums': list(map(map_album, filter(is_album, children))),
         'singles': list(map(map_track, filter(not_featured, filter(is_single, children))))
     }
@@ -100,6 +100,8 @@ def map_track(item):
     if license:
         track["license"] = license
         track["license_name"] = licenses.names[license]
+
+    track['feature_sort'] = item.get('FeatureSort')
 
     return track
 
