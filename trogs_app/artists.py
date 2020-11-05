@@ -46,6 +46,7 @@ def map_detail(items):
     artist_detail = {
         'artistId': artist['AC_PK'],
         'name': artist['AA_SK'],
+        'bio': artist.get('Bio'),
         'image_url': artist.get('ImageURL'),
         'featured_tracks': sorted(list(map(map_track, filter(is_featured, children))),key = lambda t: t['feature_sort']),
         'albums': list(map(map_album, filter(is_album, children))),

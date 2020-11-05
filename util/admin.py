@@ -4,6 +4,7 @@ import os
 import sys
 import boto3
 import re
+import datetime
 from boto3.dynamodb.conditions import Key
 
 sys.path.insert(0, os.path.abspath(
@@ -34,7 +35,9 @@ def create_artist(artistName, owner='', bio='', imageUrl=''):
         'AC_PK': id,
         'AC_SK': '000',
         'Bio': bio,
-        'ImageURL': imageUrl
+        'ImageURL': imageUrl,
+        'NormalizedName': safe_obj_name(artistName),
+        'CreatedDate': datetime.datetime.utcnow().isoformat(timespec='seconds')
     })
 
     query = table.query(
@@ -174,7 +177,6 @@ def add_track(artistName, albumTitle, trackTitle, audioUrl, sortNum=None):
         'TrackTitle': trackTitle,
         'AudioURL': audioUrl,
         'AlbumTitle': albumTitle,
-        #'AlbumID': album['AA_PK'],
         'ArtistID': album['PK'],
         'ArtistName': album['ArtistName'],
         'License': album['License']
@@ -276,12 +278,16 @@ def feature_track(id):
 
 
     # define update
-    update_exp = 'set AC_PK = :AC_PK, AC_SK = :AC_SK, Featured= :Featured'
+    update_exp = 'set AC_PK = :AC_PK, Featured = :Featured, FeatureSort = :FeatureSort'
     update_exp_vals = {
             ':AC_PK': track['ArtistID'],
-            ':AC_SK': sort,
-            ':Featured': True
+            ':Featured': True,
+            ':FeatureSort': sort
         }
+
+    if 'AC_SK' not in track:
+        update_exp += ', AC_SK = :AC_SK'
+        update_exp_vals[':AC_SK'] = sort
 
     # update
     res = table.update_item(
@@ -292,82 +298,6 @@ def feature_track(id):
         UpdateExpression=update_exp,
         ExpressionAttributeValues=update_exp_vals,
         ReturnValues='UPDATED_NEW'
-    )
-
-    print(res)
-
-
-def unfeature_track(id):
-
-    table = db.get_table()
-
-     # get track
-    res = table.query(
-        KeyConditionExpression=Key('PK').eq(id) & Key('SK').eq(id)
-    )
-    if len(res['Items']) == 0:
-        print('no track found by id', id)
-        return
-    track = res['Items'][0]
-
-    # define update
-    key = {
-            'PK': id,
-            'SK': id
-        }
-    update_exp = 'remove Featured'
-    update_exp_vals = None
-
-
-    # if album track, ok to remove from AC
-    if 'AA_PK' in track:
-        update_exp += ', AC_SK, AC_PK'
-    else:
-        # determine sort for single
-        sort = '300'
-        res = table.query(
-            IndexName='IX_ARTIST_CONTENT',
-            ScanIndexForward=True,
-            KeyConditionExpression=Key('AC_PK').eq(
-                track['ArtistID']) & Key('AC_SK').begins_with('3')
-        )
-        if len(res['Items']) > 0:
-            last_track = res['Items'][len(res['Items'])-1]
-            last_sort = int(last_track['AC_SK'])
-            sort = str(last_sort + 1)
-        update_exp += ' set AC_SK = :AC_SK'
-        update_exp_vals = {':AC_SK': sort}
-
-    # update
-    print('update_exp', update_exp)
-
-    if update_exp_vals:
-        res = table.update_item(
-            Key=key,
-            UpdateExpression=update_exp,
-            ExpressionAttributeValues=update_exp_vals,
-            ReturnValues='UPDATED_NEW'
-        )
-    else:
-        res = table.update_item(
-            Key=key,
-            UpdateExpression=update_exp,
-            ReturnValues='UPDATED_NEW'
-        )
-
-    print(res)
-
-
-def delete_track(id):
-    table = db.get_table()
-
-    key = {
-        'PK': id,
-        'SK': id
-    }
-    
-    res = table.delete_item(
-        Key = key
     )
 
     print(res)

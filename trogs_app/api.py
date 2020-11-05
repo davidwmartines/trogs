@@ -244,7 +244,7 @@ def add_artist_image(artist_id):
     # persist image
     object_name = 'art/{0}-{1}/{0}-{2}.jpg'.format(
         artist.normalized_name, artist.id, ids.new_id()[:8])
-    admin.files.save(file_data, object_name, content_type='image/jpeg')
+    admin.files.save(file_data, object_name, content_type=admin.files.content_types['.jpg'])
     if artist.image_url:
         admin.files.delete(artist.image_url)
 
@@ -416,7 +416,7 @@ def add_album_image(artist_id, album_id):
         admin.names.safe_obj_name(album.title),
         album.id,
         ids.new_id()[:8])
-    admin.files.save(file_data, object_name, content_type=admin.files.content_types['jpg'])
+    admin.files.save(file_data, object_name, content_type=admin.files.content_types['.jpg'])
     # delete old file, if exists
     if album.image_url:
         admin.files.delete(album.image_url)

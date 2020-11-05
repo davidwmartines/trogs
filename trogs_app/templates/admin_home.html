@@ -18,11 +18,11 @@
   </div>
   <div class="container">
     <b-breadcrumb>
-      <b-breadcrumb-item v-for="item in breadcrumbs" v-bind:key="item.text" :to="item.to">{{item.text}}</b-breadcrumb-item>
+      <b-breadcrumb-item v-for="item in breadcrumbs" v-bind:key="item.text" :to="item.to" :text="item.text"></b-breadcrumb-item>
    </b-breadcrumb>
   </div>
   <div class="container">
-    <b-alert :show="showSuccess" dismissible fade variant="success" @dismissed="showSuccess=0" >{{successMessage}}</b-alert>
+    <b-alert :show="showSuccess" dismissible fade variant="success" @dismissed="showSuccess=0">{{successMessage}}</b-alert>
     <b-alert :show="showError" dismissible variant="danger" @dismissed="showError=false">{{errorMessage}}</b-alert>
   </div>
   <router-view></router-view>
@@ -571,8 +571,7 @@
           .then((response) => {
             this.$root.alertSuccess('Artist created');
             this.artist = response.data.data;
-            this.origBio = this.artist.attributes.bio;
-            this.origName = this.artist.attributes.name
+            this.origAttributes = Object.assign({}, this.artist.attributes);
             this.editing = false;
             this.saving = false;
             this.saveFunction = this.update;

@@ -28,6 +28,7 @@ def map_album(items):
         'year': dateutil.parser.parse(album['ReleaseDate']).strftime('%Y'),
         'artist_id': ids.to_id(album['PK']),
         'image_url': album.get('ImageURL'),
+        'description': album.get('Description'),
         'license': license,
         'license_name': licenses.names[license],
         'tracks': list(map(map_track, items[slice(1, len(items)+1)]))
