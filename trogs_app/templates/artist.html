@@ -34,9 +34,8 @@
         </div>
         {% if track.license|length %}
         <p class="license">
-            <a rel="license" href="http://creativecommons.org/licenses/{{track.license}}/4.0/" target="_blank">
+            <a rel="license" href="http://creativecommons.org/licenses/{{track.license}}/4.0/" target="_blank" title="{{track.license_name}}">
             <img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/{{track.license}}/4.0/80x15.png" /></a>
-            <a rel="license" href="http://creativecommons.org/licenses/{{track.license}}/4.0/" target="_blank" class="inline_license_name">{{track.license_name}}</a>
             </p>
         {% endif %}
        
@@ -91,6 +90,13 @@
         </a>
     {% endfor %}
  </div>
+{% endif %}
+
+{% if artist.bio is not none and artist.bio|length %}
+<h3>About</h3>
+<p>
+  {{artist.bio}}
+</p>
 {% endif %}
 {% endblock %}
 
