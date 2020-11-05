@@ -571,8 +571,7 @@
           .then((response) => {
             this.$root.alertSuccess('Artist created');
             this.artist = response.data.data;
-            this.origBio = this.artist.attributes.bio;
-            this.origName = this.artist.attributes.name
+            this.origAttributes = Object.assign({}, this.artist.attributes);
             this.editing = false;
             this.saving = false;
             this.saveFunction = this.update;
