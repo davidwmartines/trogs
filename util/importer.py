@@ -143,6 +143,12 @@ def import_artist(id):
 
     admin.create_artist(artist_name, artist_owner, artist_bio, imageUrl)
 
+    for album in list_albums(id):
+        import_album(album[0])
+
+    for single in list_singles(id):
+        import_single(single)
+
 
 def import_album(id, conn=None):
     print("getting data for album id '{0}'".format(id))
@@ -175,7 +181,7 @@ def import_album(id, conn=None):
     print("got data for '{0}'".format(title))
 
     imageUrl = ''
-    if imageId != '':
+    if imageId:
         filename = "temp.jpg"
         print('downloading image data...')
         get_file(imageId, filename)
@@ -232,4 +238,5 @@ def import_single(track):
     print(full_url)
 
     id = admin.add_single(track['artistName'], track['title'], full_url, track['releaseDate'], track['license'])
-    admin.feature_track(id)
+    #admin.feature_track(id)
+
