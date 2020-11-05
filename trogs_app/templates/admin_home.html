@@ -18,7 +18,7 @@
   </div>
   <div class="container">
     <b-breadcrumb>
-      <b-breadcrumb-item v-for="item in breadcrumbs" v-bind:key="item.text" :to="item.to">{{item.text}}</b-breadcrumb-item>
+      <b-breadcrumb-item v-for="item in breadcrumbs" v-bind:key="item.text" :to="item.to" :text="item.text"></b-breadcrumb-item>
    </b-breadcrumb>
   </div>
   <div class="container">
