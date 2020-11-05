@@ -461,7 +461,7 @@ def add_album_track(artist_id, album_id):
         safe_title,
         ids.new_id()[:8],
         extension)
-    url = admin.files.save(file_data, object_name, content_type=admin.files.content_types.get(extension))
+    url = admin.files.save(file_data, object_name, content_type=admin.files.content_types.get(extension.lower()))
 
     try:
         track = admin.albums.create_track(album, track_title=track_title, audio_url=url)
@@ -614,7 +614,7 @@ def add_single(artist_id):
         safe_title,
         ids.new_id()[:8],
         extension)
-    url = admin.files.save(file_data, object_name, content_type=admin.files.content_types.get(extension))
+    url = admin.files.save(file_data, object_name, content_type=admin.files.content_types.get(extension.lower()))
 
     try:
         single = admin.singles.create(artist, single_title=single_title, audio_url=url)
@@ -713,7 +713,8 @@ def get_posted_image(request, key='image_file'):
         raise admin.exceptions.InvalidData(message='no image file posted')
 
     file_data = request.files[key]
-    if not file_data.filename.endswith('.jpg') and not file_data.filename.endswith(".jpeg"):
+    test_name = file_data.filename.lower()
+    if not test_name.endswith('.jpg') and not test_name.endswith(".jpeg"):
         raise admin.exceptions.InvalidData(message='Only JPEG files can be used for images')
 
     return file_data
