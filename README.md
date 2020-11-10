@@ -16,7 +16,7 @@ The Flask app is deployed to an Elastic Beanstalk instance.  The deployment is d
 An S3 bucket is used to store and serve the user-uploaded images and audio files.  Users can create create songs on the site by uploading any of several types of audio files streamable through native browser support of the HTML5 audio element (MP3, M4A, OGG, Flac, Wave).  Users can upload artist-profile images and album-cover artwork as JPEG files, which are resized and cached in S3 using the Flask-Resize library.
 
 #### DynamoDB
-A single DynamoDB table houses the data for all artist, album, and track entities.  To keep costs **low** (i.e. below AWS free-tier limits, i.e. $0), careful use of Global-Secondary Indexes (GSIs) and read/write request unit allocation is used.  All views and API GET requests on the site are loaded using single queries against specially designed GSIs, (no scans used at all), making use of overloaded indexes and compound result sets.
+A single DynamoDB table houses the data for all artist, album, and track entities.  To keep costs **low** (i.e. below AWS free-tier limits, i.e. $0), careful use of Global Secondary Indexes (GSIs) and read/write request unit allocation is used.  All views and API GET requests on the site are loaded using single queries against specially designed GSIs, (no scans used at all), making use of overloaded indexes and compound result sets.
 
 #### Auth0
 Auth0 (via authlib) is used to let users authenticate and access the "Create" section of the site.  Currently enabled are the Google, Amazon, and Auth0 providers.
