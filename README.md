@@ -1,22 +1,25 @@
 # Trogs!
 
 ## Description
-This is the source code to my newest [audio-streaming site](https://mushmud.com).  This is a rewrite and redesign of a [site originally created in 2009](https://github.com/davidwmartines/MushMud-Archive).  The intent is to provide a very simple and clean DIY audio streaming and sharing platform, geared towards independent musicians.  There are purposely no "social" features such as, liking, commenting, following, etc.
+This is the source code to my newest [audio-streaming site](https://mushmud.com).  This is a 2020 rewrite and redesign of a [site originally created in 2009](https://github.com/davidwmartines/MushMud-Archive).  The intent is to provide a very simple and clean DIY audio streaming and sharing platform, geared towards independent musicians.  There are purposely no social features such as liking, commenting, following, etc.
 
 ### Tech
-The servers-side components of the are written in Python using the Flask framework.  The client-side scripting is minimal, and uses JQuery to coordinate playlist functionality across html audio elements.  The "Create" section of the site, where users can upload their own music, is implemented as a simple SPA using Vue.js and Bootstrap.
+The server-side component of site is written in Python using the Flask framework.  The client-side scripting is minimal, and uses JQuery to coordinate playlist functionality across html audio elements.  The "Create" section of the site, where users can upload their own music, is implemented as a simple SPA using Vue.js and Bootstrap.
 
 ## Architecture
 The app uses a very simple architecture, leveraging a few AWS services:
 
-#### Flask App
-The flask app is deployed to an Elastic Beanstalk instance, via GitHub commit actions.
+#### Elastic Beanstalk
+The Flask app is deployed to an Elastic Beanstalk instance.  The deployment is done via a GitHub commit action which, upon commit to the master branch, creates and uploads a source code package to AWS and triggers a deploy.
 
-#### File Storage
+#### S3
 An S3 bucket is used to store and serve the user-uploaded images and audio files.
 
-#### Database
+#### DynamoDB
 A single DynamoDB table is used to persist all artist, album, and track entities.  To keep costs **low** (i.e. below AWS free-tier limits, i.e. $0), careful use of Global-Secondary Indexes (GSIs) and read/write request unit allocation is used.  All views and API GET requests on the site are loaded single queries against specially designed GSIs, (no SCANS used at all), leveraging overloaded indexes and compound result sets.
+
+#### Auth0
+Auth0 is used to let users authenticate and enter the "Create" section of the site.
 
 
 ## Dev Env Setup
