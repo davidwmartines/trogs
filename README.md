@@ -112,3 +112,4 @@ Only the **trogs_app** directory (where the actual Flask app lives) gets zipped 
 *Need to make sure **pyodbc** is not in `/trogs_app/requirements.txt`, since pyodbc does not seem to install in EB and breaks the EB environment.  So need to manually remove after runnning pip freeze!*  
 
 Pyodbc **IS** in the root level `requirements.txt` file, since it is used in the utils/importer module, for extracting data from the legacy SQL database.  (utils is only for local use, and not deployed to EB.)
+
