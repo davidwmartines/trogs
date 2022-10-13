@@ -1,4 +1,4 @@
-# Trogs!
+# Trogs
 
 ## Description
 This is the source code to my newest [audio-streaming site](https://mushmud.com).  This is a 2020 rewrite and redesign of a [site originally created in 2009](https://github.com/davidwmartines/MushMud-Archive).  The intent is to provide a very simple and clean DIY audio streaming and sharing platform, geared towards independent musicians.  There are purposely no social features such as liking, commenting, following, etc.
