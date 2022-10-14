@@ -112,3 +112,19 @@ Only the **trogs_app** directory (where the actual Flask app lives) gets zipped 
 *Need to make sure **pyodbc** is not in `/trogs_app/requirements.txt`, since pyodbc does not seem to install in EB and breaks the EB environment.  So need to manually remove after runnning pip freeze!*  
 
 Pyodbc **IS** in the root level `requirements.txt` file, since it is used in the utils/importer module, for extracting data from the legacy SQL database.  (utils is only for local use, and not deployed to EB.)
+
+
+## Update 10/2021
+Since my AWS Free Account expired, as of now I am hosting in Azure using a B1 app service.  The following Application Settings just need to be set:
+```
+AUTH0_ACCESS_TOKEN_URL
+AUTH0_API_BASE_URL
+AUTH0_AUTHORIZE_URL
+AUTH0_CLIENT_ID
+AUTH0_CLIENT_SECRET
+AWS_ACCESS_KEY_ID
+AWS_CONTENT_BUCKET
+AWS_DEFAULT_REGION
+AWS_SECRET_ACCESS_KEY
+FLASK_SECRET_KEY
+```
