@@ -27,10 +27,10 @@ jobs:
       - name: Create new ElasticBeanstalk Application Version
         run: |
           aws elasticbeanstalk create-application-version \
-          --application-name mushmud2 \
+          --application-name mushmud3 \
           --source-bundle S3Bucket="elasticbeanstalk-us-east-2-603217460366",S3Key="deploy_package.zip" \
           --version-label "ver-${{ github.sha }}" \
           --description "commit-sha-${{ github.sha }}"
 
       - name: Deploy new ElasticBeanstalk Application Version
-        run: aws elasticbeanstalk update-environment --environment-name Mushmud2-env --version-label "ver-${{ github.sha }}"
+        run: aws elasticbeanstalk update-environment --environment-name Mushmud3-env --version-label "ver-${{ github.sha }}"
