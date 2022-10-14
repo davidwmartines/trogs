@@ -128,3 +128,6 @@ AWS_DEFAULT_REGION
 AWS_SECRET_ACCESS_KEY
 FLASK_SECRET_KEY
 ```
+
+## Update 10/2022
+Back on AWS, since Azure got too expensive.
